@@ -1,0 +1,38 @@
+<?php
+
+namespace TestAnalysis;
+
+ini_set('display_startup_errors', 1);
+ini_set('display_errors', 1);
+error_reporting(-1);
+
+class Config {
+    const site = "Droitwich Spa High School & Sixth Form Centre Test Analysis Service";
+    const site_docroot = "/home/crees/public_html/roombooking/test-analysis";
+    const site_url = "https://www.bayofrum.net/~crees/roombooking/test-analysis";
+    
+    const db = array(
+        'host' => "localhost:3306",
+        'user' => "root",
+        'password' => "iamroot",
+        'name' => "testAnalysis",
+    );
+    
+    const arbor = array(
+        'site' => "https://api-sandbox2.uk.arbor.sc/",
+        'user' => "",
+        'password' => "",
+    );
+    
+    public static $maintenance = true;
+    
+    const debug = true;
+    
+    /* No user serviceable parts beyond this point */
+    
+    static function debug($msg) {
+        if (defined ("self::debug") && self::debug) {
+            echo "<br />" . substr(round(microtime(true) * 1000), 6) . " $msg\n";
+        }
+    }
+}
