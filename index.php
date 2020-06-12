@@ -32,6 +32,8 @@ require "bin/classes.php";
         </nav>
 
 		<h3 class="mb-4"><?= Config::site ?></h3>
+		
+		<pre><?php print_r(Subject::retrieveByDetail('name', "Physics")); ?>
 	</div>
 </body>
 

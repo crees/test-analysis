@@ -5,7 +5,12 @@ namespace TestAnalysis;
 /* Have we been called before? */
 if (!class_exists("Config")) {
     require "Config.php";
-
+    require "Database.php";
+    require "DatabaseCollection.php";
+    require "Student.php";
+    require "Subject.php";
+    require "TeachingGroup.php";
+    
     /**
      * We start the session timer on creation, and destroy it after that time.
      * We don't allow keepalive or the data will become stale.
