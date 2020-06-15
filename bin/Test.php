@@ -1,20 +1,17 @@
 <?php
 namespace TestAnalysis;
 
-class Student extends DatabaseCollection
+class Test extends DatabaseCollection
 {
-    protected $id, $name, $code;
+    protected $id, $name, $total, $code;
     
     public function __construct(array $details)
     {
         $this->id = $details['id'];
         $this->name = $details['name'];
+        $this->total = $details['total'];
     }
     
-    public function getTestResults() {
-        return TestResult::retrieveByDetail('Student_id', $this->id);
-    }
-
     function __destruct()
     {}
 }

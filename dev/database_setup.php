@@ -22,7 +22,7 @@ if (isset(Config::$maintenance) && Config::$maintenance) {
     CREATE TABLE TeachingGroup (
         id INT UNSIGNED NOT NULL AUTO_INCREMENT,
         name VARCHAR(30) NOT NULL,
-        Subject INT NOT NULL,
+        Subject_id INT NOT NULL,
         CONSTRAINT PRIMARY KEY (id)
     );");
     $db->dosql("
@@ -32,6 +32,21 @@ if (isset(Config::$maintenance) && Config::$maintenance) {
         TeachingGroup INT NOT NULL,
         CONSTRAINT PRIMARY KEY (id)
     );");
-    }
-
+    $db->dosql("
+    CREATE TABLE Test (
+        id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        name VARCHAR(30) NOT NULL,
+        total INT NOT NULL,
+        Subject_id INT NOT NULL,
+        CONSTRAINT PRIMARY KEY (id)
+    );");
+    $db->dosql("
+    CREATE TABLE TestResult (
+        id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        Student_id INT NOT NULL,
+        Test_id INT NOT NULL,
+        score INT NOT NULL,
+        CONSTRAINT PRIMARY KEY (id)
+    );");
+}
 ?>

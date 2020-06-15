@@ -10,6 +10,8 @@ if (!class_exists("Config")) {
     require "Student.php";
     require "Subject.php";
     require "TeachingGroup.php";
+    require "Test.php";
+    require "TestResult.php";
     
     /**
      * We start the session timer on creation, and destroy it after that time.
