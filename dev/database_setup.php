@@ -26,6 +26,13 @@ if (isset(Config::$maintenance) && Config::$maintenance) {
         CONSTRAINT PRIMARY KEY (id)
     );");
     $db->dosql("
+    CREATE TABLE GroupSubjectMembership (
+        id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        Subject_id INT NOT NULL,
+        TeachingGroup_id INT NOT NULL,
+        CONSTRAINT PRIMARY KEY (id)
+    );");
+    $db->dosql("
     CREATE TABLE Student (
         id INT UNSIGNED NOT NULL AUTO_INCREMENT,
         name VARCHAR(30) NOT NULL,

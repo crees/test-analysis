@@ -15,7 +15,9 @@ class Subject extends DatabaseCollection
     }
 
     public function getTeachingGroups() {
-        return TeachingGroup::retrieveByDetail(TeachingGroup::SUBJECT_ID, $this->id);
+        $teachingGroupIds = array_map(function($x) { return $x['TeachingGroup_id']; }, (new Database())->dosql("SELECT TeachingGroup_id FROM GroupSubjectMembership WHERE Subject_id = $this->id;")->fetch_array(MYSQLI_ASSOC));
+        return array_map(function($x) { return TeachingGroup::retrieveByDetail(TeachingGroup::ID, $x); }, $teachingGroupIds);
+
     }
     
     public function getTests() {
