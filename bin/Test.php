@@ -15,6 +15,21 @@ class Test extends DatabaseCollection
         $this->total = $details[self::TOTAL];
     }
     
+    /**
+     * Returns empty string if there is no test mark recorded.
+     * 
+     * @param Student $s
+     * @return integer|string
+     */
+    public function getResult(Student $s) {
+        foreach(TestResult::retrieveByDetail(TestResult::STUDENT_ID, $s->getId()) as $r) {
+            if ($r->getTestId() == $this->id) {
+                return $r->getScore();
+            }
+        }
+        return "";
+    }
+    
     function __destruct()
     {}
 }

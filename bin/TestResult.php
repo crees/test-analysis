@@ -26,6 +26,10 @@ class TestResult extends DatabaseCollection
         return Student::retrieveByDetail(Student::ID, $this->studentId);
     }
     
+    public function getTestId() {
+        return $this->testId;
+    }
+    
     public function getScore() {
         return $this->score();
     }

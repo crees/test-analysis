@@ -12,6 +12,7 @@ if (!class_exists("Config")) {
     require "TeachingGroup.php";
     require "Test.php";
     require "TestResult.php";
+    require "View.php";
     
     /**
      * We start the session timer on creation, and destroy it after that time.
