@@ -16,7 +16,7 @@ abstract class DatabaseCollection
      * @param string $detailType
      * @param string $detail
      * @param Database $db
-     * @return DatabaseCollection[]
+     * @return \TestAnalysis\DatabaseCollection[]
      */
     public static function retrieveByDetail(string $detailType, string $detail, string $orderBy = "") {
         if (is_null(self::$db)) {
