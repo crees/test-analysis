@@ -3,6 +3,10 @@ namespace TestAnalysis;
 
 abstract class DatabaseCollection
 {
+    const ID='id';
+    const NAME='name';
+    const OPERATOR_MATCH_ALL = 'MATCHALL';
+    
     protected $id, $name;
     
     /**
@@ -17,7 +21,7 @@ abstract class DatabaseCollection
             $db = new Database();
         }
         
-        if (is_null($detailType)) {
+        if ($detail = self::OPERATOR_MATCH_ALL) {
             $where = "";
         } else {
             $where = " WHERE $detailType = '$detail'";
@@ -40,7 +44,7 @@ abstract class DatabaseCollection
     
     
     public static function retrieveAll(Database $db = null) {
-        return static::retrieveByDetail(null, null, $db);
+        return static::retrieveByDetail("", self::OPERATOR_MATCH_ALL, $db);
     }
     
     public function getId() { return $this->id; }

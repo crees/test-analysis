@@ -5,12 +5,12 @@ class Student extends DatabaseCollection
 {
     public function __construct(array $details)
     {
-        $this->id = $details['id'];
-        $this->name = $details['name'];
+        $this->id = $details[self::ID];
+        $this->name = $details[self::NAME];
     }
     
     public function getTestResults() {
-        return TestResult::retrieveByDetail('Student_id', $this->id);
+        return TestResult::retrieveByDetail(TestResult::STUDENT_ID, $this->id);
     }
 
     function __destruct()
