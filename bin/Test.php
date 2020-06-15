@@ -3,7 +3,7 @@ namespace TestAnalysis;
 
 class Test extends DatabaseCollection
 {
-    protected $id, $name, $total, $code;
+    protected $total;
     
     public function __construct(array $details)
     {

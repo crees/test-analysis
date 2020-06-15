@@ -3,11 +3,12 @@ namespace TestAnalysis;
 
 class TestResult extends DatabaseCollection
 {
-    protected $id, $score, $testId, $studentId, $code;
+    protected $score, $testId, $studentId, $code;
     
     public function __construct(array $details)
     {
         $this->id = $details['id'];
+        $this->name = null;
         $this->score = $details['score'];
         $this->testId = $details['Test_id'];
         $this->studentId = $details['Student_id'];
