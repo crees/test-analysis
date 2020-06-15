@@ -7,6 +7,8 @@ abstract class DatabaseCollection
     const NAME='name';
     const OPERATOR_MATCH_ALL = 'MATCHALL';
     
+    protected static $db = null; 
+    
     protected $id, $name;
     
     /**
@@ -16,10 +18,11 @@ abstract class DatabaseCollection
      * @param Database $db
      * @return DatabaseCollection[]
      */
-    public static function retrieveByDetail(string $detailType, string $detail, string $orderBy = "", Database $db = null) {
-        if (is_null($db)) {
-            $db = new Database();
+    public static function retrieveByDetail(string $detailType, string $detail, string $orderBy = "") {
+        if (is_null(self::$db)) {
+            self::$db = new Database();
         }
+        $db = self::$db;
         
         if ($detail == self::OPERATOR_MATCH_ALL) {
             $where = "";
@@ -36,7 +39,7 @@ abstract class DatabaseCollection
         $result = $db->dosql("SELECT * FROM " . explode('\\', static::class)[1] . "$where $orderBy;")->fetch_all(MYSQLI_ASSOC);
         
         if (!isset($result[0])) {
-            return null;
+            return [];
         }
         
         $ret = [];
@@ -49,8 +52,8 @@ abstract class DatabaseCollection
     }
     
     
-    public static function retrieveAll(string $orderBy = "", Database $db = null) {
-        return static::retrieveByDetail("", self::OPERATOR_MATCH_ALL, $orderBy, $db);
+    public static function retrieveAll(string $orderBy = "") {
+        return static::retrieveByDetail("", self::OPERATOR_MATCH_ALL, $orderBy);
     }
     
     public function getId() { return $this->id; }

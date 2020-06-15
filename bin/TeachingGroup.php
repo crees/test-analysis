@@ -12,7 +12,11 @@ class TeachingGroup extends DatabaseCollection
     }
     
     public function getStudents() {
-        $studentIds = array_map(function($x) { return $x['Student_id']; }, (new Database())->dosql("SELECT Student_id FROM StudentGroupMembership WHERE TeachingGroup_id = $this->id;")->fetch_array(MYSQLI_ASSOC));
+        $arr = (new Database())->dosql("SELECT Student_id FROM StudentGroupMembership WHERE TeachingGroup_id = $this->id;")->fetch_all(MYSQLI_ASSOC);
+        if (!isset($arr['Student_id'])) {
+            return [];
+        }
+        $studentIds = array_map(function($x) { return $x['Student_id']; }, $arr);
         return array_map(function($x) { return Student::retrieveByDetail(Student::ID, $x); }, $studentIds);
     }
 

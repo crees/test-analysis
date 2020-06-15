@@ -15,9 +15,22 @@ class Subject extends DatabaseCollection
     }
 
     public function getTeachingGroups() {
-        $teachingGroupIds = array_map(function($x) { return $x['TeachingGroup_id']; }, (new Database())->dosql("SELECT TeachingGroup_id FROM GroupSubjectMembership WHERE Subject_id = $this->id;")->fetch_array(MYSQLI_ASSOC));
+        $arr = (new Database())->dosql("SELECT TeachingGroup_id FROM GroupSubjectMembership WHERE Subject_id = $this->id;")->fetch_all(MYSQLI_ASSOC);
+        if (!isset($arr['TeachingGroup_id'])) {
+            return [];
+        }
+        $teachingGroupIds = array_map(function($x) { return $x['TeachingGroup_id']; }, $arr);
         return array_map(function($x) { return TeachingGroup::retrieveByDetail(TeachingGroup::ID, $x); }, $teachingGroupIds);
-
+    }
+    
+    public function getStudents() {
+        $students = [];
+        foreach ($this->getTeachingGroups() as $g) {
+            foreach ($g->getStudents as $s) {
+                array_push($students, $s);
+            }
+        }
+        return $students;
     }
     
     public function getTests() {
