@@ -21,7 +21,7 @@ abstract class DatabaseCollection
             $db = new Database();
         }
         
-        if ($detail = self::OPERATOR_MATCH_ALL) {
+        if ($detail == self::OPERATOR_MATCH_ALL) {
             $where = "";
         } else {
             $where = " WHERE $detailType = '$detail'";
