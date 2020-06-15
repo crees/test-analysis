@@ -16,7 +16,7 @@ abstract class DatabaseCollection
      * @param Database $db
      * @return DatabaseCollection[]
      */
-    public static function retrieveByDetail(string $detailType, string $detail, Database $db = null) {
+    public static function retrieveByDetail(string $detailType, string $detail, string $orderBy = "", Database $db = null) {
         if (is_null($db)) {
             $db = new Database();
         }
@@ -27,7 +27,13 @@ abstract class DatabaseCollection
             $where = " WHERE $detailType = '$detail'";
         }
         
-        $result = $db->dosql("SELECT * FROM " . explode('\\', static::class)[1] . "$where;")->fetch_all(MYSQLI_ASSOC);
+        if ($orderBy === "") {
+            $orderBy = "";
+        } else {
+            $orderBy = "ORDER BY $orderBy";
+        }
+        
+        $result = $db->dosql("SELECT * FROM " . explode('\\', static::class)[1] . "$where $orderBy;")->fetch_all(MYSQLI_ASSOC);
         
         if (!isset($result[0])) {
             return null;
@@ -43,8 +49,8 @@ abstract class DatabaseCollection
     }
     
     
-    public static function retrieveAll(Database $db = null) {
-        return static::retrieveByDetail("", self::OPERATOR_MATCH_ALL, $db);
+    public static function retrieveAll(string $orderBy = "", Database $db = null) {
+        return static::retrieveByDetail("", self::OPERATOR_MATCH_ALL, $orderBy, $db);
     }
     
     public function getId() { return $this->id; }
