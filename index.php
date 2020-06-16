@@ -7,7 +7,7 @@ $allSubjects = Subject::retrieveAll(Subject::NAME);
 
 if (isset($_GET['subject']) && !empty($_GET['subject'])) {
     $subject = Subject::retrieveByDetail(Subject::ID, $_GET['subject'])[0];
-    $teachingGroups = TeachingGroup::retrieveByDetail(TeachingGroup::SUBJECT_ID, $_GET['subject'], TeachingGroup::NAME);
+    $teachingGroups = $subject->getTeachingGroups();
     $tests = Test::retrieveByDetail(Test::SUBJECT_ID, $_GET['subject']);
     
     if (isset($_GET['teaching_group']) && !empty($_GET['teaching_group'])) {
@@ -58,7 +58,12 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
         				    echo "<option value=\"\" selected>Please select subject</option>";
         				}
         				foreach ($allSubjects as $s) {
-        				    echo "<option value=\"" . $s->getId() . "\">" . $s->getName() . "</option>";
+        				    if (isset($_GET['subject']) && $_GET['subject'] === $s->getId()) {
+        				        $selected = "selected";
+        				    } else {
+        				        $selected = "";
+        				    }
+        				    echo "<option value=\"" . $s->getId() . "\" $selected>" . $s->getName() . "</option>";
         				}
         				?>
         			</select>
@@ -67,10 +72,10 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
             		<label for="teaching_group" class="col-2 col-form-label">Teaching group</label>
             		<div class="col-10">
             			<select class="form-control" id="teaching_group" name="teaching_group" onchange="this.form.submit()">
-            				<option value="<?= TeachingGroup::OPERATOR_MATCH_ALL ?>">All groups</option>
+            				<option value="">All groups</option>
             				<?php
             				foreach ($teachingGroups as $g) {
-            				    if (isset($_GET['teaching_group']) && $_GET['teaching_group'] == $g->getId()) {
+            				    if (isset($_GET['teaching_group']) && $_GET['teaching_group'] === $g->getId()) {
             				        $selected = "selected";
             				    } else {
             				        $selected = "";
