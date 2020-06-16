@@ -29,13 +29,13 @@ eof;
             echo "<th>" . $c->getName() . "</th>\n";
         }
         echo "</tr>\n</thead>\n";
-
+        
         foreach ($this->r as $r) {
             echo "<tr>\n";
             echo "<th>" . $r->getName() . "</th>\n";
             foreach ($this->c as $c) {
                 $marks = $c->getResult($r);
-                echo "<td><input type=\"text\" id=\"result-" . $c->getId . "-" . $r->getId . " value=\"$marks\"></td>\n";
+                echo "<td><input type=\"text\" id=\"result-" . $c->getId() . "-" . $r->getId() . " value=\"$marks\"></td>\n";
             }
             echo "</tr>\n";
         }
