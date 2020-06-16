@@ -32,7 +32,7 @@ class Subject extends DatabaseCollection
     public function getStudents() {
         $students = [];
         foreach ($this->getTeachingGroups() as $g) {
-            foreach ($g->getStudents as $s) {
+            foreach ($g->getStudents() as $s) {
                 array_push($students, $s);
             }
         }
