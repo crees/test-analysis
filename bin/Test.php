@@ -10,9 +10,12 @@ class Test extends DatabaseCollection
     
     public function __construct(array $details)
     {
-        $this->id = $details[self::ID];
-        $this->name = $details[self::NAME];
-        $this->total = $details[self::TOTAL];
+        $this->details[self::ID] = $details[self::ID];
+        $this->details[self::NAME] = $details[self::NAME];
+        $this->details[self::TOTAL] = $details[self::TOTAL];
+        if (isset($details[self::SUBJECT_ID])) {
+            $this->details[self::SUBJECT_ID]= $details[self::SUBJECT_ID];
+        }
     }
     
     /**
@@ -23,7 +26,7 @@ class Test extends DatabaseCollection
      */
     public function getResult(Student $s) {
         foreach(TestResult::retrieveByDetail(TestResult::STUDENT_ID, $s->getId()) as $r) {
-            if ($r->getTestId() == $this->id) {
+            if ($r->getTestId() == $this->getId()) {
                 return $r->getScore();
             }
         }

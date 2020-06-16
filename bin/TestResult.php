@@ -11,27 +11,27 @@ class TestResult extends DatabaseCollection
     
     public function __construct(array $details)
     {
-        $this->id = $details[self::ID];
-        $this->name = null;
-        $this->score = $details[self::SCORE];
-        $this->testId = $details[self::TEST_ID];
-        $this->studentId = $details[self::STUDENT_ID];
+        $this->details[self::ID] = $details[self::ID];
+        $this->details[self::NAME] = null;
+        $this->details[self::SCORE] = $details[self::SCORE];
+        $this->details[self::TEST_ID] = $details[self::TEST_ID];
+        $this->details[self::STUDENT_ID] = $details[self::STUDENT_ID];
     }
     
     public function getTest() {
-        return Test::retrieveByDetail(Test::ID, $this->testId);
+        return Test::retrieveByDetail(Test::ID, $this->get(self::TEST_ID));
     }
     
     public function getStudent() {
-        return Student::retrieveByDetail(Student::ID, $this->studentId);
+        return Student::retrieveByDetail(Student::ID, $this->get(self::STUDENT_ID));
     }
     
     public function getTestId() {
-        return $this->testId;
+        return $this->get(self::TEST_ID);
     }
     
     public function getScore() {
-        return $this->score();
+        return $this->get(self::SCORE);
     }
     
     function __destruct()

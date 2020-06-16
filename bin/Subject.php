@@ -5,17 +5,15 @@ class Subject extends DatabaseCollection
 {
     const CODE = 'code';
     
-    protected $code;
-    
     public function __construct(array $details)
     {
-        $this->id = $details[self::ID];
-        $this->name = $details[self::NAME];
-        $this->code = $details[self::CODE];
+        $this->details[self::ID] = $details[self::ID];
+        $this->details[self::NAME] = $details[self::NAME];
+        $this->details[self::CODE] = $details[self::CODE];
     }
 
     public function getTeachingGroups() {
-        $arr = (new Database())->dosql("SELECT TeachingGroup_id FROM GroupSubjectMembership WHERE Subject_id = $this->id;")->fetch_all(MYSQLI_ASSOC);
+        $arr = (new Database())->dosql("SELECT TeachingGroup_id FROM GroupSubjectMembership WHERE Subject_id = " . $this->getId() . ";")->fetch_all(MYSQLI_ASSOC);
         if (!isset($arr['TeachingGroup_id'])) {
             return [];
         }
@@ -34,7 +32,7 @@ class Subject extends DatabaseCollection
     }
     
     public function getTests() {
-        return Test::retrieveByDetail(Test::SUBJECT_ID, $this->id);
+        return Test::retrieveByDetail(Test::SUBJECT_ID, $this->getId);
     }
     
     function __destruct()

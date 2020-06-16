@@ -9,7 +9,7 @@ abstract class DatabaseCollection
     
     protected static $db = null; 
     
-    protected $id, $name;
+    protected $details;
     
     /**
      * 
@@ -56,8 +56,10 @@ abstract class DatabaseCollection
         return static::retrieveByDetail("", self::OPERATOR_MATCH_ALL, $orderBy);
     }
     
-    public function getId() { return $this->id; }
-    public function getName() { return $this->name; }
+    public function getId() { return $this->details[self::ID]; }
+    public function getName() { return $this->details[self::NAME]; }
+    
+    public function get(String $element) { return $this->details[$element]; }
 
     public function __construct()
     {}
