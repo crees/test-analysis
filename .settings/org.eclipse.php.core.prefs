@@ -1,2 +1,2 @@
 eclipse.preferences.version=1
-include_path=0;/test-analysis
+include_path=0;/test-analysis\u00050;/test-analysis/contrib/php-graphql-client

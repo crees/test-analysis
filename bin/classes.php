@@ -13,6 +13,7 @@ if (!class_exists("Config")) {
     require "Test.php";
     require "TestResult.php";
     require "View.php";
+    require Config::site_docroot . "/contrib/php-graphql-client/vendor/autoload.php";
     
     /**
      * We start the session timer on creation, and destroy it after that time.
