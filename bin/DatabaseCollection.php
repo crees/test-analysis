@@ -49,17 +49,40 @@ abstract class DatabaseCollection
         }
         
         return $ret;
-    }
-    
+    }    
     
     public static function retrieveAll(string $orderBy = "") {
         return static::retrieveByDetail("", self::OPERATOR_MATCH_ALL, $orderBy);
+    }
+    
+    public function commit() {
+        if (is_null(self::$db)) {
+            self::$db = new Database();
+        }
+        $db = self::$db;
+        
+        $updatelist = [];
+        
+        foreach ($this->details as $key => $detail) {
+            if ($key === self::ID) {
+                continue;
+            }
+            array_push($updatelist, "$key = \"$detail\"");
+        }
+        
+        $updatelist = implode(",", $updatelist);
+        
+        $db->dosql("INSERT INTO " . explode('\\', static::class)[1] . "(" . implode(",", array_keys($this->details)) . ") VALUES (\"" .
+            implode("\",\"", array_values($this->details)) . "\") ON DUPLICATE KEY UPDATE $updatelist;"
+            );
     }
     
     public function getId() { return $this->details[self::ID]; }
     public function getName() { return $this->details[self::NAME]; }
     
     public function get(String $element) { return $this->details[$element]; }
+    
+    public function setName(String $name) { $this->details[self::NAME] = $name; }
 
     public function __construct()
     {}
