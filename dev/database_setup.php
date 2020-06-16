@@ -34,7 +34,8 @@ if (isset(Config::$maintenance) && Config::$maintenance) {
     $db->dosql("
     CREATE TABLE Student (
         id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-        name VARCHAR(30) NOT NULL,
+        first_name VARCHAR(30) NOT NULL,
+        last_name VARCHAR(30) NOT NULL,
         CONSTRAINT PRIMARY KEY (id)
     );");
     $db->dosql("
