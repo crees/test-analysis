@@ -56,6 +56,17 @@ class Subject extends DatabaseCollection
         $db->dosql("INSERT INTO GroupSubjectMembership(Subject_id, TeachingGroup_id) VALUES ($sid, $gid);");
     }
     
+    public function removeMember(TeachingGroup $group) {
+        if (is_null(self::$db)) {
+            self::$db = new Database();
+        }
+        $db = self::$db;
+        
+        $sid = $this->getId();
+        $gid = $group->getId();
+        
+        $db->dosql("DELETE FROM GroupSubjectMembership WHERE TeachingGroup_Id = $gid AND Subject_id = $sid;");
+    }
     
     function __destruct()
     {}
