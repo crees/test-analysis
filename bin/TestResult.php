@@ -5,6 +5,7 @@ class TestResult extends DatabaseCollection
 {
     const SCORE = 'score';
     const STUDENT_ID = 'Student_id';
+    const RECORDED_TS = 'recorded_ts';
     const TEST_ID = 'Test_id';
     
     protected $score, $testId, $studentId, $code;
@@ -16,6 +17,11 @@ class TestResult extends DatabaseCollection
         $this->details[self::SCORE] = $details[self::SCORE];
         $this->details[self::TEST_ID] = $details[self::TEST_ID];
         $this->details[self::STUDENT_ID] = $details[self::STUDENT_ID];
+        if (isset($details[self::RECORDED_TS])) {
+            $this->details[self::RECORDED_TS] = strtotime($details[self::RECORDED_TS]);
+        } else {
+            $this->details[self::RECORDED_TS] = null;
+        }
     }
     
     public function getTest() {

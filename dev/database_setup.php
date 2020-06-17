@@ -58,6 +58,7 @@ if (isset(Config::$maintenance) && Config::$maintenance) {
         id INT UNSIGNED NOT NULL AUTO_INCREMENT,
         Student_id INT NOT NULL,
         Test_id INT NOT NULL,
+        Recorded_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         score INT NOT NULL,
         CONSTRAINT PRIMARY KEY (id)
     );");

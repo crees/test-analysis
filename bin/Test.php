@@ -21,16 +21,24 @@ class Test extends DatabaseCollection
     /**
      * Returns empty string if there is no test mark recorded.
      * 
+     * If multiple test scores recorded, return latest
+     * 
      * @param Student $s
      * @return integer|string
      */
     public function getResult(Student $s) {
+        $latest = 0;
+        $score = "";
         foreach(TestResult::retrieveByDetail(TestResult::STUDENT_ID, $s->getId()) as $r) {
             if ($r->getTestId() == $this->getId()) {
-                return $r->getScore();
+                $ts = $r->get(TestResult::RECORDED_TS);
+                if ($ts > $latest) {
+                    $latest = $ts;
+                    $score = $r->getScore();
+                }
             }
         }
-        return "";
+        return $score;
     }
     
     function __destruct()
