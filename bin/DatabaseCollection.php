@@ -67,7 +67,7 @@ abstract class DatabaseCollection
             if ($key === self::ID) {
                 continue;
             }
-            if (!is_null($detail)) {
+            if (!is_null($detail) && !empty($detail)) {
                 array_push($updatelist, "$key = \"$detail\"");
             }
         }
