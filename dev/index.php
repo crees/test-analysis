@@ -14,9 +14,13 @@ require "../bin/classes.php";
 		<div class="container">
 			<div class="h1">Database tools:</div>
 
-			<div class="row"><a href="arbor_import.php" class="btn btn-warning" role="button">Refreshes from Arbor and allows new subjects to be added.</a></div>
+			<div class="row"><a href="arbor_import.php" class="btn" role="button">Refresh from Arbor and add new subjects.</a></div>
 
-			<div class="row"><a href="database_setup.php" class="btn btn-danger" role="button">Initial database setup- DELETES ALL DATA!</a></div>
+			<?php if (isset($_GET['showmethegoodstuff']) && $_GET['showmethegoodstuff'] === "yes") { ?>
+				<div class="row"><a href="database_setup.php" class="btn btn-danger" role="button">Initial database setup- DELETES ALL DATA!</a></div>
+			<?php } else { ?>
+				<div class="row"><a href="?showmethegoodstuff=yes" class="btn btn-danger" role="button">Show me the really dangerous stuff.</a></div>
+			<?php } ?>
 		</div>
 	</body>
 </html>
