@@ -38,7 +38,7 @@ eof;
             echo "<th>" . $s->getTeachingGroup(Subject::retrieveByDetail(Subject::ID, $t->get(Test::SUBJECT_ID))[0]);
             foreach ($this->tests as $t) {
                 $marks = $t->getResult($s);
-                echo "<td style=\"padding: 0\"><input class=\"form-control border-0 px-1\" type=\"text\" name=\"result-" . $t->getId() . "-" . $s->getId() . "\" value=\"$marks\"></td>\n";
+                self::makeTextBoxCell("result-" . $t->getId() . "-" . $s->getId(), $marks);
                 if ($marks == "") {
                     echo "<td>&nbsp;</td><td>&nbsp;</td>";
                 } else {
@@ -57,6 +57,15 @@ eof;
         </form>
 
 eof;
+    }
+    
+    static function makeTextBoxCell(String $name, $value) {
+        if (is_null($value)) {
+            $value = "";
+        }
+        echo "<td style=\"padding: 0\">";
+        echo "<input class=\"form-control border-0 px-1\" type=\"text\" name=\"$name\" value=\"$value\">";
+        echo "</td>\n";
     }
 
     function __destruct()
