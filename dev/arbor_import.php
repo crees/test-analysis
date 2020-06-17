@@ -3,16 +3,18 @@ namespace TestAnalysis;
 
 include "../bin/classes.php";
 
-if (isset($_POST['newsubjectcode'])) {
-    if (!empty($_POST['newsubjectname'])) {
+if (isset($_GET['removeGroup'])) {
+    Subject::retrieveByDetail(Subject::ID, $_GET['removeFromSubject'])[0]->removeMember(TeachingGroup::retrieveByDetail(TeachingGroup::ID, $_GET['removeGroup'])[0]);
+} elseif (isset($_GET['newsubjectcode'])) {
+    if (!empty($_GET['newsubjectname'])) {
         $s = new Subject([
-            Subject::NAME => $_POST['newsubjectname'],
-            Subject::CODE => $_POST['newsubjectcode'],
+            Subject::NAME => $_GET['newsubjectname'],
+            Subject::CODE => $_GET['newsubjectcode'],
         ]);
         $s->commit();
     }
     
-    foreach ($_POST as $k => $value) {
+    foreach ($_GET as $k => $value) {
         if (!empty($value)) {
             if (str_contains($k, "subject-add-group-")) {
                 $subject = Subject::retrieveByDetail(Subject::ID, str_replace("subject-add-group-", "", $k))[0];
@@ -68,23 +70,26 @@ if (isset($_POST['newsubjectcode'])) {
 <html><head><?php require "../bin/head.php" ?></head>
 <body>
 <div class="container">
-<form method="post">
+<form method="get">
 <table class="table">
-<thead><tr><th>Subject code</th><th>Subject name</th><th>Groups...</th></tr></thead>
+<thead><tr><th>Subject code</th><th>Subject name</th><th>Groups (click to remove)</th><th>Add group</th></tr></thead>
 <?php
 $orphanedGroups = TeachingGroup::retrieveAll();
 foreach (Subject::retrieveAll(Subject::NAME) as $s) {
     $allGroups = TeachingGroup::retrieveAll();
     echo "<tr><td>" . $s->get(Subject::CODE) . "</td><td>" . $s->get(Subject::NAME) . "</td>";
+    $names = [];
     foreach ($s->getTeachingGroups() as $g) {
-        echo "<td>" . $g->getName() . "</td>";
+        array_push($names, "<a href=\"?removeGroup=" . $g->getId() . "&removeFromSubject=" . $s->getId() . "\">" . $g->getName() . "</a>");
         unset($allGroups[array_search($g, $allGroups)]);
-        if (isset($orphanedGroups[array_search($g, $allGroups)])) {
-            unset($orphanedGroups[array_search($g, $allGroups)]);
+        if ($o = array_search($g, $orphanedGroups)) {
+            unset($orphanedGroups[$o]);
         }
     }
+    echo "<td>" . implode(", ", $names) . "</td>";
+    
     echo "<td><select name=\"subject-add-group-" . $s->getId() . "\" onchange=\"this.form.submit()\">";
-    echo "<option value=\"\" selected>Add Group to Subject</option>";
+    echo "<option value=\"\" selected>Add Group to " . $s->getName() . "</option>";
     foreach ($allGroups as $g) {
         echo "<option value=\"" . $g->getId() . "\">" . $g->getName() . "</option>";
     }
@@ -93,10 +98,12 @@ foreach (Subject::retrieveAll(Subject::NAME) as $s) {
 }
 ?>
 <tr>
-	<td><input type="text" name="newsubjectcode"></td>
-	<td><input type="text" name="newsubjectname"></td>
+	<td><input class="form-control" type="text" name="newsubjectcode"></td>
+
+	<td><input class="form-control" type="text" name="newsubjectname"></td>
+
+	<td><input class="form-control" type="submit" value="Add subject"></td>
 </tr>
-<tr><td>&nbsp;</td><td><input type="submit" value="Add subject"></td></tr>
 </table>
 </form>
 <?php
