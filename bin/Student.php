@@ -24,6 +24,26 @@ class Student extends DatabaseCollection
     public function getName() {
         return $this->details[self::FIRST_NAME] . " " . $this->details[self::LAST_NAME];
     }
+    
+    /**
+     * Returns the teaching group the student is in, in the context of the Subject
+     * 
+     * @param Subject $subject
+     * @return string
+     */
+    public function getTeachingGroup(Subject $subject) {
+        foreach ($subject->getTeachingGroups() as $g) {
+            if (in_array($this, $g->getStudents())) {
+                return $g->get(TeachingGroup::NAME);
+            }
+        }
+        return "NOGROUP??";
+    }
+    
+    /** Records a new test result.  The latest result is read, but all previous are stored */
+    public function recordTestResult(Test $test) {
+        
+    }
 
     function __destruct()
     {}
