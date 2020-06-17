@@ -40,7 +40,7 @@ eof;
                 $marks = $t->getResult($s);
                 echo "<td style=\"padding: 0\"><input class=\"form-control border-0 px-1\" type=\"text\" name=\"result-" . $t->getId() . "-" . $s->getId() . "\" value=\"$marks\"></td>\n";
                 if ($marks == "") {
-                    echo "<td>&nbsp</td><td>&nbsp</td>";
+                    echo "<td>&nbsp;</td><td>&nbsp;</td>";
                 } else {
                     echo "<td>" . round($marks * 100 / $t->get(Test::TOTAL), 0) . "</td><td>&nbsp;</td>"; // TODO grade calculation
                 }
