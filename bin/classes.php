@@ -39,4 +39,10 @@ if (!class_exists("Config")) {
         header('location: ' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
         exit();
     }
+    
+    if (!isset($_SESSION['form_serial'])) {
+        $_SESSION['form_serial'] = 0;
+    }
+    $_SESSION['form_serial']++;
+    
 }

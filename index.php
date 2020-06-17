@@ -11,10 +11,33 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
     $tests = Test::retrieveByDetail(Test::SUBJECT_ID, $_GET['subject']);
     
     if (isset($_GET['teaching_group']) && !empty($_GET['teaching_group'])) {
-        $view = new View($tests, TeachingGroup::retrieveByDetail(TeachingGroup::ID, $_GET['teaching_group'])[0]->getStudents());
+        $students = TeachingGroup::retrieveByDetail(TeachingGroup::ID, $_GET['teaching_group'])[0]->getStudents();
     } else {
-        $view = new View($tests, $subject->getStudents());
+        $students = $subject->getStudents();
     }
+    if (isset($_POST['form_serial']) && $_POST['form_serial'] == $_SESSION['form_serial'] - 1) {
+        foreach ($tests as $t) {
+            $testId = $t->getId();
+            foreach ($students as $s) {
+                $studentId = $s->getId();
+                //echo "<pre>"; print_r($_POST);
+                if (isset($_POST["result-$testId-$studentId"])) {
+                    $newscore = $_POST["result-$testId-$studentId"];
+                    // Is it different from the current result?
+                    if ($newscore != $t->getResult($s)) {
+                        $result = new TestResult([
+                            TestResult::ID => null,
+                            TestResult::SCORE => $newscore,
+                            TestResult::TEST_ID => $testId,
+                            TestResult::STUDENT_ID => $studentId,
+                        ]);
+                        $result->commit();
+                    }
+                }
+            }
+        }
+    }
+    $view = new View($tests, $students);
 }
 
 ?>
@@ -40,7 +63,10 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
             <div class="collapse navbar-collapse" id="collapsibleNavbar">
             	<ul class="navbar-nav">
             		<li class="nav-item">
-                		<a class="nav-link" href="?session_destroy=<?= $_SESSION['SESSION_CREATIONTIME']; ?>">Destroy session</a>
+                		<a class="nav-link" href="?session_destroy=<?= $_SESSION['SESSION_CREATIONTIME']; ?>">Home</a>
+                	</li>
+            		<li class="nav-item">
+                		<a class="nav-link" href="dev">Manage database</a>
                 	</li>
             	</ul>
         	</div>

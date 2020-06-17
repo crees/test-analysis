@@ -3,7 +3,7 @@ namespace TestAnalysis;
 
 class View
 {
-    protected $c, $r;
+    protected $tests, $students;
 
     /**
      * 
@@ -12,36 +12,48 @@ class View
      */
     public function __construct(Array $cols, Array $rows)
     {
-        $this->c = $cols;
-        $this->r = $rows;
+        $this->tests = $cols;
+        $this->students = $rows;
     }
     
     public function print() {
         echo <<< eof
         <form method="POST">
-            <table class="table">
+            <input type="submit" class="form-control" value="Save">
+            <table class="table table-bordered table-sm table-hover">
                 <thead>
                     <tr>
-                        <th scope="col">&nbsp</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Group</th>
 
 eof;
-        foreach ($this->c as $c) {
-            echo "<th>" . $c->getName() . "</th>\n";
+        foreach ($this->tests as $t) {
+            echo "<th>" . $t->getName() . "</th><th>%</th><th>Grade</th>\n";
         }
         echo "</tr>\n</thead>\n";
         
-        foreach ($this->r as $r) {
+        foreach ($this->students as $s) {
             echo "<tr>\n";
-            echo "<th>" . $r->getName() . "</th>\n";
-            foreach ($this->c as $c) {
-                $marks = $c->getResult($r);
-                echo "<td><input type=\"text\" id=\"result-" . $c->getId() . "-" . $r->getId() . " value=\"$marks\"></td>\n";
+            echo "<th>" . $s->getName() . "</th>\n";
+            echo "<th>" . $s->getTeachingGroup(Subject::retrieveByDetail(Subject::ID, $t->get(Test::SUBJECT_ID))[0]);
+            foreach ($this->tests as $t) {
+                $marks = $t->getResult($s);
+                echo "<td style=\"padding: 0\"><input class=\"form-control border-0 px-1\" type=\"text\" name=\"result-" . $t->getId() . "-" . $s->getId() . "\" value=\"$marks\"></td>\n";
+                if ($marks == "") {
+                    echo "<td>&nbsp</td><td>&nbsp</td>";
+                } else {
+                    echo "<td>" . round($marks * 100 / $t->get(Test::TOTAL), 0) . "</td><td>&nbsp;</td>"; // TODO grade calculation
+                }
             }
             echo "</tr>\n";
         }
         
+        $serial = $_SESSION['form_serial'];
+        
         echo <<< eof
             </table>
+            <input type="hidden" name="form_serial" value="$serial">
+
         </form>
 
 eof;
