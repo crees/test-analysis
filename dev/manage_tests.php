@@ -4,30 +4,45 @@ namespace TestAnalysis;
 include "../bin/classes.php";
 
 if (isset($_GET['newtest-name'])) {
+    foreach (Test::retrieveAll() as $t) {
+        $tId = $t->getId();
+        if (isset($_GET[Test::SUBJECT_ID . "-$tId"]) && !empty($_GET[Test::SUBJECT_ID . "-$tId"])) {
+            $detail = [];
+            $detail[Test::ID] = $tId;
+            $detail[Test::SUBJECT_ID] = $_GET[Test::SUBJECT_ID . "-$tId"];
+            $detail[Test::NAME] = $_GET[Test::NAME . "-$tId"];
+            // $t->set(Test::TOPIC, $_GET[Test::TOPIC . "-$tId"]);
+            $detail[Test::TOTAL] = $_GET[Test::TOTAL . "-$tId"];
+            if (isset($_GET[Test::CUSTOM_GRADE_BOUNDARIES . "-$tId"])) {
+                $detail[Test::CUSTOM_GRADE_BOUNDARIES] = 1;
+            } else {
+                $detail[Test::CUSTOM_GRADE_BOUNDARIES] = 0;
+            }
+            for ($i = 1; $i <= 9; $i++) {
+                $detail[Test::GRADE . $i] = $_GET[Test::GRADE . $i . "-$tId"];
+            }
+            
+            $newTest = new Test($detail);
+            
+            $newTest->commit();
+        }
+    }
+    
     if (!empty($_GET['newtest-name'])) {
         $newTestDetails = [];
         foreach ($_GET as $k => $v) {
             if (str_contains($k, "newtest-")) {
                 $k = str_replace('newtest-', '', $k);
-                $newTestDetails[$k] = $v;
+                if ($k == Test::CUSTOM_GRADE_BOUNDARIES) {
+                    $newTestDetails[$k] = 1;
+                } else {
+                    $newTestDetails[$k] = $v;
+                }
             }
         }
         $t = new Test($newTestDetails);
         $t->commit();
     }
-    
-    /* TODO This doesn't work yet
-    
-    foreach ($_GET as $k => $v) {
-        if (!empty($v)) {
-            if (str_contains($k, "subject-add-group-")) {
-                $subject = Subject::retrieveByDetail(Subject::ID, str_replace("subject-add-group-", "", $k))[0];
-                $subject->addMember(TeachingGroup::retrieveByDetail(TeachingGroup::ID, $v)[0]);
-            }
-        }
-    }
-    
-    */
 }
 ?>
 <!doctype html>
@@ -57,7 +72,7 @@ $subjects = Subject::retrieveAll(Subject::NAME);
 foreach (Test::retrieveAll(Test::NAME) as $t) {
     $tId = $t->getId();
     // Subject
-    echo "<tr><td><select name=\"subject-$tId\">";
+    echo "<tr><td><select name=\"" . Test::SUBJECT_ID . "-$tId\">";
     foreach ($subjects as $s) {
         if ($s->getId() == $t->get(Test::SUBJECT_ID)) {
             $selected = "selected";
@@ -68,11 +83,11 @@ foreach (Test::retrieveAll(Test::NAME) as $t) {
     }
     echo "</select></td>";    
     // Test name
-    View::makeTextBoxCell("name-$tId", $t->get(Test::NAME));
+    View::makeTextBoxCell(Test::NAME . "-$tId", $t->get(Test::NAME));
     // TODO Topic
     echo "<td>&nbsp;</td>";
     // Total score
-    View::makeTextBoxCell("total-$tId", $t->get(Test::TOTAL));
+    View::makeTextBoxCell(Test::TOTAL . "-$tId", $t->get(Test::TOTAL));
     // Custom grade boundaries?
     if ($t->get(Test::CUSTOM_GRADE_BOUNDARIES)) {
         $checked = "checked";
@@ -80,11 +95,11 @@ foreach (Test::retrieveAll(Test::NAME) as $t) {
         $checked = "";
     }
     echo "<td><div class=\"custom-control custom-checkbox\">";
-    echo "<input type=\"checkbox\" class=\"custom-control-input\" id=\"custom-$tId\" name=\"custom-$tId\" $checked>";
-    echo "<label class=\"custom-control-label\" for=\"custom-$tId\">&nbsp;&nbsp;</label>";
+    echo "<input type=\"checkbox\" class=\"custom-control-input\" id=\"custom-$tId\" name=\"" . Test::CUSTOM_GRADE_BOUNDARIES . "-$tId\" $checked>";
+    echo "<label class=\"custom-control-label\" for=\"custom-$tId\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>";
     echo "</div></td>";
     for ($i = 1; $i <= 9; $i++) {
-        View::makeTextBoxCell("grade-$i-$tId", $t->getGradeBoundary($i));
+        View::makeTextBoxCell("grade$i-$tId", $t->getGradeBoundary($i));
     }
     echo "</tr>";
 }
