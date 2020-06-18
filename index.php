@@ -20,11 +20,11 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
             $testId = $t->getId();
             foreach ($students as $s) {
                 $studentId = $s->getId();
-                //echo "<pre>"; print_r($_POST);
-                if (isset($_POST["result-$testId-$studentId"])) {
+                if ($_POST["result-$testId-$studentId"] !== "") {
                     $newscore = $_POST["result-$testId-$studentId"];
+                    $currentResult = $t->getResult($s);
                     // Is it different from the current result?
-                    if ($newscore != $t->getResult($s)) {
+                    if (is_null($currentResult) || $newscore != $currentResult->getScore()) {
                         $result = new TestResult([
                             TestResult::ID => null,
                             TestResult::SCORE => $newscore,

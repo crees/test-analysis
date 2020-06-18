@@ -52,21 +52,21 @@ class Test extends DatabaseCollection
      * If multiple test scores recorded, return latest
      * 
      * @param Student $s
-     * @return integer|string
+     * @return TestResult
      */
     public function getResult(Student $s) {
         $latest = 0;
-        $score = "";
+        $result = null;
         foreach(TestResult::retrieveByDetail(TestResult::STUDENT_ID, $s->getId()) as $r) {
             if ($r->getTestId() == $this->getId()) {
                 $ts = $r->get(TestResult::RECORDED_TS);
                 if ($ts > $latest) {
                     $latest = $ts;
-                    $score = $r->getScore();
+                    $result = $r;
                 }
             }
         }
-        return $score;
+        return $result;
     }
     
     public function calculateGrade(TestResult $result) {

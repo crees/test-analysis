@@ -20,6 +20,7 @@ class View
         echo <<< eof
         <form method="POST">
             <input type="submit" class="form-control" value="Save">
+            <div class="table-responsive">
             <table class="table table-bordered table-sm table-hover">
                 <thead>
                     <tr>
@@ -27,23 +28,34 @@ class View
                         <th scope="col">Group</th>
 
 eof;
+        if (count($this->tests) < 1) {
+            echo "</tr></table></form><div>No tests defined.</div>";
+            return;
+        }
         foreach ($this->tests as $t) {
             echo "<th>" . $t->getName() . "</th><th>%</th><th>Grade</th>\n";
         }
         echo "</tr>\n</thead>\n";
         
+        $firstTabIndex = 0;
+        $studentCount = count($this->students);
+        
         foreach ($this->students as $s) {
+            $firstTabIndex++;
+            $tabIndex = $firstTabIndex;
             echo "<tr>\n";
             echo "<th>" . $s->getName() . "</th>\n";
-            echo "<th>" . $s->getTeachingGroup(Subject::retrieveByDetail(Subject::ID, $t->get(Test::SUBJECT_ID))[0]);
+            echo "<th>" . $s->getTeachingGroup(Subject::retrieveByDetail(Subject::ID, $this->tests[0]->get(Test::SUBJECT_ID))[0]);
             foreach ($this->tests as $t) {
-                $marks = $t->getResult($s);
-                self::makeTextBoxCell("result-" . $t->getId() . "-" . $s->getId(), $marks);
-                if ($marks == "") {
+                $result = $t->getResult($s);
+                self::makeTextBoxCell("result-" . $t->getId() . "-" . $s->getId(), is_null($result) ? "" : $result->getScore(), $tabIndex);
+                if (is_null($result)) {
                     echo "<td>&nbsp;</td><td>&nbsp;</td>";
                 } else {
-                    echo "<td>" . round($marks * 100 / $t->get(Test::TOTAL), 0) . "</td><td>&nbsp;</td>"; // TODO grade calculation
+                    echo "<td>" . round($result->getScore() * 100 / $t->get(Test::TOTAL), 0) . "</td>";
+                    echo "<td>" . $t->calculateGrade($result) . "</td>";
                 }
+                $tabIndex += $studentCount;
             }
             echo "</tr>\n";
         }
@@ -52,6 +64,7 @@ eof;
         
         echo <<< eof
             </table>
+            </div>
             <input type="hidden" name="form_serial" value="$serial">
 
         </form>
@@ -59,12 +72,15 @@ eof;
 eof;
     }
     
-    static function makeTextBoxCell(String $name, $value) {
+    static function makeTextBoxCell(String $name, $value, int $tabindex = 0) {
         if (is_null($value)) {
             $value = "";
         }
+        if ($tabindex != 0) {
+            $tabindex = "tabindex=\"$tabindex\"";
+        }
         echo "<td style=\"padding: 0\">";
-        echo "<input class=\"form-control border-0 px-1\" type=\"text\" name=\"$name\" value=\"$value\">";
+        echo "<input class=\"form-control border-0 px-1\" type=\"text\" name=\"$name\" value=\"$value\" $tabindex>";
         echo "</td>\n";
     }
 
