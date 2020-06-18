@@ -38,6 +38,14 @@ class Test extends DatabaseCollection
         }
     }
     
+    public function set(String $detail, String $value) {
+        if ($detail == self::ID) {
+            // We're not even going to think about the pain that would cause
+            return false;
+        }
+        return $this->details[$detail] = $value;
+    }
+    
     /**
      * Returns empty string if there is no test mark recorded.
      * 
