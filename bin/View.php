@@ -48,7 +48,7 @@ eof;
             echo "<th>" . $s->getTeachingGroup(Subject::retrieveByDetail(Subject::ID, $this->tests[0]->get(Test::SUBJECT_ID))[0]);
             foreach ($this->tests as $t) {
                 $result = $t->getResult($s);
-                self::makeTextBoxCell("result-" . $t->getId() . "-" . $s->getId(), is_null($result) ? "" : $result->getScore(), $tabIndex);
+                echo self::makeTextBoxCell("result-" . $t->getId() . "-" . $s->getId(), is_null($result) ? "" : $result->getScore(), $tabIndex);
                 if (is_null($result)) {
                     echo "<td>&nbsp;</td><td>&nbsp;</td>";
                 } else {
@@ -79,9 +79,11 @@ eof;
         if ($tabindex != 0) {
             $tabindex = "tabindex=\"$tabindex\"";
         }
-        echo "<td style=\"padding: 0\">";
-        echo "<input class=\"form-control border-0 px-1\" type=\"text\" name=\"$name\" value=\"$value\" $tabindex>";
-        echo "</td>\n";
+        $ret = "";
+        $ret .= "<td style=\"padding: 0\">";
+        $ret .= "<input class=\"form-control border-0 px-1\" type=\"text\" name=\"$name\" value=\"$value\" $tabindex>";
+        $ret .= "</td>\n";
+        return $ret;
     }
 
     function __destruct()

@@ -83,11 +83,11 @@ foreach (Test::retrieveAll(Test::NAME) as $t) {
     }
     echo "</select></td>";    
     // Test name
-    View::makeTextBoxCell(Test::NAME . "-$tId", $t->get(Test::NAME));
+    echo View::makeTextBoxCell(Test::NAME . "-$tId", $t->get(Test::NAME));
     // TODO Topic
     echo "<td>&nbsp;</td>";
     // Total score
-    View::makeTextBoxCell(Test::TOTAL . "-$tId", $t->get(Test::TOTAL));
+    echo View::makeTextBoxCell(Test::TOTAL . "-$tId", $t->get(Test::TOTAL));
     // Custom grade boundaries?
     if ($t->get(Test::CUSTOM_GRADE_BOUNDARIES)) {
         $checked = "checked";
@@ -99,7 +99,7 @@ foreach (Test::retrieveAll(Test::NAME) as $t) {
     echo "<label class=\"custom-control-label\" for=\"custom-$tId\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>";
     echo "</div></td>";
     for ($i = 1; $i <= 9; $i++) {
-        View::makeTextBoxCell("grade$i-$tId", $t->getGradeBoundary($i));
+        echo View::makeTextBoxCell("grade$i-$tId", $t->getGradeBoundary($i));
     }
     echo "</tr>";
 }
@@ -115,12 +115,12 @@ foreach (Test::retrieveAll(Test::NAME) as $t) {
 		</select>
 	</td>
 	<?php
-	View::makeTextBoxCell("newtest-" . Test::NAME, "");
+	echo View::makeTextBoxCell("newtest-" . Test::NAME, "");
 
 	// Topics not implemented yet
 	echo "<td>&nbsp;</td>";
 	
-	View::makeTextBoxCell("newtest-" . Test::TOTAL, "");
+	echo View::makeTextBoxCell("newtest-" . Test::TOTAL, "");
 	
 	?>
 
@@ -133,7 +133,7 @@ foreach (Test::retrieveAll(Test::NAME) as $t) {
 	
     <?php
     for ($i = 1; $i <= 9; $i++) {
-        View::makeTextBoxCell("newtest-" . Test::GRADE . $i, "");
+        echo View::makeTextBoxCell("newtest-" . Test::GRADE . $i, "");
     }
 	?>
 </tr>
