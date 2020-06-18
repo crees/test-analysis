@@ -67,14 +67,12 @@ abstract class DatabaseCollection
         $columnvalues = [];
         
         foreach ($this->details as $key => $detail) {
-            if (!is_null($detail) && !empty($detail)) {
+            if (!is_null($detail) && strcmp($detail, "") != 0) {
                 array_push($columnkeys, $key);
                 array_push($columnvalues, $detail);
-            }
-            if ($key === self::ID) {
-                continue;
-            }
-            if (!is_null($detail) && !empty($detail)) {
+                if ($key === self::ID) {
+                    continue;
+                }
                 array_push($updatelist, "$key = \"$detail\"");
             }
         }
