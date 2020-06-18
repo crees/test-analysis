@@ -2,10 +2,6 @@
 
 namespace TestAnalysis;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
-error_reporting(-1);
-
 class Config {
     const site = "Droitwich Spa High School & Sixth Form Centre Test Analysis Service";
     const site_docroot = "/home/crees/public_html/roombooking/test-analysis";
@@ -14,7 +10,7 @@ class Config {
     const db = array(
         'host' => "localhost:3306",
         'user' => "root",
-        'password' => "iamroot",
+        'password' => "",
         'name' => "testAnalysis",
     );
     
@@ -25,6 +21,19 @@ class Config {
     );
     
     public static $maintenance = true;
+    
+    const defaultGradePercent = array(
+    	0 =>  0,
+    	1 => 10,
+    	2 => 20,
+    	3 => 30,
+    	4 => 40,
+    	5 => 50,
+    	6 => 60,
+    	7 => 70,
+    	8 => 80,
+    	9 => 90,
+   	);
     
     const debug = true;
     

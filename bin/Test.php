@@ -69,7 +69,25 @@ class Test extends DatabaseCollection
         return $score;
     }
     
+    public function calculateGrade(TestResult $result) {
+        $grade = 9;
+        if ($this->details[self::CUSTOM_GRADE_BOUNDARIES] == 1) {
+            while ($this->getGradeBoundary($grade) > $result->getScore()) {
+                $grade--;
+            }
+        } else {
+            $percent = $result->getScore() * 100 / $this->get(self::TOTAL);
+            while (Config::defaultGradePercent[$grade] > $percent) {
+                $grade--;
+            }
+        }
+        return $grade;
+    }
+    
     public function getGradeBoundary(string $grade) {
+        if ($grade == "0") {
+            return 0;
+        }
         $gradeToGet = self::GRADE . $grade;
         return $this->details[$gradeToGet];
     }
