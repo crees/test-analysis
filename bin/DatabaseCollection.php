@@ -63,7 +63,14 @@ abstract class DatabaseCollection
         
         $updatelist = [];
         
+        $columnkeys = [];
+        $columnvalues = [];
+        
         foreach ($this->details as $key => $detail) {
+            if (!is_null($detail) && !empty($detail)) {
+                array_push($columnkeys, $key);
+                array_push($columnvalues, $detail);
+            }
             if ($key === self::ID) {
                 continue;
             }
@@ -74,13 +81,16 @@ abstract class DatabaseCollection
         
         $updatelist = implode(",", $updatelist);
         
+        $columnkeys = implode(",", $columnkeys);
+        $columnvalues = implode("\",\"", $columnvalues);
+        
         if (is_null($this->getId())) {
             // We don't actually want to replace existing items, we just want a new one if ID is null
             $db->dosql("INSERT INTO " . explode('\\', static::class)[1] . " SET $updatelist;");
         } else {
-            $db->dosql("INSERT INTO " . explode('\\', static::class)[1] . "(" . implode(",", array_keys($this->details)) . ") VALUES (\"" .
-                implode("\",\"", array_values($this->details)) . "\") ON DUPLICATE KEY UPDATE $updatelist;"
-                );
+            $db->dosql("INSERT INTO " . explode('\\', static::class)[1] .
+                "($columnkeys) VALUES (\"$columnvalues\") ON DUPLICATE KEY UPDATE $updatelist;"
+            );
         }
     }
     
