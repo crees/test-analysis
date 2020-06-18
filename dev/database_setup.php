@@ -52,15 +52,14 @@ if (isset(Config::$maintenance) && Config::$maintenance) {
         name VARCHAR(30) NOT NULL,
         total INT NOT NULL,
         custom_grade_boundaries BOOLEAN NOT NULL DEFAULT FALSE,
-        grade1 SMALLINT,
-        grade2 SMALLINT,
-        grade3 SMALLINT,
-        grade4 SMALLINT,
-        grade5 SMALLINT,
-        grade6 SMALLINT,
-        grade7 SMALLINT,
-        grade8 SMALLINT,
-        grade9 SMALLINT,
+        CONSTRAINT PRIMARY KEY (id)
+    );");
+    $db->dosql("
+    CREATE TABLE GradeBoundary (
+        id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        Test_id INT NOT NULL,
+        name VARCHAR(30) NOT NULL,
+        boundary SMALLINT,
         CONSTRAINT PRIMARY KEY (id)
     );");
     $db->dosql("

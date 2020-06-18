@@ -18,9 +18,6 @@ if (isset($_GET['newtest-name'])) {
             } else {
                 $detail[Test::CUSTOM_GRADE_BOUNDARIES] = 0;
             }
-            for ($i = 1; $i <= 9; $i++) {
-                $detail[Test::GRADE . $i] = $_GET[Test::GRADE . $i . "-$tId"];
-            }
             
             $newTest = new Test($detail);
             
@@ -43,7 +40,63 @@ if (isset($_GET['newtest-name'])) {
         $t = new Test($newTestDetails);
         $t->commit();
     }
+    
+    // Let's now examine the grade boundaries.  First handle any that have changed
+    foreach (GradeBoundary::retrieveAll() as $b) {
+        $bId = $b->getId();
+        if (!isset($_GET["GradeBoundary-grade-$bId"])) {
+            continue;
+        }
+        $newGrade = $_GET["GradeBoundary-grade-$bId"];
+        $newBoundary = $_GET["GradeBoundary-boundary-$bId"];
+        if ($newGrade != $b->get(GradeBoundary::NAME) || $newBoundary != $b->get(GradeBoundary::BOUNDARY)) {
+            $b->setName($newGrade);
+            $b->setBoundary($newBoundary);
+            $b->commit();
+        }
+    }
+    
+    // Now we add any new ones we find for each subject.
+    foreach (Subject::retrieveAll() as $s) {
+        $sId = $s->getId();
+        for ($i = 1; $i < 20; $i++) {
+            $newGrade = $_GET["GradeBoundary-grade-new-for-subject-$sId-$i"];
+            $newBoundary = $_GET["GradeBoundary-boundary-new-for-subject-$sId-$i"];
+            if (!empty($newGrade) && !empty($newBoundary)) {
+                $b = new GradeBoundary([
+                    GradeBoundary::NAME => $newGrade,
+                    GradeBoundary::BOUNDARY => $newBoundary,
+                    GradeBoundary::TEST_ID => -$sId,
+                ]);
+                $b->commit();
+            }
+        }
+    }
+
+    // Finally add any new custom grade boundaries
+    foreach (Test::retrieveAll() as $t) {
+        $tId = $t->getId();
+        for ($i = 1; $i < 20; $i++) {
+            if (!isset($_GET["GradeBoundary-grade-new-for-test-$tId-$i"])) {
+                break;
+            }
+            $newGrade = $_GET["GradeBoundary-grade-new-for-test-$tId-$i"];
+            $newBoundary = $_GET["GradeBoundary-boundary-new-for-test-$tId-$i"];
+            if (!empty($newGrade) && !empty($newBoundary)) {
+                $b = new GradeBoundary([
+                    GradeBoundary::NAME => $newGrade,
+                    GradeBoundary::BOUNDARY => $newBoundary,
+                    GradeBoundary::TEST_ID => $tId,
+                ]);
+                $b->commit();
+            }
+        }
+    }
 }
+
+$subjects = Subject::retrieveAll(Subject::NAME);
+$tests = Test::retrieveAll(Test::NAME);
+
 ?>
 <!doctype html>
 <html><head><?php require "../bin/head.php" ?></head>
@@ -58,18 +111,12 @@ if (isset($_GET['newtest-name'])) {
 		<th>Test name</th>
 		<th>Topic<!-- TODO --></th>
 		<th>Total score</th>
-		<th>Nonstandard grades?</th>
-<?php
-for ($i = 1; $i <= 9; $i++) {
-    echo "      <th>$i</th>\n";
-}
-?>
+		<th>Custom grade boundaries?</th>
 	</tr>
 </thead>
 
 <?php
-$subjects = Subject::retrieveAll(Subject::NAME);
-foreach (Test::retrieveAll(Test::NAME) as $t) {
+foreach ($tests as $t) {
     $tId = $t->getId();
     // Subject
     echo "<tr><td><select name=\"" . Test::SUBJECT_ID . "-$tId\">";
@@ -98,9 +145,6 @@ foreach (Test::retrieveAll(Test::NAME) as $t) {
     echo "<input type=\"checkbox\" class=\"custom-control-input\" id=\"custom-$tId\" name=\"" . Test::CUSTOM_GRADE_BOUNDARIES . "-$tId\" $checked>";
     echo "<label class=\"custom-control-label\" for=\"custom-$tId\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>";
     echo "</div></td>";
-    for ($i = 1; $i <= 9; $i++) {
-        echo View::makeTextBoxCell("grade$i-$tId", $t->getGradeBoundary($i));
-    }
     echo "</tr>";
 }
 ?>
@@ -130,16 +174,84 @@ foreach (Test::retrieveAll(Test::NAME) as $t) {
     		<label class="custom-control-label" for="custom-newtest">&nbsp;&nbsp;</label>
     	</div>
     </td>
-	
-    <?php
-    for ($i = 1; $i <= 9; $i++) {
-        echo View::makeTextBoxCell("newtest-" . Test::GRADE . $i, "");
-    }
-	?>
 </tr>
 
 </table>
 <input type="submit" class="form-control" value="Save">
+
+<div class="row">You can set default grade boundaries for tests in each subject (these are PERCENTAGES):</div>
+
+<?php
+// Subject grade boundaries
+foreach ($subjects as $s) {
+    echo "<table class=\"table table-hover table-bordered table-sm\">";
+    $gradeArray = [];
+    $boundaryArray = [];
+    $columns = 0;
+    // We'll give whatever's already there + 20 columns; that should be enough!
+    foreach (GradeBoundary::retrieveByDetail(GradeBoundary::TEST_ID, -$s->getId(), GradeBoundary::BOUNDARY) as $b) {
+        array_push($gradeArray, View::makeTextBoxCell("GradeBoundary-grade-" . $b->getId(), $b->get(GradeBoundary::NAME)));
+        array_push($boundaryArray, View::makeTextBoxCell("GradeBoundary-boundary-" . $b->getId(), $b->get(GradeBoundary::BOUNDARY)));
+        $columns++;
+    }
+    for ($i = 1; $i < 20; $i++) {
+        array_push($gradeArray, View::makeTextBoxCell("GradeBoundary-grade-new-for-subject-". $s->getId() . "-$i", ""));
+        array_push($boundaryArray, View::makeTextBoxCell("GradeBoundary-boundary-new-for-subject-". $s->getId() . "-$i", ""));
+        $columns++;
+    }
+    echo "<thead><tr><th>" . $s->getName() . "</th>";
+    while ($columns-- != 0) {
+        echo "<th class=\"th-sm\">&nbsp;</th>";
+    }
+    echo "</tr></thead>";
+    echo "<tr><th>Grade</th>";
+    echo implode("", $gradeArray);
+    echo "</tr>";
+    echo "<tr><th>Minimum mark</th>";
+    echo implode("", $boundaryArray);
+    echo "</tr>";
+    echo "</table>";
+}
+
+// Test grade boundaries
+$explain = "<div class=\"row\">You can now set custom grade boundaries for tests that have custom grades enabled (these are on RAW SCORE):</div>";
+foreach ($tests as $t) {
+    if (!$t->get(Test::CUSTOM_GRADE_BOUNDARIES)) {
+        continue;
+    }
+    echo $explain;
+    $explain = '';
+    echo "<table class=\"table table-hover table-bordered table-sm\">";
+    $gradeArray = [];
+    $boundaryArray = [];
+    $columns = 0;
+    // We'll give whatever's already there + 20 columns; that should be enough!
+    foreach (GradeBoundary::retrieveByDetail(GradeBoundary::TEST_ID, $t->getId(), GradeBoundary::BOUNDARY) as $b) {
+        array_push($gradeArray, View::makeTextBoxCell("GradeBoundary-grade-" . $b->getId(), $b->get(GradeBoundary::NAME)));
+        array_push($boundaryArray, View::makeTextBoxCell("GradeBoundary-boundary-" . $b->getId(), $b->get(GradeBoundary::BOUNDARY)));
+        $columns++;
+    }
+    for ($i = 1; $i < 20; $i++) {
+        array_push($gradeArray, View::makeTextBoxCell("GradeBoundary-grade-new-for-test-". $t->getId() . "-$i", ""));
+        array_push($boundaryArray, View::makeTextBoxCell("GradeBoundary-boundary-new-for-test-". $t->getId() . "-$i", ""));
+        $columns++;
+    }
+    echo "<thead><tr><th>" . $t->getName() . "</th>";
+    while ($columns-- != 0) {
+        echo "<th class=\"th-sm\">&nbsp;</th>";
+    }
+    echo "</tr></thead>";
+    echo "<tr><th>Grade</th>";
+    echo implode("", $gradeArray);
+    echo "</tr>";
+    echo "<tr><th>Minimum mark</th>";
+    echo implode("", $boundaryArray);
+    echo "</tr>";
+    echo "</table>";
+}
+
+
+?>
 </form>
 </div>
 </body>

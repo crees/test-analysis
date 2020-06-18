@@ -22,19 +22,6 @@ class Config {
     
     public static $maintenance = true;
     
-    const defaultGradePercent = array(
-    	0 =>  0,
-    	1 => 10,
-    	2 => 20,
-    	3 => 30,
-    	4 => 40,
-    	5 => 50,
-    	6 => 60,
-    	7 => 70,
-    	8 => 80,
-    	9 => 90,
-   	);
-    
     const debug = true;
     
     /* No user serviceable parts beyond this point */

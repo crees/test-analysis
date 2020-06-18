@@ -6,9 +6,6 @@ class Test extends DatabaseCollection
     const SUBJECT_ID = 'Subject_id';
     const CUSTOM_GRADE_BOUNDARIES = 'custom_grade_boundaries';
     const TOTAL = 'total';
-    const GRADE = 'grade';
-    
-    protected $total;
     
     public function __construct(array $details)
     {
@@ -27,12 +24,6 @@ class Test extends DatabaseCollection
         } else {
             $this->details[self::CUSTOM_GRADE_BOUNDARIES] = 0;
         }
-        foreach ($details as $k => $v) {
-            if (substr($k, 0, strlen(self::GRADE)) == self::GRADE) {
-                $this->details[$k] = $v;
-            }
-        }
-        
         if (isset($details[self::SUBJECT_ID])) {
             $this->details[self::SUBJECT_ID]= $details[self::SUBJECT_ID];
         }
@@ -70,26 +61,29 @@ class Test extends DatabaseCollection
     }
     
     public function calculateGrade(TestResult $result) {
-        $grade = 9;
+        /* 
+         * XXX
+         * 
+         * If we have custom grade boundaries set, we need to use the ones per subject, which
+         * are stored as negative testIds.
+         * 
+         */
         if ($this->details[self::CUSTOM_GRADE_BOUNDARIES] == 1) {
-            while ($this->getGradeBoundary($grade) > $result->getScore()) {
-                $grade--;
-            }
+            $id_to_use = $this->getId();
+            $result_to_use = $result->getScore();
         } else {
-            $percent = $result->getScore() * 100 / $this->get(self::TOTAL);
-            while (Config::defaultGradePercent[$grade] > $percent) {
-                $grade--;
+            $id_to_use = -$this->get(self::SUBJECT_ID);
+            $result_to_use = round($result->getScore() * 100 / $this->get(Test::TOTAL), 0);
+        }
+        $grade = 0;
+        // First, get the grades ordered by highest to lowest
+        foreach (GradeBoundary::retrieveByDetail(GradeBoundary::TEST_ID, $id_to_use, GradeBoundary::BOUNDARY . ' DESC') as $g) {
+            if ($g->get(GradeBoundary::BOUNDARY) <= $result_to_use) {
+                $grade = $g->getName();
+                break;
             }
         }
         return $grade;
-    }
-    
-    public function getGradeBoundary(string $grade) {
-        if ($grade == "0") {
-            return 0;
-        }
-        $gradeToGet = self::GRADE . $grade;
-        return $this->details[$gradeToGet];
     }
     
     function __destruct()
