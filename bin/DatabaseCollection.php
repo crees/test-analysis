@@ -55,6 +55,13 @@ abstract class DatabaseCollection
         return static::retrieveByDetail("", self::OPERATOR_MATCH_ALL, $orderBy);
     }
     
+    public static function delete(int $id) {
+        if (is_null(self::$db)) {
+            self::$db = new Database();
+        }
+        self::$db->dosql("DELETE FROM " . explode('\\', static::class)[1] . " WHERE id = $id;");
+    }
+    
     public function commit() {
         if (is_null(self::$db)) {
             self::$db = new Database();
