@@ -44,7 +44,7 @@ eof;
             $firstTabIndex++;
             $tabIndex = $firstTabIndex;
             echo "<tr>\n";
-            echo "<th>" . $s->getName() . "</th>\n";
+            echo "<th><a href=\"student_individual_scores.php?student=" . $s->getId() . "\">" . $s->getName() . "</a></th>\n";
             echo "<th>" . $s->getTeachingGroup(Subject::retrieveByDetail(Subject::ID, $this->tests[0]->get(Test::SUBJECT_ID))[0]);
             foreach ($this->tests as $t) {
                 $result = $t->getResult($s);
