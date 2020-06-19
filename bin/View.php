@@ -17,6 +17,10 @@ class View
     }
     
     public function print() {
+        if (count($this->tests) < 1) {
+            echo "</tr></table></form><div>No tests defined for selected subject.</div>";
+            return;
+        }
         echo <<< eof
         <form method="POST">
             <input type="submit" class="form-control" value="Save">
@@ -24,16 +28,17 @@ class View
             <table class="table table-bordered table-sm table-hover">
                 <thead>
                     <tr>
-                        <th scope="col">Name</th>
-                        <th scope="col">Group</th>
-                        <th scope="col">Ind.</th>
+                        <th rowspan="2" scope="col">Name</th>
+                        <th rowspan="2" scope="col">Group</th>
+                        <th rowspan="2" scope="col">Ind.</th>
 eof;
-        if (count($this->tests) < 1) {
-            echo "</tr></table></form><div>No tests defined.</div>";
-            return;
-        }
         foreach ($this->tests as $t) {
-            echo "<th>" . $t->getName() . "</th><th>%</th><th>Grd</th>\n";
+            echo "<th colspan=\"3\" class=\"text-center\">" . $t->getName() . "</th>\n";
+        }
+        echo "</tr>\n<tr>";
+        
+        foreach ($this->tests as $t) {
+            echo "<th>Sc</th><th>%</th><th>Grd</th>\n";
         }
         echo "</tr>\n</thead>\n";
         
