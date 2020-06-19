@@ -40,6 +40,23 @@ class Student extends DatabaseCollection
         return "NOGROUP??";
     }
     
+    public function getBaseline(Subject $subject) {
+        if (empty($subject->get(Subject::BASELINE_ID))) {
+            return "";
+        }
+        
+        // Get all baselines
+        $myBaseLines = Baseline::retrieveByDetail(Baseline::STUDENT_ID, $this->getId());
+        
+        // Now, find the baseline for the Subject
+        
+        foreach ($myBaseLines as $b) {
+            if ($subject->get(Subject::BASELINE_ID) == $b->get(Baseline::MIS_ASSESSMENT_ID)) {
+                return $b->get(Baseline::GRADE);
+            }
+        }
+    }
+    
     /** Records a new test result.  The latest result is read, but all previous are stored */
     public function recordTestResult(Test $test) {
         

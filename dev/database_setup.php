@@ -12,10 +12,20 @@ if (isset(Config::$maintenance) && Config::$maintenance) {
     $db->dosql("CREATE DATABASE $dbname;");
     $db->dosql("USE $dbname;");
     $db->dosql("
+    CREATE TABLE Baseline (
+        id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        name VARCHAR(300) NOT NULL,
+        Mis_assessment_id INT UNSIGNED NOT NULL,
+        Student_id INT UNSIGNED NOT NULL,
+        grade VARCHAR(10) NOT NULL,
+        CONSTRAINT PRIMARY KEY (id)
+    );");
+    $db->dosql("
     CREATE TABLE Subject (
         id INT UNSIGNED NOT NULL AUTO_INCREMENT,
         name VARCHAR(30) NOT NULL,
         code VARCHAR(2) NOT NULL,
+        Baseline_id INT UNSIGNED DEFAULT NULL,
         CONSTRAINT PRIMARY KEY (id)
     );");
     $db->dosql("

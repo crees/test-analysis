@@ -22,7 +22,37 @@ $data = $client->rawQuery("query {
       }
     }
   }
+  StudentProgressBaseline {
+    id
+    student {
+      id
+    }
+    assessment {
+      id
+      displayName
+      subject {
+        subjectName
+      }
+    }
+    grade {
+      displayName
+    }
+  }
 }")->getData();
+
+foreach ($data['StudentProgressBaseline'] as $baseline) {
+    $details = [];
+    // Does this Baseline already exist?  Overwrite if so.
+    if (!empty(Baseline::retrieveByDetail(Baseline::ID, $baseline['id']))) {
+        $details[Baseline::ID] = $baseline['id'];
+    }
+    $details[Baseline::GRADE] = $baseline['grade']['displayName'];
+    $details[Baseline::STUDENT_ID] = $baseline['student']['id'];
+    $details[Baseline::NAME] = $baseline['assessment']['displayName'];
+    $details[Baseline::MIS_ASSESSMENT_ID] = $baseline['assessment']['id'];
+    $dBaseline = new Baseline($details);
+    $dBaseline->commit();
+}
 
 foreach ($data['TeachingGroup'] as $group) {
     if (!empty($dGroup = TeachingGroup::retrieveByDetail(TeachingGroup::ID, $group['id']))) {

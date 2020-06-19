@@ -19,6 +19,10 @@ if (isset($_GET['removeGroup'])) {
             if (str_contains($k, "subject-add-group-")) {
                 $subject = Subject::retrieveByDetail(Subject::ID, str_replace("subject-add-group-", "", $k))[0];
                 $subject->addMember(TeachingGroup::retrieveByDetail(TeachingGroup::ID, $value)[0]);
+            } elseif (str_contains($k, "subject-baseline-")) {
+                $subject = Subject::retrieveByDetail(Subject::ID, str_replace("subject-baseline-", "", $k))[0];
+                $subject->setBaseLine($value);
+                $subject->commit();
             }
         }
     }
@@ -31,8 +35,21 @@ if (isset($_GET['removeGroup'])) {
 <div class="row"><a href=".." class="button" role="button">Home</a></div>
 <form method="get">
 <table class="table table-hover">
-<thead><tr><th>Subject code</th><th>Subject name</th><th>Groups (click to remove)</th><th>Add group</th></tr></thead>
+<thead><tr><th>Subject code</th><th>Subject name</th><th>Baseline source</th><th>Groups (click to remove)</th><th>Add group</th></tr></thead>
 <?php
+
+// Let's get the List of baseline subject IDs
+$baselines = [];
+$newId = 0;
+foreach (Baseline::retrieveAll(Baseline::MIS_ASSESSMENT_ID) as $b) {
+    if ($b->get(Baseline::MIS_ASSESSMENT_ID) == $newId) {
+        continue;
+    }
+    $newId = $b->get(Baseline::MIS_ASSESSMENT_ID);
+    $newName = $b->get(Baseline::NAME);
+    $baselines[$newId] = $newName;
+}
+
 $orphanedGroups = TeachingGroup::retrieveAll();
 foreach (Subject::retrieveAll(Subject::NAME) as $s) {
     $allGroups = TeachingGroup::retrieveAll();
@@ -45,6 +62,20 @@ foreach (Subject::retrieveAll(Subject::NAME) as $s) {
             unset($orphanedGroups[$o]);
         }
     }
+    echo "<td><select name=\"subject-baseline-" . $s->getId() . "\" onchange=\"this.form.submit()\">";
+    if (empty($s->get(Subject::BASELINE_ID))) {
+        echo "<option value=\"\" selected>No baseline selected</option>";
+    }
+    foreach ($baselines as $bId => $bName) {
+        if ($s->get(Subject::BASELINE_ID) == $bId) {
+            $selected = "selected";
+        } else {
+            $selected = "";
+        }
+        echo "<option value=\"$bId\" $selected>$bName</option>";
+    }
+    echo "</select></td>";
+    
     echo "<td>" . implode(", ", $names) . "</td>";
     
     echo "<td><select name=\"subject-add-group-" . $s->getId() . "\" onchange=\"this.form.submit()\">";

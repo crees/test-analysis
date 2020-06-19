@@ -4,6 +4,7 @@ namespace TestAnalysis;
 class Subject extends DatabaseCollection
 {
     const CODE = 'code';
+    const BASELINE_ID = 'Baseline_id';
     
     public function __construct(array $details)
     {
@@ -12,6 +13,7 @@ class Subject extends DatabaseCollection
         if (isset($details[self::ID])) {
             $this->details[self::ID] = $details[self::ID];
         }
+        $this->details[self::BASELINE_ID] = $details[self::BASELINE_ID] ?? null;
     }
 
     public function getTeachingGroups() {
@@ -41,6 +43,10 @@ class Subject extends DatabaseCollection
     
     public function getTests() {
         return Test::retrieveByDetail(Test::SUBJECT_ID, $this->getId);
+    }
+    
+    public function setBaseline(int $bId) {
+        $this->details[self::BASELINE_ID] = $bId;
     }
     
     public function addMember(TeachingGroup $group) {

@@ -7,6 +7,7 @@ if (!class_exists("Config")) {
     require "Config.php";
     require "Database.php";
     require "DatabaseCollection.php";
+    require "Baseline.php";
     require "GradeBoundary.php";
     require "GraphQLClient.php";
     require "Student.php";
