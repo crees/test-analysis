@@ -4,9 +4,31 @@ namespace TestAnalysis;
 include "../bin/classes.php";
 ?>
 <!doctype html>
-<html><head><?php require "../bin/head.php" ?></head>
+<html>
+<head><?php require "../bin/head.php" ?></head>
 <body>
-<div class="container">
+	<div class="container">
+        <nav class="navbar navbar-expand">
+            <!-- Brand -->
+            <a class="navbar-brand">Navigation</a>
+            
+            <!-- Toggler/collapsibe Button -->
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+            	<span class="navbar-toggler-icon">collapse</span>
+            </button>
+            
+            <!-- Navbar links -->
+            <div class="collapse navbar-collapse" id="collapsibleNavbar">
+            	<ul class="navbar-nav">
+            		<li class="nav-item">
+                		<a class="nav-link" href="../">Home</a>
+                	</li>
+                	<li class="nav-item">
+                		<a class="nav-link" href="index.php">Database management</a>
+                	</li>
+            	</ul>
+        	</div>
+        </nav>
 <?php
 
 $client = new GraphQLClient();
@@ -87,7 +109,6 @@ foreach ($data['TeachingGroup'] as $group) {
     }
 }
 ?>
-
-</div>
+	</div>
 </body>
 </html>

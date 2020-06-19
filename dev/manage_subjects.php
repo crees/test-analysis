@@ -32,7 +32,27 @@ if (isset($_GET['removeGroup'])) {
 <html><head><?php require "../bin/head.php" ?></head>
 <body>
 <div class="container">
-<div class="row"><a href=".." class="button" role="button">Home</a></div>
+    <nav class="navbar navbar-expand">
+        <!-- Brand -->
+        <a class="navbar-brand">Navigation</a>
+        
+        <!-- Toggler/collapsibe Button -->
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+        	<span class="navbar-toggler-icon">collapse</span>
+        </button>
+        
+        <!-- Navbar links -->
+        <div class="collapse navbar-collapse" id="collapsibleNavbar">
+        	<ul class="navbar-nav">
+        		<li class="nav-item">
+            		<a class="nav-link" href="../">Home</a>
+            	</li>
+            	<li class="nav-item">
+            		<a class="nav-link" href="index.php">Database management</a>
+            	</li>
+        	</ul>
+    	</div>
+    </nav>
 <form method="get">
 <table class="table table-hover">
 <thead><tr><th>Subject code</th><th>Subject name</th><th>Baseline source</th><th>Groups (click to remove)</th><th>Add group</th></tr></thead>
