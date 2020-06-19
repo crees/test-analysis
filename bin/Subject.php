@@ -28,7 +28,9 @@ class Subject extends DatabaseCollection
             return [];
         }
         $teachingGroupIds = array_map(function($x) { return $x['TeachingGroup_id']; }, $arr);
-        return array_map(function($x) { return TeachingGroup::retrieveByDetail(TeachingGroup::ID, $x)[0]; }, $teachingGroupIds);
+        $ids = array_map(function($x) { return TeachingGroup::retrieveByDetail(TeachingGroup::ID, $x)[0]; }, $teachingGroupIds);
+        sort($ids);
+        return $ids;
     }
     
     public function getStudents() {
