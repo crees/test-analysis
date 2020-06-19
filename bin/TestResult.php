@@ -8,8 +8,6 @@ class TestResult extends DatabaseCollection
     const RECORDED_TS = 'recorded_ts';
     const TEST_ID = 'Test_id';
     
-    protected $score, $testId, $studentId, $code;
-    
     public function __construct(array $details)
     {
         $this->details[self::ID] = $details[self::ID];
