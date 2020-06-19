@@ -26,14 +26,14 @@ class View
                     <tr>
                         <th scope="col">Name</th>
                         <th scope="col">Group</th>
-
+                        <th scope="col">Ind.</th>
 eof;
         if (count($this->tests) < 1) {
             echo "</tr></table></form><div>No tests defined.</div>";
             return;
         }
         foreach ($this->tests as $t) {
-            echo "<th>" . $t->getName() . "</th><th>%</th><th>Grade</th>\n";
+            echo "<th>" . $t->getName() . "</th><th>%</th><th>Grd</th>\n";
         }
         echo "</tr>\n</thead>\n";
         
@@ -45,7 +45,10 @@ eof;
             $tabIndex = $firstTabIndex;
             echo "<tr>\n";
             echo "<th><a href=\"student_individual_scores.php?student=" . $s->getId() . "\">" . $s->getName() . "</a></th>\n";
-            echo "<th>" . $s->getTeachingGroup(Subject::retrieveByDetail(Subject::ID, $this->tests[0]->get(Test::SUBJECT_ID))[0]);
+            $subject = Subject::retrieveByDetail(Subject::ID, $this->tests[0]->get(Test::SUBJECT_ID))[0];
+            echo "<th>" . $s->getTeachingGroup($subject) . "</th>";
+            $baseline = $s->getBaseline($subject);
+            echo "<th>$baseline</th>";
             foreach ($this->tests as $t) {
                 $result = $t->getResult($s);
                 echo self::makeTextBoxCell("result-" . $t->getId() . "-" . $s->getId(), is_null($result) ? "" : $result->getScore(), $tabIndex);
@@ -53,7 +56,30 @@ eof;
                     echo "<td>&nbsp;</td><td>&nbsp;</td>";
                 } else {
                     echo "<td>" . round($result->getScore() * 100 / $t->get(Test::TOTAL), 0) . "</td>";
-                    echo "<td>" . $t->calculateGrade($result) . "</td>";
+                    $grade = $t->calculateGrade($result);
+                    $cellColour = "";
+                    if (!empty($baseline)) {
+                        if ($grade == $baseline) {
+                            $cellColour = "class=\"table-warning\"";
+                        } else {
+                            foreach ($t->getGradeBoundaries() as $boundary) {
+                                if ($baseline == $boundary->getName()) {
+                                    $cellColour = "class=\"table-danger\"";
+                                    break;
+                                }
+                                if ($grade == $boundary->getName()) {
+                                    // Greater
+                                    $cellColour = "class=\"table-success\"";
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    echo "<td $cellColour>";
+                    
+                    echo "$grade";
+                    
+                    echo "</td>";
                 }
                 $tabIndex += $studentCount;
             }
