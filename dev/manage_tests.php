@@ -250,7 +250,19 @@ foreach ($tests as $t) {
     $boundaryArray = [];
     $columns = 0;
     // We'll give whatever's already there + 20 columns; that should be enough!
-    foreach (GradeBoundary::retrieveByDetail(GradeBoundary::TEST_ID, $t->getId(), GradeBoundary::BOUNDARY) as $b) {
+    $existingBoundaries = GradeBoundary::retrieveByDetail(GradeBoundary::TEST_ID, $t->getId(), GradeBoundary::BOUNDARY);
+    if (empty($existingBoundaries)) {
+        foreach ($t->getGradeBoundaries(true) as $b) {
+            (new GradeBoundary([
+                GradeBoundary::TEST_ID => $t->getId(),
+                GradeBoundary::NAME => $b->get(GradeBoundary::NAME),
+                GradeBoundary::BOUNDARY => $b->get(GradeBoundary::BOUNDARY)
+            ]))->commit();
+        }
+        $existingBoundaries = GradeBoundary::retrieveByDetail(GradeBoundary::TEST_ID, $t->getId(), GradeBoundary::BOUNDARY);
+    }
+    
+    foreach ($existingBoundaries as $b) {
         array_push($gradeArray, View::makeTextBoxCell("GradeBoundary-grade-" . $b->getId(), $b->get(GradeBoundary::NAME)));
         array_push($boundaryArray, View::makeTextBoxCell("GradeBoundary-boundary-" . $b->getId(), $b->get(GradeBoundary::BOUNDARY)));
         $columns++;

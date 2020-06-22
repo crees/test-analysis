@@ -63,7 +63,7 @@ class Test extends DatabaseCollection
         return $grade;
     }
     
-    public function getGradeBoundaries() {
+    public function getGradeBoundaries(bool $forceForSubject = false) {
         /*
          * XXX
          *
@@ -71,7 +71,7 @@ class Test extends DatabaseCollection
          * are stored as negative testIds.
          *
          */
-        if ($this->details[self::CUSTOM_GRADE_BOUNDARIES] == 1) {
+        if ($this->details[self::CUSTOM_GRADE_BOUNDARIES] == 1 && $forceForSubject == false) {
             $ret = GradeBoundary::retrieveByDetail(GradeBoundary::TEST_ID, $this->getId(), GradeBoundary::BOUNDARY . ' DESC');
         } else {
             $id_to_use = -$this->get(self::SUBJECT_ID);

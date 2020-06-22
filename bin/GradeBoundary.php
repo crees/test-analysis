@@ -28,8 +28,12 @@ class GradeBoundary extends DatabaseCollection
         return Test::retrieveByDetail(Test::ID, $this->get(self::TEST_ID));
     }
     
-    public function setName(String $name) { $this->detail[self::NAME] = $name; }
-    public function setBoundary(int $boundary) { $this->detail[self::BOUNDARY] = $boundary; }
+    public function setTestId(int $tId) {
+        $this->details[self::TEST_ID] = $tId;
+    }
+    
+    public function setName(String $name) { $this->details[self::NAME] = $name; }
+    public function setBoundary(int $boundary) { $this->details[self::BOUNDARY] = $boundary; }
     
     function __destruct()
     {}
