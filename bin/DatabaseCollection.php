@@ -11,6 +11,15 @@ abstract class DatabaseCollection
     
     protected $details;
     
+    public static function parseBoolean(Array $details, String $key) {
+        if (isset($details[$key])) {
+            if ($details[$key] != 0) {
+                return 1;
+            }
+        }
+        return 0;
+    }
+    
     /**
      * 
      * @param string $detailType
