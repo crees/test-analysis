@@ -61,7 +61,9 @@ $student = $student[0];
 				<tr>
 					<th>Test name</th>
 					
-					<th>Result</th>
+					<th>Section A</th>
+					
+					<th>Section B</th>
 				
 					<th>Date entered</th>
 				</tr>
@@ -71,7 +73,8 @@ $student = $student[0];
                 $link = "<a href=\"?student=" . $student->getId() . "&resultToDelete=" . $r->getid() . "\" class=\"stretched-link\">";
 			    echo "<tr>";
                 echo "<td>$link" . $r->getTest()[0]->getName() . "</a></td>";
-                echo "<td>$link" . $r->getScore() . "</a></td>";
+                echo "<td>$link" . $r->get(TestResult::SCORE_A) . "</a></td>";
+                echo "<td>$link" . $r->get(TestResult::SCORE_B) . "</a></td>";
                 echo "<td>$link" . date("Y-m-d H:i:s", $r->get(TestResult::RECORDED_TS)) . "</a></td>";
                 echo "</tr>";
 			}

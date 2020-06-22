@@ -20,19 +20,27 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
             $testId = $t->getId();
             foreach ($students as $s) {
                 $studentId = $s->getId();
-                if ($_POST["result-$testId-$studentId"] !== "") {
-                    $newscore = $_POST["result-$testId-$studentId"];
-                    $currentResult = $t->getResult($s);
-                    // Is it different from the current result?
-                    if (is_null($currentResult) || $newscore != $currentResult->getScore()) {
-                        $result = new TestResult([
-                            TestResult::ID => null,
-                            TestResult::SCORE => $newscore,
-                            TestResult::TEST_ID => $testId,
-                            TestResult::STUDENT_ID => $studentId,
-                        ]);
-                        $result->commit();
+                $currentResult = $t->getResult($s);
+                $newscore = [];
+                foreach ([TestResult::SCORE_A, TestResult::SCORE_B] as $res) {
+                    if ($_POST["$res-$testId-$studentId"] !== "") {
+                        $newscore[$res] = $_POST["$res-$testId-$studentId"];
                     }
+                }
+                if (isset($newscore[TestResult::SCORE_A]) && isset($newscore[TestResult::SCORE_B])) {
+                    // New scores entered
+                    if (is_null($currentResult) ||
+                        $currentResult->get(TestResult::SCORE_A) != $newscore[TestResult::SCORE_A] ||
+                        $currentResult->get(TestResult::SCORE_B) != $newscore[TestResult::SCORE_B]
+                        )
+                        (new TestResult([
+                                        TestResult::ID => null,
+                                        TestResult::SCORE_A => $newscore[TestResult::SCORE_A],
+                                        TestResult::SCORE_B => $newscore[TestResult::SCORE_B],
+                                        TestResult::STUDENT_ID => $studentId,
+                                        TestResult::TEST_ID => $testId
+                            ])
+                        )->commit();
                 }
             }
         }

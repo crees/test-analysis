@@ -3,7 +3,8 @@ namespace TestAnalysis;
 
 class TestResult extends DatabaseCollection
 {
-    const SCORE = 'score';
+    const SCORE_A = 'score_a';
+    const SCORE_B = 'score_b';
     const STUDENT_ID = 'Student_id';
     const RECORDED_TS = 'recorded_ts';
     const TEST_ID = 'Test_id';
@@ -12,7 +13,8 @@ class TestResult extends DatabaseCollection
     {
         $this->details[self::ID] = $details[self::ID];
         $this->details[self::NAME] = null;
-        $this->details[self::SCORE] = $details[self::SCORE];
+        $this->details[self::SCORE_A] = $details[self::SCORE_A];
+        $this->details[self::SCORE_B] = $details[self::SCORE_B];
         $this->details[self::TEST_ID] = $details[self::TEST_ID];
         $this->details[self::STUDENT_ID] = $details[self::STUDENT_ID];
         if (isset($details[self::RECORDED_TS])) {
@@ -32,10 +34,6 @@ class TestResult extends DatabaseCollection
     
     public function getTestId() {
         return $this->get(self::TEST_ID);
-    }
-    
-    public function getScore() {
-        return $this->get(self::SCORE);
     }
     
     function __destruct()

@@ -12,7 +12,8 @@ if (isset($_GET['newtest-name'])) {
             $detail[Test::SUBJECT_ID] = $_GET[Test::SUBJECT_ID . "-$tId"];
             $detail[Test::NAME] = $_GET[Test::NAME . "-$tId"];
             // $t->set(Test::TOPIC, $_GET[Test::TOPIC . "-$tId"]);
-            $detail[Test::TOTAL] = $_GET[Test::TOTAL . "-$tId"];
+            $detail[Test::TOTAL_A] = $_GET[Test::TOTAL_A . "-$tId"];
+            $detail[Test::TOTAL_B] = $_GET[Test::TOTAL_B . "-$tId"];
             if (isset($_GET[Test::CUSTOM_GRADE_BOUNDARIES . "-$tId"])) {
                 $detail[Test::CUSTOM_GRADE_BOUNDARIES] = 1;
             } else {
@@ -130,7 +131,8 @@ $tests = Test::retrieveAll(Test::NAME);
 		<th>Subject</th>
 		<th>Test name</th>
 		<th>Topic<!-- TODO --></th>
-		<th>Total score</th>
+		<th>Total sect A</th>
+		<th>Total sect B</th>
 		<th>Custom grade boundaries?</th>
 	</tr>
 </thead>
@@ -154,7 +156,8 @@ foreach ($tests as $t) {
     // TODO Topic
     echo "<td>&nbsp;</td>";
     // Total score
-    echo View::makeTextBoxCell(Test::TOTAL . "-$tId", $t->get(Test::TOTAL));
+    echo View::makeTextBoxCell(Test::TOTAL_A . "-$tId", $t->get(Test::TOTAL_A));
+    echo View::makeTextBoxCell(Test::TOTAL_B . "-$tId", $t->get(Test::TOTAL_B));
     // Custom grade boundaries?
     if ($t->get(Test::CUSTOM_GRADE_BOUNDARIES)) {
         $checked = "checked";
@@ -184,8 +187,9 @@ foreach ($tests as $t) {
 	// Topics not implemented yet
 	echo "<td>&nbsp;</td>";
 	
-	echo View::makeTextBoxCell("newtest-" . Test::TOTAL, "");
+	echo View::makeTextBoxCell("newtest-" . Test::TOTAL_A, "");
 	
+	echo View::makeTextBoxCell("newtest-" . Test::TOTAL_B, "");
 	?>
 
     <td>
@@ -199,7 +203,7 @@ foreach ($tests as $t) {
 </table>
 <input type="submit" class="form-control" value="Save">
 
-<div class="row">You can set default grade boundaries for tests in each subject (these are PERCENTAGES):</div>
+<div class="row">You can set default grade boundaries for tests in each subject (these are PERCENTAGES, based on Section B):</div>
 
 <?php
 // Subject grade boundaries
@@ -227,14 +231,14 @@ foreach ($subjects as $s) {
     echo "<tr><th>Grade</th>";
     echo implode("", $gradeArray);
     echo "</tr>";
-    echo "<tr><th>Minimum mark</th>";
+    echo "<tr><th>Minimum section B %</th>";
     echo implode("", $boundaryArray);
     echo "</tr>";
     echo "</table>";
 }
 
 // Test grade boundaries
-$explain = "<div class=\"row\">You can now set custom grade boundaries for tests that have custom grades enabled (these are on RAW SCORE):</div>";
+$explain = "<div class=\"row\">You can now set custom grade boundaries for tests that have custom grades enabled (these are on RAW SCORE for Section B):</div>";
 foreach ($tests as $t) {
     if (!$t->get(Test::CUSTOM_GRADE_BOUNDARIES)) {
         continue;
@@ -264,7 +268,7 @@ foreach ($tests as $t) {
     echo "<tr><th>Grade</th>";
     echo implode("", $gradeArray);
     echo "</tr>";
-    echo "<tr><th>Minimum mark</th>";
+    echo "<tr><th>Minimum section B mark</th>";
     echo implode("", $boundaryArray);
     echo "</tr>";
     echo "</table>";

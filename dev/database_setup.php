@@ -60,7 +60,8 @@ if (isset(Config::$maintenance) && Config::$maintenance) {
         id INT UNSIGNED NOT NULL AUTO_INCREMENT,
         Subject_id INT NOT NULL,
         name VARCHAR(30) NOT NULL,
-        total INT NOT NULL,
+        total_a INT NOT NULL,
+        total_b INT NOT NULL,
         custom_grade_boundaries BOOLEAN NOT NULL DEFAULT FALSE,
         CONSTRAINT PRIMARY KEY (id)
     );");
@@ -78,7 +79,8 @@ if (isset(Config::$maintenance) && Config::$maintenance) {
         Student_id INT NOT NULL,
         Test_id INT NOT NULL,
         recorded_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        score INT NOT NULL,
+        score_a INT NOT NULL,
+        score_b INT NOT NULL,
         CONSTRAINT PRIMARY KEY (id)
     );");
 }

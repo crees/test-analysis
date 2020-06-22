@@ -33,12 +33,12 @@ class View
                         <th rowspan="2" scope="col">Ind.</th>
 eof;
         foreach ($this->tests as $t) {
-            echo "<th colspan=\"3\" class=\"text-center\">" . $t->getName() . "</th>\n";
+            echo "<th colspan=\"4\" class=\"text-center\">" . $t->getName() . "</th>\n";
         }
         echo "</tr>\n<tr>";
         
         foreach ($this->tests as $t) {
-            echo "<th>Sc</th><th>%</th><th>Grd</th>\n";
+            echo "<th>A</th><th>B</th><th>%</th><th>Grd</th>\n";
         }
         echo "</tr>\n</thead>\n";
         
@@ -56,11 +56,13 @@ eof;
             echo "<th>$baseline</th>";
             foreach ($this->tests as $t) {
                 $result = $t->getResult($s);
-                echo self::makeTextBoxCell("result-" . $t->getId() . "-" . $s->getId(), is_null($result) ? "" : $result->getScore(), $tabIndex);
+                echo self::makeTextBoxCell(TestResult::SCORE_A . "-" . $t->getId() . "-" . $s->getId(), is_null($result) ? "" : $result->get(TestResult::SCORE_A), $tabIndex);
+                $tabIndex++;
+                echo self::makeTextBoxCell(TestResult::SCORE_B . "-" . $t->getId() . "-" . $s->getId(), is_null($result) ? "" : $result->get(TestResult::SCORE_B), $tabIndex);
                 if (is_null($result)) {
                     echo "<td>&nbsp;</td><td>&nbsp;</td>";
                 } else {
-                    echo "<td>" . round($result->getScore() * 100 / $t->get(Test::TOTAL), 0) . "</td>";
+                    echo "<td>" . round(($result->get(TestResult::SCORE_A)+$result->get(TestResult::SCORE_B)) * 100 / ($t->get(Test::TOTAL_A)+$t->get(Test::TOTAL_B)), 0) . "</td>";
                     $grade = $t->calculateGrade($result);
                     $cellColour = "";
                     if (!empty($baseline)) {

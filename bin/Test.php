@@ -5,21 +5,16 @@ class Test extends DatabaseCollection
 {
     const SUBJECT_ID = 'Subject_id';
     const CUSTOM_GRADE_BOUNDARIES = 'custom_grade_boundaries';
-    const TOTAL = 'total';
+    const TOTAL_A = 'total_a';
+    const TOTAL_B = 'total_b';
     
     public function __construct(array $details)
     {
         $this->details[self::ID] = $details[self::ID] ?? null;
         $this->details[self::NAME] = $details[self::NAME];
-        $this->details[self::TOTAL] = $details[self::TOTAL];
-        if (isset($details[self::CUSTOM_GRADE_BOUNDARIES]))
-            if ($details[self::CUSTOM_GRADE_BOUNDARIES] != 0) {
-                $this->details[self::CUSTOM_GRADE_BOUNDARIES] = 1;
-            } else {
-                $this->details[self::CUSTOM_GRADE_BOUNDARIES] = 0;
-        } else {
-            $this->details[self::CUSTOM_GRADE_BOUNDARIES] = 0;
-        }
+        $this->details[self::TOTAL_A] = $details[self::TOTAL_A];
+        $this->details[self::TOTAL_B] = $details[self::TOTAL_B];
+        $this->details[self::CUSTOM_GRADE_BOUNDARIES] = self::parseBoolean($details, self::CUSTOM_GRADE_BOUNDARIES);
         if (isset($details[self::SUBJECT_ID])) {
             $this->details[self::SUBJECT_ID]= $details[self::SUBJECT_ID];
         }
@@ -60,7 +55,7 @@ class Test extends DatabaseCollection
         $grade = 0;
         // First, get the grades ordered by highest to lowest
         foreach ($this->getGradeBoundaries() as $g) {
-            if ($g->get(GradeBoundary::BOUNDARY) <= $result->getScore()) {
+            if ($g->get(GradeBoundary::BOUNDARY) <= $result->get(TestResult::SCORE_B)) {
                 $grade = $g->getName();
                 break;
             }
@@ -83,7 +78,7 @@ class Test extends DatabaseCollection
             $ret = [];
             foreach (GradeBoundary::retrieveByDetail(GradeBoundary::TEST_ID, $id_to_use, GradeBoundary::BOUNDARY . ' DESC') as $g) {
                 array_push($ret, new GradeBoundary([
-                    GradeBoundary::BOUNDARY => $g->get(GradeBoundary::BOUNDARY) * $this->get(self::TOTAL) / 100,
+                    GradeBoundary::BOUNDARY => round($g->get(GradeBoundary::BOUNDARY) * $this->get(self::TOTAL_B) / 100.0, 0),
                     GradeBoundary::ID       => $g->get(GradeBoundary::ID),
                     GradeBoundary::NAME     => $g->get(GradeBoundary::NAME),
                     GradeBoundary::TEST_ID  => $g->get(GradeBoundary::TEST_ID)
