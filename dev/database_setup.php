@@ -21,6 +21,21 @@ if (isset(Config::$maintenance) && Config::$maintenance) {
         CONSTRAINT PRIMARY KEY (id)
     );");
     $db->dosql("
+    CREATE TABLE GradeBoundary (
+        id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        Test_id INT NOT NULL,
+        name VARCHAR(30) NOT NULL,
+        boundary SMALLINT,
+        CONSTRAINT PRIMARY KEY (id)
+    );");
+    $db->dosql("
+    CREATE TABLE Student (
+        id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        first_name VARCHAR(30) NOT NULL,
+        last_name VARCHAR(30) NOT NULL,
+        CONSTRAINT PRIMARY KEY (id)
+    );");
+    $db->dosql("
     CREATE TABLE Subject (
         id INT UNSIGNED NOT NULL AUTO_INCREMENT,
         name VARCHAR(30) NOT NULL,
@@ -42,13 +57,6 @@ if (isset(Config::$maintenance) && Config::$maintenance) {
         CONSTRAINT PRIMARY KEY (id)
     );");
     $db->dosql("
-    CREATE TABLE Student (
-        id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-        first_name VARCHAR(30) NOT NULL,
-        last_name VARCHAR(30) NOT NULL,
-        CONSTRAINT PRIMARY KEY (id)
-    );");
-    $db->dosql("
     CREATE TABLE StudentGroupMembership (
         id INT UNSIGNED NOT NULL AUTO_INCREMENT,
         Student_id INT NOT NULL,
@@ -63,14 +71,6 @@ if (isset(Config::$maintenance) && Config::$maintenance) {
         total_a INT NOT NULL,
         total_b INT NOT NULL,
         custom_grade_boundaries BOOLEAN NOT NULL DEFAULT FALSE,
-        CONSTRAINT PRIMARY KEY (id)
-    );");
-    $db->dosql("
-    CREATE TABLE GradeBoundary (
-        id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-        Test_id INT NOT NULL,
-        name VARCHAR(30) NOT NULL,
-        boundary SMALLINT,
         CONSTRAINT PRIMARY KEY (id)
     );");
     $db->dosql("
