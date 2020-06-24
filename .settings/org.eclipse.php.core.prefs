@@ -1,2 +1,5 @@
 eclipse.preferences.version=1
 include_path=0;/test-analysis\u00050;/test-analysis/contrib/php-graphql-client
+phpVersion=php7.4
+useShortTags=false
+use_asp_tags_as_php=false
