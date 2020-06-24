@@ -3,15 +3,17 @@ namespace TestAnalysis;
 
 include "../bin/classes.php";
 
-if (isset($_GET['newtest-name'])) {
+if (isset($_GET['removeTopic'])) {
+    // TODO Remove
+} else if (isset($_GET['newtest-name'])) {
     foreach (Test::retrieveAll() as $t) {
         $tId = $t->getId();
+        // Test modifications
         if (isset($_GET[Test::SUBJECT_ID . "-$tId"]) && !empty($_GET[Test::SUBJECT_ID . "-$tId"])) {
             $detail = [];
             $detail[Test::ID] = $tId;
             $detail[Test::SUBJECT_ID] = $_GET[Test::SUBJECT_ID . "-$tId"];
             $detail[Test::NAME] = $_GET[Test::NAME . "-$tId"];
-            // $t->set(Test::TOPIC, $_GET[Test::TOPIC . "-$tId"]);
             $detail[Test::TOTAL_A] = $_GET[Test::TOTAL_A . "-$tId"];
             $detail[Test::TOTAL_B] = $_GET[Test::TOTAL_B . "-$tId"];
             if (isset($_GET[Test::CUSTOM_GRADE_BOUNDARIES . "-$tId"])) {
@@ -23,6 +25,12 @@ if (isset($_GET['newtest-name'])) {
             $newTest = new Test($detail);
             
             $newTest->commit();
+        }
+        if (!empty($topicToAdd = $_GET["test-add-topic-to-{$t->getId()}"])) {
+            (new TestTestTopic([
+                TestTestTopic::TESTTOPIC_ID => $topicToAdd,
+                TestTestTopic::TEST_ID => $t->getId()
+            ]))->commit();
         }
     }
     
@@ -130,14 +138,15 @@ $tests = Test::retrieveAll(Test::NAME);
 	<tr>
 		<th>Subject</th>
 		<th>Test name</th>
-		<th>Topic<!-- TODO --></th>
 		<th>Total sect A</th>
 		<th>Total sect B</th>
 		<th>Custom grade boundaries?</th>
+		<th colspan="2">Topic<!-- TODO --></th>
 	</tr>
 </thead>
 
 <?php
+$orphanedTopics = TestTopic::retrieveAll(TestTopic::NAME);
 foreach ($tests as $t) {
     $tId = $t->getId();
     // Subject
@@ -153,8 +162,6 @@ foreach ($tests as $t) {
     echo "</select></td>";    
     // Test name
     echo View::makeTextBoxCell(Test::NAME . "-$tId", $t->get(Test::NAME));
-    // TODO Topic
-    echo "<td>&nbsp;</td>";
     // Total score
     echo View::makeTextBoxCell(Test::TOTAL_A . "-$tId", $t->get(Test::TOTAL_A));
     echo View::makeTextBoxCell(Test::TOTAL_B . "-$tId", $t->get(Test::TOTAL_B));
@@ -168,6 +175,29 @@ foreach ($tests as $t) {
     echo "<input type=\"checkbox\" class=\"custom-control-input\" id=\"custom-$tId\" name=\"" . Test::CUSTOM_GRADE_BOUNDARIES . "-$tId\" $checked>";
     echo "<label class=\"custom-control-label\" for=\"custom-$tId\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>";
     echo "</div></td>";
+    // TODO Topic
+    $allTopics = TestTopic::retrieveByDetail(TestTopic::SUBJECT_ID, $t->get(Test::SUBJECT_ID), TestTopic::NAME);
+    $names = [];
+    foreach ($t->getTopics() as $topic) {
+        array_push($names, "<a href=\"?removeTopic=" . $topic->getId() . "&removeFromTest=" . $t->getId() . "\">" . $topic->getName() . "</a>");
+        unset($allTopics[array_search($topic, $allTopics)]);
+        if ($o = array_search($topic, $orphanedTopics)) {
+            unset($orphanedTopics[$o]);
+        }
+    }
+    
+    echo "<td>" . implode(', ', $names) . "</td>";
+    
+    echo "<td><select name=\"test-add-topic-to-{$t->getid()}\" onchange=\"this.form.submit()\">";
+    
+    echo "<option value=\"\" selected>Add Topic to " . $t->getName() . "</option>";
+    
+    foreach ($allTopics as $topic) {
+        echo "<option value=\"" . $topic->getId() . "\">" . $topic->getName() . "</option>";
+    }
+    
+    echo "</select></td>";
+    
     echo "</tr>";
 }
 ?>
@@ -184,9 +214,6 @@ foreach ($tests as $t) {
 	<?php
 	echo View::makeTextBoxCell("newtest-" . Test::NAME, "");
 
-	// Topics not implemented yet
-	echo "<td>&nbsp;</td>";
-	
 	echo View::makeTextBoxCell("newtest-" . Test::TOTAL_A, "");
 	
 	echo View::makeTextBoxCell("newtest-" . Test::TOTAL_B, "");

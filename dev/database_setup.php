@@ -75,6 +75,18 @@ if (isset(Config::$maintenance) && Config::$maintenance) {
         score_b INT NOT NULL,
         CONSTRAINT PRIMARY KEY (id)
     );
+    CREATE TABLE TestTopic (
+        id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        Subject_id INT NOT NULL,
+        name VARCHAR(50) NOT NULL,
+        CONSTRAINT PRIMARY KEY (id)
+    );
+    CREATE TABLE TestTestTopic (
+        id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        Test_id INT NOT NULL,
+        TestTopic_id INT NOT NULL,
+        CONSTRAINT PRIMARY KEY (id)
+    );
 EOF);
 }
 ?>

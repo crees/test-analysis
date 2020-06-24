@@ -88,6 +88,14 @@ class Test extends DatabaseCollection
         return $ret;
     }
     
+    public function getTopics() {
+        $ret = [];
+        foreach (TestTestTopic::retrieveByDetail(TestTestTopic::TEST_ID, $this->getId()) as $ttt) {
+            array_push($ret, TestTopic::retrieveByDetail(TestTopic::ID, $ttt->get(TestTestTopic::TEST_ID))[0]);
+        }
+        return $ret;
+    }
+    
     function __destruct()
     {}
 }
