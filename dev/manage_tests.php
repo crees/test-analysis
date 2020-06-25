@@ -4,8 +4,14 @@ namespace TestAnalysis;
 include "../bin/classes.php";
 
 if (isset($_GET['removeTopic'])) {
-    // TODO Remove
-} else if (isset($_GET['newtest-name'])) {
+    // Remove removeTopic removeFromTest
+    foreach (TestTestTopic::retrieveByDetail(TestTestTopic::TESTTOPIC_ID, $_GET['removeTopic']) as $ttt) {
+        if ($ttt->get(TestTestTopic::TEST_ID) == $_GET['removeFromTest']) {
+            $ttt->destroy();
+            break;
+        }
+    }
+} else if (isset($_GET['newtest-name']) && isset($_GET['form_serial']) && $_GET['form_serial'] == $_SESSION['form_serial']-1) {
     foreach (Test::retrieveAll() as $t) {
         $tId = $t->getId();
         // Test modifications
@@ -179,7 +185,7 @@ foreach ($tests as $t) {
     $allTopics = TestTopic::retrieveByDetail(TestTopic::SUBJECT_ID, $t->get(Test::SUBJECT_ID), TestTopic::NAME);
     $names = [];
     foreach ($t->getTopics() as $topic) {
-        array_push($names, "<a href=\"?removeTopic=" . $topic->getId() . "&removeFromTest=" . $t->getId() . "\">" . $topic->getName() . "</a>");
+        array_push($names, "<a href=\"?removeTopic=" . $topic->getId() . "&removeFromTest=$tId\">" . $topic->getName() . "</a>");
         unset($allTopics[array_search($topic, $allTopics)]);
         if ($o = array_search($topic, $orphanedTopics)) {
             unset($orphanedTopics[$o]);
@@ -312,9 +318,8 @@ foreach ($tests as $t) {
     echo "</tr>";
     echo "</table>";
 }
-
-
 ?>
+<input type="hidden" name="form_serial" value="<?= $_SESSION['form_serial']; ?>">
 </form>
 </div>
 </body>

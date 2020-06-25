@@ -17,6 +17,17 @@ class TestTestTopic extends DatabaseCollection
         $this->details[self::TEST_ID] = $details[self::TEST_ID];
     }
     
+    public function destroy() {
+        if (is_null(self::$db)) {
+            self::$db = new Database();
+        }
+        
+        $testId = $this->get(self::TEST_ID);
+        $topicId = $this->get(self::TESTTOPIC_ID);
+        
+        self::$db->dosql("DELETE FROM " . explode('\\', static::class)[1] . " WHERE " . self::TEST_ID . " = $testId AND " . self::TESTTOPIC_ID . " = $topicId;");
+    }
+    
     function __destruct()
     {}
 }
