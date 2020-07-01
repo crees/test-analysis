@@ -98,7 +98,7 @@ abstract class DatabaseCollection
         $columnkeys = implode(",", $columnkeys);
         $columnvalues = implode("\",\"", $columnvalues);
         
-        if (is_null($this->getId())) {
+        if (!isset($this->details[self::ID]) || is_null($this->getId())) {
             // We don't actually want to replace existing items, we just want a new one if ID is null
             $db->dosql("INSERT INTO " . explode('\\', static::class)[1] . " SET $updatelist;");
         } else {
