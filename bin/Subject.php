@@ -5,6 +5,7 @@ class Subject extends DatabaseCollection
 {
     const CODE = 'code';
     const BASELINE_ID = 'Baseline_id';
+    const NUM_TARGETS = 'num_targets';
     
     public function __construct(array $details)
     {
@@ -14,6 +15,7 @@ class Subject extends DatabaseCollection
             $this->details[self::ID] = $details[self::ID];
         }
         $this->details[self::BASELINE_ID] = $details[self::BASELINE_ID] ?? null;
+        $this->details[self::NUM_TARGETS] = $details[self::NUM_TARGETS];
     }
 
     public function getTeachingGroups() {
@@ -49,6 +51,10 @@ class Subject extends DatabaseCollection
     
     public function setBaseline(int $bId) {
         $this->details[self::BASELINE_ID] = $bId;
+    }
+    
+    public function setNumTargets(int $n) {
+        $this->details[self::NUM_TARGETS] = $n;
     }
     
     public function addMember(TeachingGroup $group) {

@@ -147,6 +147,7 @@ $tests = Test::retrieveAll(Test::NAME);
 		<th>Total sect A</th>
 		<th>Total sect B</th>
 		<th>Custom grade boundaries?</th>
+		<th>Targets?</th>
 		<th colspan="2">Topic (section B only!)</th>
 	</tr>
 </thead>
@@ -181,6 +182,7 @@ foreach ($tests as $t) {
     echo "<input type=\"checkbox\" class=\"custom-control-input\" id=\"custom-$tId\" name=\"" . Test::CUSTOM_GRADE_BOUNDARIES . "-$tId\" $checked>";
     echo "<label class=\"custom-control-label\" for=\"custom-$tId\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>";
     echo "</div></td>";
+    echo "<td><a href=\"manage_targets.php?test=$tId\">Edit targets</a></td>";
     $allTopics = TestTopic::retrieveByDetail(TestTopic::SUBJECT_ID, $t->get(Test::SUBJECT_ID), TestTopic::NAME);
     $names = [];
     foreach ($t->getTopics() as $topic) {

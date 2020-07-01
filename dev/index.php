@@ -40,7 +40,7 @@ require "../bin/classes.php";
     
     			<div class="card-text"><a href="manage_topics.php" class="btn btn-primary" role="button">Manage topics.</a></div>
     
-    			<div class="card-text"><a href="manage_tests.php" class="btn btn-primary" role="button">Manage tests and grade boundaries.</a></div>
+    			<div class="card-text"><a href="manage_tests.php" class="btn btn-primary" role="button">Manage tests, targets and grade boundaries.</a></div>
     
     			<?php if (isset($_GET['showmethegoodstuff']) && $_GET['showmethegoodstuff'] === "yes") { ?>
     				<div class="card-text"><a href="database_setup.php" class="btn btn-danger" role="button">Initial database setup- DELETES ALL DATA!</a></div>

@@ -8,6 +8,8 @@ class Test extends DatabaseCollection
     const TOTAL_A = 'total_a';
     const TOTAL_B = 'total_b';
     
+    const TARGETS = 'targets';
+    
     public function __construct(array $details)
     {
         $this->details[self::ID] = $details[self::ID] ?? null;
@@ -18,14 +20,35 @@ class Test extends DatabaseCollection
         if (isset($details[self::SUBJECT_ID])) {
             $this->details[self::SUBJECT_ID]= $details[self::SUBJECT_ID];
         }
+        if (isset($details[self::TARGETS])) {
+            if (is_array($details[self::TARGETS])) {
+                $this->details[self::TARGETS] = base64_encode(serialize($details[self::TARGETS]));
+            } else {
+                $this->details[self::TARGETS] = $details[self::TARGETS];
+            }
+        }
     }
     
-    public function set(String $detail, String $value) {
+    public function get(String $detail) {
+        if ($detail == self::TARGETS) {
+            return unserialize(base64_decode($this->details[self::TARGETS]));
+        }
+        return parent::get($detail);
+    }
+    
+    public function set(String $detail, $value) {
         if ($detail == self::ID) {
             // We're not even going to think about the pain that would cause
             return false;
         }
+        if ($detail == self::TARGETS && isset($value[0])) {
+            return $this->details[self::TARGETS] = base64_encode(serialize($value));
+        }
         return $this->details[$detail] = $value;
+    }
+    
+    public function getSubject() {
+        return Subject::retrieveByDetail(Subject::ID, $this->details[self::SUBJECT_ID])[0];
     }
     
     /**

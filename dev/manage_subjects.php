@@ -7,11 +7,14 @@ if (isset($_GET['removeGroup'])) {
     Subject::retrieveByDetail(Subject::ID, $_GET['removeFromSubject'])[0]->removeMember(TeachingGroup::retrieveByDetail(TeachingGroup::ID, $_GET['removeGroup'])[0]);
 } elseif (isset($_GET['newsubjectcode'])) {
     if (!empty($_GET['newsubjectname'])) {
-        $s = new Subject([
+        if (empty($_GET['newsubjectnumtargets'])) {
+            $_GET['newsubjectnumtargets'] = "12";
+        }
+        (new Subject([
             Subject::NAME => $_GET['newsubjectname'],
             Subject::CODE => $_GET['newsubjectcode'],
-        ]);
-        $s->commit();
+            Subject::NUM_TARGETS => $_GET['newsubjectnumtargets'],
+        ]))->commit();
     }
     
     foreach ($_GET as $k => $value) {
@@ -22,6 +25,10 @@ if (isset($_GET['removeGroup'])) {
             } elseif (str_contains($k, "subject-baseline-")) {
                 $subject = Subject::retrieveByDetail(Subject::ID, str_replace("subject-baseline-", "", $k))[0];
                 $subject->setBaseLine($value);
+                $subject->commit();
+            } elseif(str_contains($k, "subject-numtargets-")) {
+                $subject = Subject::retrieveByDetail(Subject::ID, str_replace("subject-numtargets-", "", $k))[0];
+                $subject->setNumTargets($value);
                 $subject->commit();
             }
         }
@@ -54,8 +61,8 @@ if (isset($_GET['removeGroup'])) {
     	</div>
     </nav>
 <form method="get">
-<table class="table table-hover">
-<thead><tr><th>Subject code</th><th>Subject name</th><th>Baseline source</th><th>Groups (click to remove)</th><th>Add group</th></tr></thead>
+<table class="table table-sm table-hover">
+<thead><tr><th>Code</th><th>Name</th><th>Number of targets</th><th>Baseline source</th><th>Groups (click to remove)</th><th>Add group</th></tr></thead>
 <?php
 
 // Let's get the List of baseline subject IDs
@@ -74,6 +81,7 @@ $orphanedGroups = TeachingGroup::retrieveAll();
 foreach (Subject::retrieveAll(Subject::NAME) as $s) {
     $allGroups = TeachingGroup::retrieveAll();
     echo "<tr><td>" . $s->get(Subject::CODE) . "</td><td>" . $s->get(Subject::NAME) . "</td>";
+    echo View::makeTextBoxCell("subject-numtargets-{$s->getId()}", $s->get(SUBJECT::NUM_TARGETS));
     $names = [];
     foreach ($s->getTeachingGroups() as $g) {
         array_push($names, "<a href=\"?removeGroup=" . $g->getId() . "&removeFromSubject=" . $s->getId() . "\">" . $g->getName() . "</a>");
@@ -111,6 +119,8 @@ foreach (Subject::retrieveAll(Subject::NAME) as $s) {
 	<td><input class="form-control" type="text" name="newsubjectcode"></td>
 
 	<td><input class="form-control" type="text" name="newsubjectname"></td>
+	
+	<td><input class="form-control" type="text" name="newsubjectnumtargets"></td>
 
 	<td><input class="form-control" type="submit" value="Add subject"></td>
 	

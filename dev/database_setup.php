@@ -37,6 +37,7 @@ if (isset(Config::$maintenance) && Config::$maintenance) {
         id INT UNSIGNED NOT NULL AUTO_INCREMENT,
         name VARCHAR(30) NOT NULL,
         code VARCHAR(2) NOT NULL,
+        num_targets INT UNSIGNED NOT NULL,
         Baseline_id INT UNSIGNED DEFAULT NULL,
         CONSTRAINT PRIMARY KEY (id)
     );
@@ -64,6 +65,7 @@ if (isset(Config::$maintenance) && Config::$maintenance) {
         total_a INT NOT NULL,
         total_b INT NOT NULL,
         custom_grade_boundaries BOOLEAN NOT NULL DEFAULT FALSE,
+        targets VARCHAR(65000) NULL,
         CONSTRAINT PRIMARY KEY (id)
     );
     CREATE TABLE TestResult (
