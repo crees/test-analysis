@@ -3,7 +3,7 @@ namespace TestAnalysis;
 
 include "../bin/classes.php";
 
-if (isset($_GET['test'])) {
+if (isset($_GET['test']) && !isset($_POST['form_serial'])) {
     $test = Test::retrieveByDetail(Test::ID, $_GET['test'])[0];
 } else foreach (Test::retrieveAll(Test::ID) as $test) {
     $targets = $test->get(Test::TARGETS);
@@ -11,11 +11,11 @@ if (isset($_GET['test'])) {
         if (!isset($targets[$i])) {
             $targets[$i] = '';
         }
-        if (isset($_GET["test-{$test->getId()}-target-$i"]) && 
-                ($_GET["test-{$test->getId()}-target-$i"] != $targets[$i]))
+        if (isset($_POST["test-{$test->getId()}-target-$i"]) && 
+                ($_POST["test-{$test->getId()}-target-$i"] != $targets[$i]))
         {
             for ($j = 0; $j < $test->getSubject()->get(Subject::NUM_TARGETS); $j++) {
-                $targets[$j] = $_GET["test-{$test->getId()}-target-$j"];
+                $targets[$j] = $_POST["test-{$test->getId()}-target-$j"];
             }
             $test->set(Test::TARGETS, $targets);
             $test->commit();
@@ -50,7 +50,7 @@ if (isset($_GET['test'])) {
         	</ul>
     	</div>
     </nav>
-<form method="get">
+<form method="post">
 <table class="table table-hover table-sm">
 <thead>
 	<tr>
@@ -75,6 +75,7 @@ for ($i = 0; $i < $test->getSubject()->get(Subject::NUM_TARGETS); $i++) {
 ?>
 <tr><td colspan="13"><input class="form-control" type="submit" value="Save"></td></tr>
 </table>
+<input type="hidden" name="form_serial" value="<?= $_SESSION['form_serial'] ?>">
 </form>
 </div>
 </body>

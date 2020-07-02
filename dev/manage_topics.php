@@ -3,22 +3,22 @@ namespace TestAnalysis;
 
 include "../bin/classes.php";
 
-if (!empty($_GET['topic-name-new'])) {
+if (!empty($_POST['topic-name-new'])) {
     (new TestTopic([
-        TestTopic::NAME => $_GET['topic-name-new'],
-        TestTopic::SUBJECT_ID => $_GET['topic-subject-new'],        
+        TestTopic::NAME => $_POST['topic-name-new'],
+        TestTopic::SUBJECT_ID => $_POST['topic-subject-new'],        
     ]))->commit();
 }
  
 foreach (TestTopic::retrieveAll(TestTopic::ID) as $topic) {
-    if (isset($_GET["topic-name-{$topic->getId()}"]) && 
-            ($_GET["topic-name-{$topic->getId()}"] != $topic->getName() ||
-             $_GET["topic-subject-{$topic->getId()}"] != $topic->get(TestTopic::SUBJECT_ID))
+    if (isset($_POST["topic-name-{$topic->getId()}"]) && 
+            ($_POST["topic-name-{$topic->getId()}"] != $topic->getName() ||
+             $_POST["topic-subject-{$topic->getId()}"] != $topic->get(TestTopic::SUBJECT_ID))
             ) {
         (new TestTopic([
             TestTopic::ID => $topic->getId(),
-            TestTopic::NAME => $_GET["topic-name-{$topic->getId()}"],
-            TestTopic::SUBJECT_ID => $_GET["topic-subject-{$topic->getId()}"],
+            TestTopic::NAME => $_POST["topic-name-{$topic->getId()}"],
+            TestTopic::SUBJECT_ID => $_POST["topic-subject-{$topic->getId()}"],
         ]))->commit();
     }
 }
@@ -48,7 +48,7 @@ foreach (TestTopic::retrieveAll(TestTopic::ID) as $topic) {
         	</ul>
     	</div>
     </nav>
-<form method="get">
+<form method="post">
 <table class="table table-hover table-sm">
 <thead><tr><th>Attach to subject</th><th>Topic</th></tr></thead>
 <?php

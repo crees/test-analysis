@@ -11,18 +11,18 @@ if (isset($_GET['removeTopic'])) {
             break;
         }
     }
-} else if (isset($_GET['newtest-name']) && isset($_GET['form_serial']) && $_GET['form_serial'] == $_SESSION['form_serial']-1) {
+} else if (isset($_POST['newtest-name']) && isset($_POST['form_serial']) && $_POST['form_serial'] == $_SESSION['form_serial']-1) {
     foreach (Test::retrieveAll() as $t) {
         $tId = $t->getId();
         // Test modifications
-        if (isset($_GET[Test::SUBJECT_ID . "-$tId"]) && !empty($_GET[Test::SUBJECT_ID . "-$tId"])) {
+        if (isset($_POST[Test::SUBJECT_ID . "-$tId"]) && !empty($_POST[Test::SUBJECT_ID . "-$tId"])) {
             $detail = [];
             $detail[Test::ID] = $tId;
-            $detail[Test::SUBJECT_ID] = $_GET[Test::SUBJECT_ID . "-$tId"];
-            $detail[Test::NAME] = $_GET[Test::NAME . "-$tId"];
-            $detail[Test::TOTAL_A] = $_GET[Test::TOTAL_A . "-$tId"];
-            $detail[Test::TOTAL_B] = $_GET[Test::TOTAL_B . "-$tId"];
-            if (isset($_GET[Test::CUSTOM_GRADE_BOUNDARIES . "-$tId"])) {
+            $detail[Test::SUBJECT_ID] = $_POST[Test::SUBJECT_ID . "-$tId"];
+            $detail[Test::NAME] = $_POST[Test::NAME . "-$tId"];
+            $detail[Test::TOTAL_A] = $_POST[Test::TOTAL_A . "-$tId"];
+            $detail[Test::TOTAL_B] = $_POST[Test::TOTAL_B . "-$tId"];
+            if (isset($_POST[Test::CUSTOM_GRADE_BOUNDARIES . "-$tId"])) {
                 $detail[Test::CUSTOM_GRADE_BOUNDARIES] = 1;
             } else {
                 $detail[Test::CUSTOM_GRADE_BOUNDARIES] = 0;
@@ -32,7 +32,7 @@ if (isset($_GET['removeTopic'])) {
             
             $newTest->commit();
         }
-        if (!empty($topicToAdd = $_GET["test-add-topic-to-{$t->getId()}"])) {
+        if (!empty($topicToAdd = $_POST["test-add-topic-to-{$t->getId()}"])) {
             (new TestTestTopic([
                 TestTestTopic::TESTTOPIC_ID => $topicToAdd,
                 TestTestTopic::TEST_ID => $t->getId()
@@ -40,9 +40,9 @@ if (isset($_GET['removeTopic'])) {
         }
     }
     
-    if (!empty($_GET['newtest-name'])) {
+    if (!empty($_POST['newtest-name'])) {
         $newTestDetails = [];
-        foreach ($_GET as $k => $v) {
+        foreach ($_POST as $k => $v) {
             if (str_contains($k, "newtest-")) {
                 $k = str_replace('newtest-', '', $k);
                 if ($k == Test::CUSTOM_GRADE_BOUNDARIES) {
@@ -59,11 +59,11 @@ if (isset($_GET['removeTopic'])) {
     // Let's now examine the grade boundaries.  First handle any that have changed
     foreach (GradeBoundary::retrieveAll() as $b) {
         $bId = $b->getId();
-        if (!isset($_GET["GradeBoundary-grade-$bId"])) {
+        if (!isset($_POST["GradeBoundary-grade-$bId"])) {
             continue;
         }
-        $newGrade = $_GET["GradeBoundary-grade-$bId"];
-        $newBoundary = $_GET["GradeBoundary-boundary-$bId"];
+        $newGrade = $_POST["GradeBoundary-grade-$bId"];
+        $newBoundary = $_POST["GradeBoundary-boundary-$bId"];
         if ($newGrade != $b->get(GradeBoundary::NAME) || $newBoundary != $b->get(GradeBoundary::BOUNDARY)) {
             $b->setName($newGrade);
             $b->setBoundary($newBoundary);
@@ -75,8 +75,8 @@ if (isset($_GET['removeTopic'])) {
     foreach (Subject::retrieveAll() as $s) {
         $sId = $s->getId();
         for ($i = 1; $i < 20; $i++) {
-            $newGrade = $_GET["GradeBoundary-grade-new-for-subject-$sId-$i"];
-            $newBoundary = $_GET["GradeBoundary-boundary-new-for-subject-$sId-$i"];
+            $newGrade = $_POST["GradeBoundary-grade-new-for-subject-$sId-$i"];
+            $newBoundary = $_POST["GradeBoundary-boundary-new-for-subject-$sId-$i"];
             if (!empty($newGrade) && !empty($newBoundary)) {
                 $b = new GradeBoundary([
                     GradeBoundary::NAME => $newGrade,
@@ -92,11 +92,11 @@ if (isset($_GET['removeTopic'])) {
     foreach (Test::retrieveAll() as $t) {
         $tId = $t->getId();
         for ($i = 1; $i < 20; $i++) {
-            if (!isset($_GET["GradeBoundary-grade-new-for-test-$tId-$i"])) {
+            if (!isset($_POST["GradeBoundary-grade-new-for-test-$tId-$i"])) {
                 break;
             }
-            $newGrade = $_GET["GradeBoundary-grade-new-for-test-$tId-$i"];
-            $newBoundary = $_GET["GradeBoundary-boundary-new-for-test-$tId-$i"];
+            $newGrade = $_POST["GradeBoundary-grade-new-for-test-$tId-$i"];
+            $newBoundary = $_POST["GradeBoundary-boundary-new-for-test-$tId-$i"];
             if (!empty($newGrade) && !empty($newBoundary)) {
                 $b = new GradeBoundary([
                     GradeBoundary::NAME => $newGrade,
@@ -138,7 +138,7 @@ $tests = Test::retrieveAll(Test::NAME);
         	</ul>
     	</div>
     </nav>
-<form method="get">
+<form method="post">
 <table class="table table-hover table-bordered table-sm">
 <thead>
 	<tr>

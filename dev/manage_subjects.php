@@ -4,20 +4,20 @@ namespace TestAnalysis;
 include "../bin/classes.php";
 
 if (isset($_GET['removeGroup'])) {
-    Subject::retrieveByDetail(Subject::ID, $_GET['removeFromSubject'])[0]->removeMember(TeachingGroup::retrieveByDetail(TeachingGroup::ID, $_GET['removeGroup'])[0]);
-} elseif (isset($_GET['newsubjectcode'])) {
-    if (!empty($_GET['newsubjectname'])) {
-        if (empty($_GET['newsubjectnumtargets'])) {
-            $_GET['newsubjectnumtargets'] = "12";
+    Subject::retrieveByDetail(Subject::ID, $_GET['removeFromSubject'])[0]->removeMember(TeachingGroup::retrieveByDetail(TeachingGroup::ID, $_POST['removeGroup'])[0]);
+} elseif (isset($_POST['newsubjectcode'])) {
+    if (!empty($_POST['newsubjectname'])) {
+        if (empty($_POST['newsubjectnumtargets'])) {
+            $_POST['newsubjectnumtargets'] = "12";
         }
         (new Subject([
-            Subject::NAME => $_GET['newsubjectname'],
-            Subject::CODE => $_GET['newsubjectcode'],
-            Subject::NUM_TARGETS => $_GET['newsubjectnumtargets'],
+            Subject::NAME => $_POST['newsubjectname'],
+            Subject::CODE => $_POST['newsubjectcode'],
+            Subject::NUM_TARGETS => $_POST['newsubjectnumtargets'],
         ]))->commit();
     }
     
-    foreach ($_GET as $k => $value) {
+    foreach ($_POST as $k => $value) {
         if (!empty($value)) {
             if (str_contains($k, "subject-add-group-")) {
                 $subject = Subject::retrieveByDetail(Subject::ID, str_replace("subject-add-group-", "", $k))[0];
@@ -60,7 +60,7 @@ if (isset($_GET['removeGroup'])) {
         	</ul>
     	</div>
     </nav>
-<form method="get">
+<form method="post">
 <table class="table table-sm table-hover">
 <thead><tr><th>Code</th><th>Name</th><th>Number of targets</th><th>Baseline source</th><th>Groups (click to remove)</th><th>Add group</th></tr></thead>
 <?php
