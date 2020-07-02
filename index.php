@@ -45,7 +45,6 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
             }
         }
     }
-    $view = new View($tests, $students);
 }
 
 ?>
@@ -123,8 +122,88 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
     		</div>
 		</form>
 		<?php 
-		if (isset($view)) {
-		    $view->print();
+		if (isset($tests)) {
+		    if (count($tests) < 1) {
+		        echo "</tr></table></form><div>No tests defined for selected subject.</div>";
+		        return;
+		    }
+		    echo <<< eof
+        <form method="POST">
+            <input type="submit" class="form-control" value="Save">
+            <div class="table-responsive">
+            <table class="table table-bordered table-sm table-hover">
+                <thead>
+                    <tr>
+                        <th rowspan="2" scope="col">Name</th>
+                        <th rowspan="2" scope="col">Group</th>
+                        <th rowspan="2" scope="col">Ind.</th>
+eof;
+		    foreach ($tests as $t) {
+		        echo "<th colspan=\"4\" class=\"text-center\">" . $t->getName() . "</th>\n";
+		    }
+		    echo "</tr>\n<tr>";
+		    
+		    foreach ($tests as $t) {
+		        echo "<th>A</th><th>B</th><th>%</th><th>Grd</th>\n";
+		    }
+		    echo "</tr>\n</thead>\n";
+		    
+		    $firstTabIndex = 0;
+		    $studentCount = count($students);
+		    
+		    foreach ($students as $s) {
+		        $firstTabIndex++;
+		        $tabIndex = $firstTabIndex;
+		        echo "<tr>\n";
+		        echo "<th><a href=\"student_individual_scores.php?student=" . $s->getId() . "\">" . $s->getName() . "</a></th>\n";
+		        echo "<th>" . $s->getTeachingGroup($subject) . "</th>";
+		        $baseline = $s->getBaseline($subject);
+		        echo "<th>$baseline</th>";
+		        foreach ($tests as $t) {
+		            $result = $t->getResult($s);
+		            echo View::makeTextBoxCell(TestResult::SCORE_A . "-" . $t->getId() . "-" . $s->getId(), is_null($result) ? "" : $result->get(TestResult::SCORE_A), $tabIndex);
+		            $tabIndex++;
+		            echo View::makeTextBoxCell(TestResult::SCORE_B . "-" . $t->getId() . "-" . $s->getId(), is_null($result) ? "" : $result->get(TestResult::SCORE_B), $tabIndex);
+		            if (is_null($result)) {
+		                echo "<td>&nbsp;</td><td>&nbsp;</td>";
+		            } else {
+		                echo "<td>" . round(($result->get(TestResult::SCORE_A)+$result->get(TestResult::SCORE_B)) * 100 / ($t->get(Test::TOTAL_A)+$t->get(Test::TOTAL_B)), 0) . "</td>";
+		                $grade = $t->calculateGrade($result);
+		                $cellColour = "";
+		                if (!empty($baseline)) {
+		                    if ($grade == $baseline) {
+		                        $cellColour = "class=\"table-warning\"";
+		                    } else {
+		                        foreach ($t->getGradeBoundaries() as $boundary) {
+		                            if ($baseline == $boundary->getName()) {
+		                                $cellColour = "class=\"table-danger\"";
+		                                break;
+		                            }
+		                            if ($grade == $boundary->getName()) {
+		                                // Greater
+		                                $cellColour = "class=\"table-success\"";
+		                                break;
+		                            }
+		                        }
+		                    }
+		                }
+		                echo "<td $cellColour>";
+		                
+		                echo "$grade";
+		                
+		                echo "</td>";
+		            }
+		            $tabIndex += $studentCount;
+		        }
+		        echo "</tr>\n";
+		    }
+		    
+		    echo <<< eof
+            </table>
+            </div>
+            <input type="hidden" name="form_serial" value="{$_SESSION['form_serial']}">
+        </form>
+eof;
 		}
 		?>
 	</div>
