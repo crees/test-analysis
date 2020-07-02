@@ -26,6 +26,8 @@ class Test extends DatabaseCollection
             } else {
                 $this->details[self::TARGETS] = $details[self::TARGETS];
             }
+        } else {
+            $this->details[self::TARGETS] = '';
         }
     }
     
