@@ -4,7 +4,7 @@ namespace TestAnalysis;
 include "../bin/classes.php";
 
 if (isset($_GET['removeGroup'])) {
-    Subject::retrieveByDetail(Subject::ID, $_GET['removeFromSubject'])[0]->removeMember(TeachingGroup::retrieveByDetail(TeachingGroup::ID, $_POST['removeGroup'])[0]);
+    Subject::retrieveByDetail(Subject::ID, $_GET['removeFromSubject'])[0]->removeMember(TeachingGroup::retrieveByDetail(TeachingGroup::ID, $_GET['removeGroup'])[0]);
 } elseif (isset($_POST['newsubjectcode'])) {
     if (!empty($_POST['newsubjectname'])) {
         if (empty($_POST['newsubjectnumtargets'])) {
