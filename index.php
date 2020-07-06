@@ -11,7 +11,8 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
     $tests = Test::retrieveByDetail(Test::SUBJECT_ID, $_GET['subject']);
     
     if (isset($_GET['teaching_group']) && !empty($_GET['teaching_group'])) {
-        $students = TeachingGroup::retrieveByDetail(TeachingGroup::ID, $_GET['teaching_group'])[0]->getStudents();
+        $teaching_group = $_GET['teaching_group'];
+        $students = TeachingGroup::retrieveByDetail(TeachingGroup::ID, $teaching_group)[0]->getStudents();
     } else {
         $students = $subject->getStudents();
     }
@@ -139,7 +140,12 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
                         <th rowspan="2" scope="col">Ind.</th>
 eof;
 		    foreach ($tests as $t) {
-		        echo "<th colspan=\"4\" class=\"text-center\">" . $t->getName() . "</th>\n";
+		        if (isset($teaching_group)) {
+		          $link = "feedback_sheet.php?teaching_group=$teaching_group&subject={$subject->getId()}&test={$t->getId()}";
+		          echo "<th colspan=\"4\" class=\"text-center\"><a href=\"$link\">{$t->getName()}</a></th>\n";
+		        } else {
+		          echo "<th colspan=\"4\" class=\"text-center\">{$t->getName()}</th>\n";
+		        }
 		    }
 		    echo "</tr>\n<tr>";
 		    
