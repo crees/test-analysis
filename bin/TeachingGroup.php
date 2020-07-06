@@ -3,12 +3,13 @@ namespace TestAnalysis;
 
 class TeachingGroup extends DatabaseCollection
 {
-    const SUBJECT_ID = 'Subject_id';
+    const ACADEMIC_YEAR = 'academic_year';
     
     public function __construct(array $details)
     {
         $this->details[self::ID] = $details[self::ID];
         $this->details[self::NAME] = $details[self::NAME];
+        $this->details[self::ACADEMIC_YEAR] = $details[self::ACADEMIC_YEAR];
     }
     
     public function getStudents() {
@@ -24,7 +25,7 @@ class TeachingGroup extends DatabaseCollection
             return [];
         }
         $studentIds = array_map(function($x) { return $x['Student_id']; }, $arr);
-        $students = array_map(function($x) { return Student::retrieveByDetail(Student::ID, $x)[0]; }, $studentIds);
+        $students = array_map(function($x) { return Student::retrieveByDetail(Student::ID, $x)[0] ?? null; }, $studentIds);
         uasort($students, function($a, $b) { return $a->get(STUDENT::LAST_NAME) > $b->get(STUDENT::LAST_NAME);});
         return $students;
     }

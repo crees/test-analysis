@@ -33,8 +33,10 @@ include "../bin/classes.php";
 
 $client = new GraphQLClient();
 
+$ay = Config::academic_year;
+
 $data = $client->rawQuery("query {
-  TeachingGroup (academicYear__code: \"2019-2020\") {
+  TeachingGroup (academicYear__code: \"$ay\") {
     displayName
     memberships {
       student {
@@ -76,13 +78,17 @@ foreach ($data['StudentProgressBaseline'] as $baseline) {
     $dBaseline->commit();
 }
 
+// Clear old memberships out
+(new Database())->dosql("DELETE FROM studentgroupmembership;");
+
 foreach ($data['TeachingGroup'] as $group) {
     if (!empty($dGroup = TeachingGroup::retrieveByDetail(TeachingGroup::ID, $group['id']))) {
         $dGroup = $dGroup[0];
         $dGroup->setName($group['displayName']);
         echo "<div class=\"row\">Scanned TeachingGroup: " . $dGroup->getName() . "</div>"; 
     } else {
-        $group['name'] = $group['displayName'];
+        $group[TeachingGroup::NAME] = $group['displayName'];
+        $group[TeachingGroup::ACADEMIC_YEAR] = Config::academic_year;
         $dGroup = new TeachingGroup($group);
         echo "<div class=\"row\">New TeachingGroup: " . $dGroup->getName() . "</div>";
     }
