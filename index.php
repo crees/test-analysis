@@ -79,6 +79,8 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
             	</ul>
         	</div>
         </nav>
+        
+        <div><img src="img/dshs.jpg" style="width: 30%;" /></div>
 
 		<h3 class="mb-4"><?= Config::site ?></h3>
 		

@@ -69,7 +69,7 @@ foreach ($group->getStudents() as $student) {
         echo "<div style=\"page-break-before: always\">&nbsp;</div>";
     }
     
-    
+    echo "<div><img src=\"img/dshs.jpg\" style=\"width:30%;\" /></div>";
     echo "<div class=\"h3\">Science Assessment Record & Feedback</div>";
     echo <<< EOF
 <table class="table table-bordered table-sm">
