@@ -82,6 +82,22 @@ class Subject extends DatabaseCollection
         $db->dosql("DELETE FROM GroupSubjectMembership WHERE TeachingGroup_Id = $gid AND Subject_id = $sid;");
     }
     
+    public function calculateGrade(int $percentage) {
+        $grade = 0;
+        // First, get the grades ordered by highest to lowest
+        foreach ($this->getGradeBoundaries() as $g) {
+            if ($g->get(GradeBoundary::BOUNDARY) <= $percentage) {
+                $grade = $g->getName();
+                break;
+            }
+        }
+        return $grade;
+    }
+    
+    public function getGradeBoundaries() {
+        return GradeBoundary::retrieveByDetail(GradeBoundary::TEST_ID, -$this->getId(), GradeBoundary::BOUNDARY . ' DESC');
+    }
+    
     function __destruct()
     {}
 }

@@ -57,6 +57,21 @@ class Student extends DatabaseCollection
         }
     }
     
+    public function getMostLikelyGrade(Subject $subject) {
+        $percentages_b = [];
+        foreach (Test::retrieveByDetail(Test::SUBJECT_ID, $subject->getId()) as $t) {
+            $result = $t->getResult($this);
+            if (!is_null($result)) {
+                array_push($percentages_b, $result->get(TestResult::SCORE_B) * 100 / $t->get(Test::TOTAL_B));
+            }
+        }
+        if (count($percentages_b) > 0) {
+            return $subject->calculateGrade((int) round(array_sum($percentages_b)/count($percentages_b), 0));
+        } else {
+            return null;
+        }
+    }
+    
     function __destruct()
     {}
 }

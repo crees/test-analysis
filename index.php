@@ -149,6 +149,7 @@ eof;
 		          echo "<th colspan=\"4\" class=\"text-center\">{$t->getName()}</th>\n";
 		        }
 		    }
+		    echo "<th rowspan=\"2\" scope=\"col\">MLG</th>";
 		    echo "</tr>\n<tr>";
 		    
 		    foreach ($tests as $t) {
@@ -175,7 +176,8 @@ eof;
 		            if (is_null($result)) {
 		                echo "<td>&nbsp;</td><td>&nbsp;</td>";
 		            } else {
-		                echo "<td>" . round(($result->get(TestResult::SCORE_A)+$result->get(TestResult::SCORE_B)) * 100 / ($t->get(Test::TOTAL_A)+$t->get(Test::TOTAL_B)), 0) . "</td>";
+		                $percent_all = ($result->get(TestResult::SCORE_A)+$result->get(TestResult::SCORE_B)) * 100 / ($t->get(Test::TOTAL_A)+$t->get(Test::TOTAL_B));
+		                echo "<td>" . round($percent_all, 0) . "</td>";
 		                $grade = $t->calculateGrade($result);
 		                $cellColour = "";
 		                if (!empty($baseline)) {
@@ -195,14 +197,35 @@ eof;
 		                        }
 		                    }
 		                }
-		                echo "<td $cellColour>";
-		                
-		                echo "$grade";
-		                
-		                echo "</td>";
+		                echo "<td $cellColour>$grade</td>";
 		            }
 		            $tabIndex += $studentCount;
 		        }
+		        if (!is_null($grade = $s->getMostLikelyGrade($subject))) {
+		            // MLG
+		            $cellColour = "";
+		            if (!empty($baseline)) {
+		                if ($grade == $baseline) {
+		                    $cellColour = "class=\"table-warning\"";
+		                } else {
+		                    foreach ($subject->getGradeBoundaries() as $boundary) {
+		                        if ($baseline == $boundary->getName()) {
+		                            $cellColour = "class=\"table-danger\"";
+		                            break;
+		                        }
+		                        if ($grade == $boundary->getName()) {
+		                            // Greater
+		                            $cellColour = "class=\"table-success\"";
+		                            break;
+		                        }
+		                    }
+		                }
+		            }
+		            echo "<td $cellColour>$grade</td>";
+		        } else {
+		            echo "<td>&nbsp;</td>";
+		        }
+		        
 		        echo "</tr>\n";
 		    }
 		    
