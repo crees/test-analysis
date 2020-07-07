@@ -57,11 +57,6 @@ class Student extends DatabaseCollection
         }
     }
     
-    /** Records a new test result.  The latest result is read, but all previous are stored */
-    public function recordTestResult(Test $test) {
-        
-    }
-
     function __destruct()
     {}
 }
