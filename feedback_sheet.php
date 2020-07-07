@@ -67,7 +67,7 @@ $firstPage = true;
 $date = date('Y-m-d');
 
 /*
- * Now we need to find the first appropriate target.
+ * Now we need to find the first appropriate target, based on Section B marks.
  *
  * So, we divide the total by the number of targets to get the 'marks per shift'
  *
@@ -76,7 +76,7 @@ $date = date('Y-m-d');
 
 $test_total = $test->get(Test::TOTAL_A) + $test->get(Test::TOTAL_B);
 
-$marks_to_shift = $test_total / $subject->get(Subject::NUM_TARGETS);
+$marks_to_shift = $test->get(Test::TOTAL_B) / $subject->get(Subject::NUM_TARGETS);
 
 foreach ($group->getStudents() as $student) {
     $result = $test->getResult($student);
@@ -88,9 +88,9 @@ foreach ($group->getStudents() as $student) {
     
     $targets = $test->get(Test::TARGETS);
     $numtargets = 3;
-    $shiftmarks = $result_total;
+    $shiftmarks = $result->get(TestResult::SCORE_B);
     
-    while (($shiftmarks = $shiftmarks - $marks_to_shift) > 0) {
+    while (($shiftmarks = $shiftmarks - $marks_to_shift) >= 0) {
         if ($numtargets >= 1) {
             $numtargets--;
             continue;
