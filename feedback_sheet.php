@@ -15,6 +15,7 @@ if (!isset($_GET['teacher_name'])) {
 
     <body>
         <div class="container">
+            <div class="h2">Please fill in the missing information for the yellow sheet.</div>
             <form method="get">
                 <input type="hidden" name="teaching_group" value="{$_GET['teaching_group']}">
 
@@ -29,11 +30,15 @@ if (!isset($_GET['teacher_name'])) {
                         <input type="text" id="teacher_name" name="teacher_name">
                     </div>
                 </div>
+                <div class="form-group row">
+                    <input type="submit" value="Make the sheets!">
+                </div>
             </form>
         </div>
     </body>
 </html>
 EOF;
+    die();
 }
 
 ?>
@@ -53,6 +58,7 @@ EOF;
     
     <body>
     	<div class="container">
+    		<div class="d-print-none h2"><a href="index.php?subject=<?= $_GET['subject']?>&teaching_group=<?= $_GET['teaching_group'] ?>">Back to database</a></div>
 <?php
 $subject = Subject::retrieveByDetail(Subject::ID, $_GET['subject'])[0];
 $group = TeachingGroup::retrieveByDetail(TeachingGroup::ID, $_GET['teaching_group'])[0];
