@@ -6,7 +6,7 @@ abstract class View
     private function __construct(Array $cols, Array $rows)
     {}
     
-    public static function makeTextBoxCell(String $name, $value, int $tabindex = 0) {
+    public static function makeTextBoxCell(String $name, $value, int $tabindex = 0, string $type = "text", string $extras = "") {
         if (is_null($value)) {
             $value = "";
         }
@@ -15,7 +15,7 @@ abstract class View
         }
         $ret = "";
         $ret .= "<td style=\"padding: 0\">";
-        $ret .= "<input class=\"form-control border-0 px-1\" type=\"text\" name=\"$name\" value=\"$value\" $tabindex>";
+        $ret .= "<input class=\"form-control border-0 px-1\" type=\"$type\" name=\"$name\" value=\"$value\" $tabindex $extras>";
         $ret .= "</td>\n";
         return $ret;
     }

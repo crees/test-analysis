@@ -169,9 +169,9 @@ eof;
 		        echo "<th>$baseline</th>";
 		        foreach ($tests as $t) {
 		            $result = $t->getResult($s);
-		            echo View::makeTextBoxCell(TestResult::SCORE_A . "-" . $t->getId() . "-" . $s->getId(), is_null($result) ? "" : $result->get(TestResult::SCORE_A), $tabIndex);
+		            echo View::makeTextBoxCell(TestResult::SCORE_A . "-" . $t->getId() . "-" . $s->getId(), is_null($result) ? "" : $result->get(TestResult::SCORE_A), $tabIndex, "number", "min=\"0\" max=\"{$t->get(Test::TOTAL_A)}\"");
 		            $tabIndex++;
-		            echo View::makeTextBoxCell(TestResult::SCORE_B . "-" . $t->getId() . "-" . $s->getId(), is_null($result) ? "" : $result->get(TestResult::SCORE_B), $tabIndex);
+		            echo View::makeTextBoxCell(TestResult::SCORE_B . "-" . $t->getId() . "-" . $s->getId(), is_null($result) ? "" : $result->get(TestResult::SCORE_B), $tabIndex, "number", "min=\"0\" max=\"{$t->get(Test::TOTAL_B)}\"");
 		            if (is_null($result)) {
 		                echo "<td>&nbsp;</td><td>&nbsp;</td>";
 		            } else {
