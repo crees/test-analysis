@@ -38,7 +38,7 @@ require "bin/classes.php";
         
         <div><img src="img/dshs.jpg" style="width: 30%;" /></div>
 
-		<h3 class="mb-4"><?= Config::site ?></h3>
+		<h3 class="mb-4"><?= Config::site ?> (topic overview)</h3>
 
 <form method="GET">
 <div class="form-group row">
