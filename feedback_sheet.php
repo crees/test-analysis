@@ -91,7 +91,7 @@ foreach ($group->getStudents() as $student) {
     $shiftmarks = $result_total;
     
     while (($shiftmarks = $shiftmarks - $marks_to_shift) > 0) {
-        if ($numtargets >= 0) {
+        if ($numtargets >= 1) {
             $numtargets--;
             continue;
         }
