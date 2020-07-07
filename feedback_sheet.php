@@ -7,6 +7,35 @@ if (!isset($_GET['teaching_group']) || !isset($_GET['subject']) || !isset($_GET[
     header('Location: index.php');
 }
 
+if (!isset($_GET['teacher_name'])) {
+    echo "<!doctype html><head>";
+    require "bin/head.php";
+    echo <<< EOF
+    </head>
+
+    <body>
+        <div class="container">
+            <form method="get">
+                <input type="hidden" name="teaching_group" value="{$_GET['teaching_group']}">
+
+                <input type="hidden" name="subject" value="{$_GET['subject']}">
+
+                <input type="hidden" name="test" value="{$_GET['test']}">
+
+        		<div class="form-group row">
+        			<label for="teacher_name" class="col-2 col-form-label">Teacher name</label>
+
+          			<div class="col-10">
+                        <input type="text" id="teacher_name" name="teacher_name">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </body>
+</html>
+EOF;
+}
+
 ?>
 <!doctype html>
 <html>
@@ -85,7 +114,7 @@ foreach ($group->getStudents() as $student) {
         <tr>
             <th colspan="2">Name: {$student->getName()}</th>
 
-            <th>Teacher:</th>
+            <th>Teacher: {$_GET['teacher_name']}</th>
         </tr>
     </thead>
 
