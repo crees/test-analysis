@@ -104,12 +104,13 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
         				?>
         			</select>
         		</div>
-        		<?php if (isset($_GET['subject'])) { ?>
+        		<?php if (isset($_GET['subject'])) {
+        		    echo <<< EOF
             		<label for="teaching_group" class="col-2 col-form-label">Teaching group</label>
             		<div class="col-10">
             			<select class="form-control" id="teaching_group" name="teaching_group" onchange="this.form.submit()">
             				<option value="">All groups</option>
-            				<?php
+EOF;
             				foreach ($teachingGroups as $g) {
             				    if (isset($_GET['teaching_group']) && $_GET['teaching_group'] === $g->getId()) {
             				        $selected = "selected";
@@ -118,13 +119,15 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
             				    }
             				    echo "<option value=\"" . $g->getId() . "\" $selected>" . $g->getName() . "</option>";
             				}
-            				?>
+            				echo <<< EOF
             			</select>
           			</div>
-          		<?php } /* isset($_GET['subject']) */ ?>
+EOF;
+        		} /* isset($_GET['subject']) */ ?>
     		</div>
 		</form>
-		<?php 
+
+		<?php
 		if (isset($tests)) {
 		    if (count($tests) < 1) {
 		        echo "</tr></table></form><div>No tests defined for selected subject.</div>";
