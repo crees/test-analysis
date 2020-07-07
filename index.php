@@ -75,7 +75,7 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
                 	</li>
 
             		<li class="nav-item">
-                		<a class="nav-link" href="?topic_overview.php">Topic overview</a>
+                		<a class="nav-link" href="topic_overview.php">Topic overview</a>
                 	</li>
             	</ul>
         	</div>
