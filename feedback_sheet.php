@@ -107,7 +107,7 @@ foreach ($group->getStudents() as $student) {
     echo "<div><img src=\"img/dshs.jpg\" style=\"width:30%;\" /></div>";
     echo "<div class=\"h3\">Science Assessment Record & Feedback</div>";
     echo <<< EOF
-<table class="table table-bordered table-sm">
+<table class="table table-bordered table-sm bigger-text">
     <colgroup>
         <col style="width:33%;">
 
