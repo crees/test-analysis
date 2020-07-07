@@ -73,11 +73,11 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
             		<li class="nav-item">
                 		<a class="nav-link" href="?session_destroy=<?= $_SESSION['SESSION_CREATIONTIME']; ?>">Home</a>
                 	</li>
-            		<li class="nav-item">
-                		<a class="nav-link" href="dev">Manage database</a>
-                	</li>
             	</ul>
         	</div>
+    		<span class="navbar-text">
+        		<a class="nav-link" href="dev">Manage database</a>
+        	</span>
         </nav>
         
         <div><img src="img/dshs.jpg" style="width: 30%;" /></div>
