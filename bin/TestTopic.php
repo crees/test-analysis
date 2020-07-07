@@ -27,7 +27,7 @@ class TestTopic extends DatabaseCollection
     
     public function getTests() {
         $ret = [];
-        foreach (TestTestTopic::retrieveByDetail(TestTestTopic::TOPIC_ID, $this->getId()) as $ttt) {
+        foreach (TestTestTopic::retrieveByDetail(TestTestTopic::TESTTOPIC_ID, $this->getId()) as $ttt) {
             array_push($ret, Test::retrieveByDetail(Test::ID, $ttt->get(TestTestTopic::TEST_ID))[0]);
         }
         return $ret;
