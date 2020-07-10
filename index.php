@@ -77,6 +77,10 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
             		<li class="nav-item">
                 		<a class="nav-link" href="topic_overview.php">Topic overview</a>
                 	</li>
+
+            		<li class="nav-item">
+                		<a class="nav-link" href="skillset_overview.php">Skillset overview</a>
+                	</li>
             	</ul>
         	</div>
     		<span class="navbar-text">
