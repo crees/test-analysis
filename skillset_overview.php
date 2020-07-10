@@ -136,15 +136,16 @@ EOF;
 		            $b_percentage = $result->get(TestResult::SCORE_B) * 100 / $test->get(Test::TOTAL_B);
 		            $colour_changed = false;
 		            for ($i = 0; $i < 4; $i++) {
+		                // Break into quartiles
 		                if ($b_percentage - $i * 25 > 0) {
-		                    echo "<td class=\"bg-success\">G</td>";
+		                    echo "<td class=\"table-success\">G</td>";
 		                } else {
 		                    if ($colour_changed) {
-		                        echo "<td class=\"bg-danger\">R</td>";
+		                        echo "<td class=\"table-danger\">R</td>";
 		                    }
 		                    else {
 		                        $colour_changed = true;
-		                        echo "<td class=\"bg-warning\">A</td>";
+		                        echo "<td class=\"table-warning\">A</td>";
 		                    }
 		                }
 		            }
