@@ -45,8 +45,8 @@ class Subject extends DatabaseCollection
         return $students;
     }
     
-    public function getTests() {
-        return Test::retrieveByDetail(Test::SUBJECT_ID, $this->getId);
+    public function getTests(string $orderBy = "") {
+        return Test::retrieveByDetail(Test::SUBJECT_ID, $this->getId(), $orderBy);
     }
     
     public function setBaseline(int $bId) {
