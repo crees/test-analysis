@@ -5,9 +5,21 @@ include "../bin/classes.php";
 
 if (isset($_GET['test']) && !isset($_POST['form_serial'])) {
     $test = Test::retrieveByDetail(Test::ID, $_GET['test'])[0];
-} else foreach (Test::retrieveAll(Test::ID) as $test) {
+    if (isset($_GET['bigTextBox'])) {
+        echo "<form method=\"post\"><textarea name=\"bigTextBox\"></textarea>";
+        echo "<input type=\"hidden\" name=\"form_serial\" value=\"{$_SESSION['form_serial']}\">";
+        echo "<input type=\"hidden\" name=\"test\" value=\"{$_GET['test']}\">";
+        echo "<input type=\"submit\">";
+        echo "</form>";
+        die();
+    }
+} else {
+    $test = Test::retrieveByDetail(Test::ID, $_POST['test'])[0];
     $targets = $test->get(Test::TARGETS);
-    for ($i = 0; $i < $test->getSubject()->get(Subject::NUM_TARGETS); $i++) {
+    if (isset($_POST['bigTextBox'])) {
+        $test->set(Test::TARGETS, explode('<br>', nl2br($_POST['bigTextBox'], false)));
+        $test->commit();
+    } else for ($i = 0; $i < $test->getSubject()->get(Subject::NUM_TARGETS); $i++) {
         if (!isset($targets[$i])) {
             $targets[$i] = '';
         }
@@ -19,7 +31,6 @@ if (isset($_GET['test']) && !isset($_POST['form_serial'])) {
             }
             $test->set(Test::TARGETS, $targets);
             $test->commit();
-            break;
         }
     }
     header('Location: manage_tests.php');
@@ -47,6 +58,14 @@ if (isset($_GET['test']) && !isset($_POST['form_serial'])) {
             	<li class="nav-item">
             		<a class="nav-link" href="index.php">Database management</a>
             	</li>
+            	<?php 
+            	if (empty($test->get(Test::TARGETS)[0])) {
+            	?>
+            	<li class="nav-item">
+            		<a class="nav-link" href="?test=<?= $test->getId() ?>&bigTextBox=yes">Use large text box</a>
+            	</li>
+            	<?php
+            	} ?>
         	</ul>
     	</div>
     </nav>
@@ -76,6 +95,7 @@ for ($i = 0; $i < $test->getSubject()->get(Subject::NUM_TARGETS); $i++) {
 <tr><td colspan="13"><input class="form-control" type="submit" value="Save"></td></tr>
 </table>
 <input type="hidden" name="form_serial" value="<?= $_SESSION['form_serial'] ?>">
+<input type="hidden" name="test" value="<?= $_GET['test'] ?>">
 </form>
 </div>
 </body>
