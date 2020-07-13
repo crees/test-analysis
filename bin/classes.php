@@ -22,9 +22,8 @@ if (!class_exists("Config")) {
     
     /**
      * We start the session timer on creation, and destroy it after that time.
-     * We don't allow keepalive or the data will become stale.
      */
-    $timeout_duration = 600;
+    $timeout_duration = 1200;
     
     session_start(['gc_maxlifetime' => $timeout_duration, 'cookie_lifetime' => $timeout_duration]);
     
@@ -36,8 +35,8 @@ if (!class_exists("Config")) {
             session_unset();
             session_destroy();
             session_start();
-            $_SESSION['SESSION_CREATIONTIME'] = $time;
     }
+    $_SESSION['SESSION_CREATIONTIME'] = $time;
     if(empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == "off") {
         header('HTTP/1.1 301 Moved Permanently');
         header('location: ' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
