@@ -8,7 +8,7 @@ $allSubjects = Subject::retrieveAll(Subject::NAME);
 if (isset($_GET['subject']) && !empty($_GET['subject'])) {
     $subject = Subject::retrieveByDetail(Subject::ID, $_GET['subject'])[0];
     $teachingGroups = $subject->getTeachingGroups();
-    $tests = Test::retrieveByDetail(Test::SUBJECT_ID, $_GET['subject']);
+    $tests = Test::retrieveByDetail(Test::SUBJECT_ID, $_GET['subject'], Test::NAME);
     
     if (isset($_GET['teaching_group']) && !empty($_GET['teaching_group'])) {
         $teaching_group = $_GET['teaching_group'];
