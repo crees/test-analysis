@@ -85,9 +85,9 @@ foreach (Baseline::retrieveAll(Baseline::MIS_ASSESSMENT_ID) as $b) {
     $baselines[$newId] = $newName;
 }
 
-$orphanedGroups = TeachingGroup::retrieveAll();
+$orphanedGroups = TeachingGroup::retrieveAll(TeachingGroup::NAME);
 foreach (Subject::retrieveAll(Subject::NAME) as $s) {
-    $allGroups = TeachingGroup::retrieveAll();
+    $allGroups = TeachingGroup::retrieveAll(TeachingGroup::NAME);
     echo "<tr>";
     echo View::makeTextBoxCell("subject-code-{$s->getId()}", $s->get(Subject::CODE));
     echo View::makeTextBoxCell("subject-name-{$s->getId()}", $s->get(Subject::NAME));
