@@ -44,6 +44,24 @@ td:last-child {
     width: 100%;
 }
 
+.table-stickyrow th {
+    background-color: white;
+	position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.table-stickyrow th[scope=row] {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+
+.table-95 {
+  height: 95vh;  
+  overflow: scroll;
+}
+
 .table-sm td, .table-sm th {
     padding: .3rem .75rem;
 }

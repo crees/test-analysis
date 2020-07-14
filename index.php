@@ -144,7 +144,7 @@ EOF;
 		    echo <<< eof
         <form method="POST">
             <input type="submit" class="form-control" value="Save">
-            <div class="table-responsive">
+            <div class="table-responsive table-95 table-stickyrow">
             <table class="table table-bordered table-sm table-hover">
                 <thead>
                     <tr>
@@ -164,7 +164,7 @@ eof;
 		    echo "</tr>\n<tr>";
 		    
 		    foreach ($tests as $t) {
-		        echo "<th>A</th><th>B</th><th>%</th><th>Grd</th>\n";
+		        echo "<td>A</td><td>B</td><td>%</td><td>Grd</td>\n";
 		    }
 		    echo "</tr>\n</thead>\n";
 		    
@@ -175,10 +175,10 @@ eof;
 		        $firstTabIndex++;
 		        $tabIndex = $firstTabIndex;
 		        echo "<tr>\n";
-		        echo "<th><a href=\"student_individual_scores.php?student=" . $s->getId() . "\">" . $s->getName() . "</a></th>\n";
-		        echo "<th>" . $s->getTeachingGroup($subject) . "</th>";
+		        echo "<th scope=\"row\"><a href=\"student_individual_scores.php?student=" . $s->getId() . "\">" . $s->getName() . "</a></th>\n";
+		        echo "<td>" . $s->getTeachingGroup($subject) . "</td>";
 		        $baseline = $s->getBaseline($subject);
-		        echo "<th>$baseline</th>";
+		        echo "<td>$baseline</td>";
 		        foreach ($tests as $t) {
 		            $result = $t->getResult($s);
 		            echo View::makeTextBoxCell(TestResult::SCORE_A . "-" . $t->getId() . "-" . $s->getId(), is_null($result) ? "" : $result->get(TestResult::SCORE_A), $tabIndex, "number", "min=\"0\" max=\"{$t->get(Test::TOTAL_A)}\"");
