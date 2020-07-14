@@ -30,6 +30,14 @@ if (isset($_GET['removeGroup'])) {
                 $subject = Subject::retrieveByDetail(Subject::ID, str_replace("subject-numtargets-", "", $k))[0];
                 $subject->setNumTargets($value);
                 $subject->commit();
+            } elseif (str_contains($k, "subject-code-")) {
+                $subject = Subject::retrieveByDetail(Subject::ID, str_replace("subject-code-", "", $k))[0];
+                $subject->setCode($value);
+                $subject->commit();
+            } elseif (str_contains($k, "subject-name-")) {
+                $subject = Subject::retrieveByDetail(Subject::ID, str_replace("subject-name-", "", $k))[0];
+                $subject->setName($value);
+                $subject->commit();
             }
         }
     }
@@ -62,7 +70,7 @@ if (isset($_GET['removeGroup'])) {
     </nav>
 <form method="post">
 <table class="table table-sm table-hover">
-<thead><tr><th>Code</th><th>Name</th><th>Number of targets</th><th>Baseline source</th><th>Groups (click to remove)</th><th>Add group</th></tr></thead>
+<thead><tr><th>Code</th><th>Name</th><th>Targets</th><th>Baseline source</th><th>Groups (click to remove)</th><th>Add group</th></tr></thead>
 <?php
 
 // Let's get the List of baseline subject IDs
@@ -80,8 +88,10 @@ foreach (Baseline::retrieveAll(Baseline::MIS_ASSESSMENT_ID) as $b) {
 $orphanedGroups = TeachingGroup::retrieveAll();
 foreach (Subject::retrieveAll(Subject::NAME) as $s) {
     $allGroups = TeachingGroup::retrieveAll();
-    echo "<tr><td>" . $s->get(Subject::CODE) . "</td><td>" . $s->get(Subject::NAME) . "</td>";
-    echo View::makeTextBoxCell("subject-numtargets-{$s->getId()}", $s->get(SUBJECT::NUM_TARGETS));
+    echo "<tr>";
+    echo View::makeTextBoxCell("subject-code-{$s->getId()}", $s->get(Subject::CODE));
+    echo View::makeTextBoxCell("subject-name-{$s->getId()}", $s->get(Subject::NAME));
+    echo View::makeTextBoxCell("subject-numtargets-{$s->getId()}", $s->get(Subject::NUM_TARGETS));
     $names = [];
     foreach ($s->getTeachingGroups() as $g) {
         array_push($names, "<a href=\"?removeGroup=" . $g->getId() . "&removeFromSubject=" . $s->getId() . "\">" . $g->getName() . "</a>");

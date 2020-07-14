@@ -57,6 +57,10 @@ class Subject extends DatabaseCollection
         $this->details[self::NUM_TARGETS] = $n;
     }
     
+    public function setCode(string $code) {
+        $this->details[self::CODE] = $code;
+    }
+    
     public function addMember(TeachingGroup $group) {
         if (is_null(self::$db)) {
             self::$db = new Database();
