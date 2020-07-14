@@ -25,6 +25,8 @@ if (!class_exists("Config")) {
      */
     $timeout_duration = 1200;
     
+    session_name("TestAnalysis");
+    
     session_start(['gc_maxlifetime' => $timeout_duration, 'cookie_lifetime' => $timeout_duration]);
     
     $time = $_SERVER['REQUEST_TIME'];
