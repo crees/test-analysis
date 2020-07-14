@@ -138,7 +138,7 @@ EOF;
 		<?php
 		if (isset($tests)) {
 		    if (count($tests) < 1) {
-		        echo "</tr></table></form><div>No tests defined for selected subject.</div>";
+		        echo "<div>No tests defined for selected subject.</div>";
 		        return;
 		    }
 		    echo <<< eof
