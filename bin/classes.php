@@ -5,6 +5,7 @@ namespace TestAnalysis;
 /* Have we been called before? */
 if (!class_exists("Config")) {
     require "Config.php";
+    require "auth.php";
     require "Database.php";
     require "DatabaseCollection.php";
     require "Baseline.php";
@@ -49,5 +50,4 @@ if (!class_exists("Config")) {
         $_SESSION['form_serial'] = 0;
     }
     $_SESSION['form_serial']++;
-    
 }

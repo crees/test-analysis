@@ -6,6 +6,7 @@ class Config {
     const site = "Droitwich Spa High School & Sixth Form Centre Test Analysis Service";
     const site_docroot = "/home/crees/public_html/roombooking/test-analysis";
     const site_url = "https://www.bayofrum.net/~crees/roombooking/test-analysis";
+    const site_emaildomain = "droitwichspahigh.worcs.sch.uk";
     
     const db = array(
         'host' => "localhost:3306",
@@ -26,11 +27,37 @@ class Config {
     
     const debug = true;
     
+    /**
+     * Regular expression for matching student logins.
+     * 
+     * At DSHS, all student logins begin with two digits and then
+     * alphabetical characters.
+     * 
+     * Be absolutely certain that this will catch all students, otherwise
+     * they will have access elsewhere.
+     */
+    private static $user_regexes = array(
+        'student' => '^[0-9]{2}[a-zA-Z]+$',
+        'staff'   => '^[a-zA-Z]+$',
+    );
+    
     /* No user serviceable parts beyond this point */
     
     static function debug($msg) {
         if (defined ("self::debug") && self::debug) {
             echo "<br />" . substr(round(microtime(true) * 1000), 6) . " $msg\n";
         }
+    }
+    
+    static protected function check_regex($name, $type) {
+        return preg_match('/^' . self::$user_regexes[$type] . '/', $name);
+    }
+    
+    static function is_student($name) {
+        return self::check_regex($name, 'student');
+    }
+    
+    static function is_staff($name) {
+        return self::check_regex($name, 'staff');
     }
 }
