@@ -15,6 +15,8 @@ if (!isset($_GET['teacher_name'])) {
 
     <body>
         <div class="container">
+    		<div class="d-print-none h2"><a href="index.php?subject={$_GET['subject']}&teaching_group={$_GET['teaching_group']}">Back to database</a></div>
+
             <div class="h2">Please fill in the missing information for the yellow sheet.</div>
             <form method="get">
                 <input type="hidden" name="teaching_group" value="{$_GET['teaching_group']}">
@@ -41,6 +43,15 @@ EOF;
     die();
 }
 
+$subject = Subject::retrieveByDetail(Subject::ID, $_GET['subject'])[0];
+$group = TeachingGroup::retrieveByDetail(TeachingGroup::ID, $_GET['teaching_group'])[0];
+$test = Test::retrieveByDetail(Test::ID, $_GET['test'])[0];
+
+header("Content-Type: application/vnd.ms-word");
+header("Expires: 0");
+header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+header("content-disposition: attachment;filename=\"feedback-{$test->getName()}-{$group->getName()}.doc\"");
+
 ?>
 <!doctype html>
 <html>
@@ -58,11 +69,7 @@ EOF;
     
     <body>
     	<div class="container">
-    		<div class="d-print-none h2"><a href="index.php?subject=<?= $_GET['subject']?>&teaching_group=<?= $_GET['teaching_group'] ?>">Back to database</a></div>
 <?php
-$subject = Subject::retrieveByDetail(Subject::ID, $_GET['subject'])[0];
-$group = TeachingGroup::retrieveByDetail(TeachingGroup::ID, $_GET['teaching_group'])[0];
-$test = Test::retrieveByDetail(Test::ID, $_GET['test'])[0];
 $firstPage = true;
 $date = date('Y-m-d');
 
@@ -77,6 +84,8 @@ $date = date('Y-m-d');
 $test_total = $test->get(Test::TOTAL_A) + $test->get(Test::TOTAL_B);
 
 $marks_to_shift = $test->get(Test::TOTAL_B) / $subject->get(Subject::NUM_TARGETS);
+
+$img = 'data:image/jpeg;base64,' . base64_encode(file_get_contents(Config::site_docroot . "/img/dshs.jpg"));
 
 foreach ($group->getStudents() as $student) {
     $result = $test->getResult($student);
@@ -99,15 +108,17 @@ foreach ($group->getStudents() as $student) {
     }
     if ($firstPage) {
         $firstPage = false;
-        echo "<div>&nbsp;</div>";
+        $pagebreak = "";
     } else {
-        echo "<div style=\"page-break-before: always\">&nbsp;</div>";
+        $pagebreak='style="page-break-before: always"';
     }
     
-    echo "<div><img src=\"img/dshs.jpg\" style=\"width:30%;\" /></div>";
-    echo "<div class=\"h3\">Science Assessment Record & Feedback</div>";
+    echo "<div $pagebreak><img src=\"$img\" style=\"width:30%;\" />&nbsp;</div>";
+    
+    
+    echo "<br /><div><h1>Science Assessment Record & Feedback</h1></div>";
     echo <<< EOF
-<table class="table table-bordered table-sm bigger-text">
+<table>
     <colgroup>
         <col style="width:33%;">
 
@@ -116,18 +127,16 @@ foreach ($group->getStudents() as $student) {
         <col style="width:34%;">
     </colgroup>
 
-    <thead>
-        <tr>
-            <th colspan="2">Name: {$student->getName()}</th>
+    <tr>
+        <td colspan="2">Name: {$student->getName()}</th>
 
-            <th>Teacher: {$_GET['teacher_name']}</th>
-        </tr>
-    </thead>
+        <td>Teacher: {$_GET['teacher_name']}</th>
+    </tr>
 
     <tr>
         <td>Indicative grade range: <strong>{$student->getBaseline($subject)}</strong></td>
 
-        <td>Most likely grade: <strong>{$student->getMostLikelyGrade($subject)}</strong.</td>
+        <td>Most likely grade: <strong>{$student->getMostLikelyGrade($subject)}</strong></td>
 
         <td>Personal target grade:</td>
     </tr>
