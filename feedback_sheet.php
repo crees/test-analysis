@@ -142,7 +142,11 @@ foreach ($group->getStudents() as $student) {
     </tr>
 
     <tr>
-        <td colspan="2">Assessment title: {$test->getName()}</td>
+        <td colspan="3">&nbsp;</td>
+    <tr>
+
+    <tr>
+        <td colspan="2">Assessment title: <strong>{$test->getName()}</strong></td>
 
         <td>Date: $date</td>
     </tr>
