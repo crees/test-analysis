@@ -86,7 +86,7 @@ abstract class DatabaseCollection
             if (!is_null($detail) && strcmp($detail, "") != 0) {
                 array_push($columnkeys, $key);
                 array_push($columnvalues, $detail);
-                if ($key === self::ID) {
+                if ($key === self::ID && is_null($detail)) {
                     continue;
                 }
                 array_push($updatelist, "$key = \"$detail\"");
