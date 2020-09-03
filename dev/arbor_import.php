@@ -33,9 +33,47 @@ include "../bin/classes.php";
 
 $client = new GraphQLClient();
 
+if (empty($_GET['baseline_done'])) {
+    $page_num = 0;
+    
+    while (!empty(($data = $client->rawQuery("query {
+      StudentProgressBaseline (page_num: $page_num) {
+        id
+        student {
+          id
+        }
+        assessment {
+          id
+          displayName
+          subject {
+            subjectName
+          }
+        }
+        grade {
+          displayName
+        }
+      }
+    }")->getData())['StudentProgressBaseline'])) {
+        foreach ($data['StudentProgressBaseline'] as $baseline) {
+            $details = [];
+            // Does this Baseline already exist?  Overwrite if so.
+            $details[Baseline::ID] = $baseline['id'];
+            $details[Baseline::GRADE] = $baseline['grade']['displayName'];
+            $details[Baseline::STUDENT_ID] = $baseline['student']['id'];
+            $details[Baseline::NAME] = $baseline['assessment']['displayName'];
+            $details[Baseline::MIS_ASSESSMENT_ID] = $baseline['assessment']['id'];
+            $dBaseline = new Baseline($details);
+            $dBaseline->commit();
+        }
+        $page_num += 1;
+    }
+    
+    die('<a href="?baseline_done=yes" class="btn btn-primary">Baselines done!  Now click to import groups</a>');
+}
+
 $ay = Config::academic_year;
 
-$data = $client->rawQuery("query {
+$query = "query {
   TeachingGroup (academicYear__code: \"$ay\") {
     displayName
     memberships {
@@ -46,38 +84,10 @@ $data = $client->rawQuery("query {
       }
     }
   }
-  StudentProgressBaseline {
-    id
-    student {
-      id
-    }
-    assessment {
-      id
-      displayName
-      subject {
-        subjectName
-      }
-    }
-    grade {
-      displayName
-    }
-  }
-}")->getData();
+}";
 
-foreach ($data['StudentProgressBaseline'] as $baseline) {
-    $details = [];
-    // Does this Baseline already exist?  Overwrite if so.
-    if (!empty(Baseline::retrieveByDetail(Baseline::ID, $baseline['id']))) {
-        $details[Baseline::ID] = $baseline['id'];
-    }
-    $details[Baseline::GRADE] = $baseline['grade']['displayName'];
-    $details[Baseline::STUDENT_ID] = $baseline['student']['id'];
-    $details[Baseline::NAME] = $baseline['assessment']['displayName'];
-    $details[Baseline::MIS_ASSESSMENT_ID] = $baseline['assessment']['id'];
-    $dBaseline = new Baseline($details);
-    $dBaseline->commit();
-}
-
+$data = $client->rawQuery($query)->getData();
+  
 // Clear old memberships out
 (new Database())->dosql("DELETE FROM studentgroupmembership;");
 
