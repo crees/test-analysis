@@ -59,7 +59,7 @@ class Student extends DatabaseCollection
     
     public function getMostLikelyGrade(Subject $subject) {
         $percentages_b = [];
-        foreach (Test::retrieveByDetail(Test::SUBJECT_ID, $subject->getId()) as $t) {
+        foreach ($subject->getTests() as $t) {
             $result = $t->getResult($this);
             if (!is_null($result)) {
                 array_push($percentages_b, $result->get(TestResult::SCORE_B) * 100 / $t->get(Test::TOTAL_B));

@@ -19,14 +19,14 @@ if (isset($_GET['test']) && !isset($_POST['form_serial'])) {
     if (isset($_POST['bigTextBox'])) {
         $test->set(Test::TARGETS, explode('<br>', nl2br($_POST['bigTextBox'], false)));
         $test->commit();
-    } else for ($i = 0; $i < $test->getSubject()->get(Subject::NUM_TARGETS); $i++) {
+    } else for ($i = 0; $i < Config::max_targets; $i++) {
         if (!isset($targets[$i])) {
             $targets[$i] = '';
         }
         if (isset($_POST["test-{$test->getId()}-target-$i"]) && 
                 ($_POST["test-{$test->getId()}-target-$i"] != $targets[$i]))
         {
-            for ($j = 0; $j < $test->getSubject()->get(Subject::NUM_TARGETS); $j++) {
+            for ($j = 0; $j < Config::max_targets; $j++) {
                 $targets[$j] = $_POST["test-{$test->getId()}-target-$j"];
             }
             $test->set(Test::TARGETS, $targets);
@@ -79,7 +79,7 @@ if (isset($_GET['test']) && !isset($_POST['form_serial'])) {
 </thead>
 <?php
 
-for ($i = 0; $i < $test->getSubject()->get(Subject::NUM_TARGETS); $i++) {
+for ($i = 0; $i < Config::max_targets; $i++) {
     echo "<tr>";
     echo "<th>Target " . ($i+1) . "</th>";
     if (isset($test->get(Test::TARGETS)[$i])) {

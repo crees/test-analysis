@@ -5,7 +5,6 @@ class Subject extends DatabaseCollection
 {
     const CODE = 'code';
     const BASELINE_ID = 'Baseline_id';
-    const NUM_TARGETS = 'num_targets';
     
     public function __construct(array $details)
     {
@@ -15,7 +14,6 @@ class Subject extends DatabaseCollection
             $this->details[self::ID] = $details[self::ID];
         }
         $this->details[self::BASELINE_ID] = $details[self::BASELINE_ID] ?? null;
-        $this->details[self::NUM_TARGETS] = $details[self::NUM_TARGETS];
     }
 
     public function getTeachingGroups() {
@@ -45,20 +43,40 @@ class Subject extends DatabaseCollection
         return $students;
     }
     
-    public function getTests(string $orderBy = "") {
-        return Test::retrieveByDetail(Test::SUBJECT_ID, $this->getId(), $orderBy);
+    public function getTests() {
+        $tests = [];
+        foreach (TestSubjectMembership::retrieveByDetail(TestSubjectMembership::SUBJECT_ID, $this->getId()) as $membership) {
+            $test = Test::retrieveByDetail(Test::ID, $membership->get(TestSubjectMembership::TEST_ID))[0];
+            $tests[$test->getName()] = $test;
+        }
+        ksort($tests);
+        return $tests;
     }
     
     public function setBaseline(int $bId) {
         $this->details[self::BASELINE_ID] = $bId;
     }
     
-    public function setNumTargets(int $n) {
-        $this->details[self::NUM_TARGETS] = $n;
-    }
-    
     public function setCode(string $code) {
         $this->details[self::CODE] = $code;
+    }
+    
+    public function addTest(Test $test) {
+        $membership = new TestSubjectMembership(
+            [
+                TestSubjectMembership::SUBJECT_ID   => $this->getId(),
+                TestSubjectMembership::TEST_ID      => $test->getId(),
+            ]
+        );
+        $membership->commit();
+    }
+    
+    public function removeTest(Test $test) {
+        foreach (TestSubjectMembership::retrieveByDetail(TestSubjectMembership::TEST_ID, $test->getId()) as $m) {
+            if ($m->get(TestSubjectMembership::SUBJECT_ID) == $this->getId()) {
+                $m->destroy();
+            }
+        }
     }
     
     public function addMember(TeachingGroup $group) {

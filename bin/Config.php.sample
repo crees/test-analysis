@@ -23,6 +23,8 @@ class Config {
     
     const academic_year = '2019-2020';
     
+    const max_targets = 12;
+    
     public static $maintenance = true;
     
     const debug = true;

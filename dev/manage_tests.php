@@ -15,10 +15,9 @@ if (isset($_GET['removeTopic'])) {
     foreach (Test::retrieveAll() as $t) {
         $tId = $t->getId();
         // Test modifications
-        if (isset($_POST[Test::SUBJECT_ID . "-$tId"]) && !empty($_POST[Test::SUBJECT_ID . "-$tId"])) {
+        if (isset($_POST[Test::NAME . "-$tId"]) && !empty($_POST[Test::NAME . "-$tId"])) {
             $detail = [];
             $detail[Test::ID] = $tId;
-            $detail[Test::SUBJECT_ID] = $_POST[Test::SUBJECT_ID . "-$tId"];
             $detail[Test::NAME] = $_POST[Test::NAME . "-$tId"];
             $detail[Test::TOTAL_A] = $_POST[Test::TOTAL_A . "-$tId"];
             $detail[Test::TOTAL_B] = $_POST[Test::TOTAL_B . "-$tId"];
@@ -142,7 +141,6 @@ $tests = Test::retrieveAll(Test::NAME);
 <table class="table table-hover table-bordered table-sm">
 <thead>
 	<tr>
-		<th>Subject</th>
 		<th>Test name</th>
 		<th>Total sect A</th>
 		<th>Total sect B</th>
@@ -156,17 +154,7 @@ $tests = Test::retrieveAll(Test::NAME);
 $orphanedTopics = TestTopic::retrieveAll(TestTopic::NAME);
 foreach ($tests as $t) {
     $tId = $t->getId();
-    // Subject
-    echo "<tr><td><select name=\"" . Test::SUBJECT_ID . "-$tId\">";
-    foreach ($subjects as $s) {
-        if ($s->getId() == $t->get(Test::SUBJECT_ID)) {
-            $selected = "selected";
-        } else {
-            $selected = "";
-        }
-        echo "<option value=\"" . $s->getId() . "\" $selected>" . $s->getName() . "</option>";
-    }
-    echo "</select></td>";    
+    echo "<tr>";    
     // Test name
     echo View::makeTextBoxCell(Test::NAME . "-$tId", $t->get(Test::NAME));
     // Total score
@@ -183,12 +171,12 @@ foreach ($tests as $t) {
     echo "<label class=\"custom-control-label\" for=\"custom-$tId\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>";
     echo "</div></td>";
     echo "<td><a href=\"manage_targets.php?test=$tId\">Edit targets</a></td>";
-    $allTopics = TestTopic::retrieveByDetail(TestTopic::SUBJECT_ID, $t->get(Test::SUBJECT_ID), TestTopic::NAME);
+    $allTopics = TestTopic::retrieveAll(TestTopic::NAME);
     $names = [];
     foreach ($t->getTopics() as $topic) {
         array_push($names, "<a href=\"?removeTopic=" . $topic->getId() . "&removeFromTest=$tId\">" . $topic->getName() . "</a>");
         unset($allTopics[array_search($topic, $allTopics)]);
-        if ($o = array_search($topic, $orphanedTopics)) {
+        if (($o = array_search($topic, $orphanedTopics)) !== FALSE) {
             unset($orphanedTopics[$o]);
         }
     }
@@ -209,15 +197,6 @@ foreach ($tests as $t) {
 }
 ?>
 <tr>
-	<td>
-		<select name="newtest-<?= Test::SUBJECT_ID?>">
-	    <?php 
-	    foreach ($subjects as $s) {
-            echo "<option value=\"" . $s->getId() . "\">" . $s->getName() . "</option>";
-        }
-        ?>
-		</select>
-	</td>
 	<?php
 	echo View::makeTextBoxCell("newtest-" . Test::NAME, "");
 
@@ -286,7 +265,10 @@ foreach ($tests as $t) {
     // We'll give whatever's already there + 20 columns; that should be enough!
     $existingBoundaries = GradeBoundary::retrieveByDetail(GradeBoundary::TEST_ID, $t->getId(), GradeBoundary::BOUNDARY);
     if (empty($existingBoundaries)) {
-        foreach ($t->getGradeBoundaries(true) as $b) {
+        // Arbitrarily base off the first subject match for the test
+        $membership = TestSubjectMembership::retrieveByDetail(TestSubjectMembership::TEST_ID, $t->getId())[0];
+        $subject = Subject::retrieveByDetail(Subject::ID, $membership->get(TestSubjectMembership::SUBJECT_ID))[0];
+        foreach ($t->getGradeBoundaries($subject, true) as $b) {
             (new GradeBoundary([
                 GradeBoundary::TEST_ID => $t->getId(),
                 GradeBoundary::NAME => $b->get(GradeBoundary::NAME),

@@ -16,6 +16,7 @@ if (!class_exists("Config")) {
     require "TeachingGroup.php";
     require "Test.php";
     require "TestResult.php";
+    require "TestSubjectMembership.php";
     require "TestTopic.php";
     require "TestTestTopic.php";
     require "View.php";

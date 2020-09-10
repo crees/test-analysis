@@ -9,7 +9,7 @@ $allSubjects = Subject::retrieveAll(Subject::NAME);
 if (isset($_GET['subject']) && !empty($_GET['subject'])) {
     $subject = Subject::retrieveByDetail(Subject::ID, $_GET['subject'])[0];
     $teachingGroups = $subject->getTeachingGroups();
-    $tests = Test::retrieveByDetail(Test::SUBJECT_ID, $_GET['subject'], Test::NAME);
+    $tests = $subject->getTests();
     
     if (isset($_GET['teaching_group']) && !empty($_GET['teaching_group'])) {
         $teaching_group = $_GET['teaching_group'];
@@ -190,13 +190,13 @@ eof;
 		            } else {
 		                $percent_all = ($result->get(TestResult::SCORE_A)+$result->get(TestResult::SCORE_B)) * 100 / ($t->get(Test::TOTAL_A)+$t->get(Test::TOTAL_B));
 		                echo "<td>" . round($percent_all, 0) . "</td>";
-		                $grade = $t->calculateGrade($result);
+		                $grade = $t->calculateGrade($result, $subject );
 		                $cellColour = "";
 		                if (!empty($baseline)) {
 		                    if ($grade == $baseline) {
 		                        $cellColour = "class=\"table-warning\"";
 		                    } else {
-		                        foreach ($t->getGradeBoundaries() as $boundary) {
+		                        foreach ($t->getGradeBoundaries($subject) as $boundary) {
 		                            if ($baseline == $boundary->getName()) {
 		                                $cellColour = "class=\"table-danger\"";
 		                                break;

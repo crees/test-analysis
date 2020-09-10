@@ -37,7 +37,6 @@ if (isset(Config::$maintenance) && Config::$maintenance) {
         id INT UNSIGNED NOT NULL AUTO_INCREMENT,
         name VARCHAR(30) NOT NULL,
         code VARCHAR(2) NOT NULL,
-        num_targets INT UNSIGNED NOT NULL,
         Baseline_id INT UNSIGNED DEFAULT NULL,
         CONSTRAINT PRIMARY KEY (id)
     );
@@ -61,7 +60,6 @@ if (isset(Config::$maintenance) && Config::$maintenance) {
     );
     CREATE TABLE Test (
         id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-        Subject_id INT NOT NULL,
         name VARCHAR(30) NOT NULL,
         total_a INT NOT NULL,
         total_b INT NOT NULL,
@@ -76,6 +74,12 @@ if (isset(Config::$maintenance) && Config::$maintenance) {
         recorded_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         score_a INT NOT NULL,
         score_b INT NOT NULL,
+        CONSTRAINT PRIMARY KEY (id)
+    );
+    CREATE TABLE TestSubjectMembership (
+        id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        Test_id INT NOT NULL,
+        Subject_id INT NOT NULL,
         CONSTRAINT PRIMARY KEY (id)
     );
     CREATE TABLE TestTopic (

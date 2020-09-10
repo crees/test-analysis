@@ -3,11 +3,9 @@ namespace TestAnalysis;
 
 class Test extends DatabaseCollection
 {
-    const SUBJECT_ID = 'Subject_id';
     const CUSTOM_GRADE_BOUNDARIES = 'custom_grade_boundaries';
     const TOTAL_A = 'total_a';
     const TOTAL_B = 'total_b';
-    
     const TARGETS = 'targets';
     
     public function __construct(array $details)
@@ -17,9 +15,6 @@ class Test extends DatabaseCollection
         $this->details[self::TOTAL_A] = $details[self::TOTAL_A];
         $this->details[self::TOTAL_B] = $details[self::TOTAL_B];
         $this->details[self::CUSTOM_GRADE_BOUNDARIES] = self::parseBoolean($details, self::CUSTOM_GRADE_BOUNDARIES);
-        if (isset($details[self::SUBJECT_ID])) {
-            $this->details[self::SUBJECT_ID]= $details[self::SUBJECT_ID];
-        }
         if (isset($details[self::TARGETS])) {
             if (is_array($details[self::TARGETS])) {
                 $this->details[self::TARGETS] = base64_encode(serialize($details[self::TARGETS]));
@@ -49,8 +44,12 @@ class Test extends DatabaseCollection
         return $this->details[$detail] = $value;
     }
     
-    public function getSubject() {
-        return Subject::retrieveByDetail(Subject::ID, $this->details[self::SUBJECT_ID])[0];
+    public function getSubjects() {
+        $s = [];
+        foreach(TestSubjectMembership::retrieveByDetail(TestSubjectMembership::TEST_ID, $this->getId()) as $m) {
+            array_push($s, Subject::retrieveByDetail(Subject::ID, $m->get(TestSubjectMembership::SUBJECT_ID))[0]);
+        }
+        return $s;
     }
     
     /**
@@ -76,10 +75,10 @@ class Test extends DatabaseCollection
         return $result;
     }
     
-    public function calculateGrade(TestResult $result) {
+    public function calculateGrade(TestResult $result, Subject $subject) {
         $grade = 0;
         // First, get the grades ordered by highest to lowest
-        foreach ($this->getGradeBoundaries() as $g) {
+        foreach ($this->getGradeBoundaries($subject) as $g) {
             if ($g->get(GradeBoundary::BOUNDARY) <= $result->get(TestResult::SCORE_B)) {
                 $grade = $g->getName();
                 break;
@@ -88,7 +87,7 @@ class Test extends DatabaseCollection
         return $grade;
     }
     
-    public function getGradeBoundaries(bool $forceForSubject = false) {
+    public function getGradeBoundaries(Subject $subject, bool $forceForSubject = false) {
         /*
          * XXX
          *
@@ -99,7 +98,7 @@ class Test extends DatabaseCollection
         if ($this->details[self::CUSTOM_GRADE_BOUNDARIES] == 1 && $forceForSubject == false) {
             $ret = GradeBoundary::retrieveByDetail(GradeBoundary::TEST_ID, $this->getId(), GradeBoundary::BOUNDARY . ' DESC');
         } else {
-            $id_to_use = -$this->get(self::SUBJECT_ID);
+            $id_to_use = -$subject->getId();
             $ret = [];
             foreach (GradeBoundary::retrieveByDetail(GradeBoundary::TEST_ID, $id_to_use, GradeBoundary::BOUNDARY . ' DESC') as $g) {
                 array_push($ret, new GradeBoundary([
