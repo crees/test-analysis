@@ -103,6 +103,9 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
         				    echo "<option value=\"\" selected>Please select subject</option>";
         				}
         				foreach ($allSubjects as $s) {
+        				    if (sizeof($s->getTests()) == 0) {
+        				        continue;
+        				    }
         				    if (isset($_GET['subject']) && $_GET['subject'] === $s->getId()) {
         				        $selected = "selected";
         				    } else {
