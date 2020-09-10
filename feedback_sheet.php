@@ -152,7 +152,7 @@ foreach ($group->getStudents() as $student) {
     </tr>
 
     <tr>
-        <td>Grade achieved: {$test->calculateGrade($result)}</td>
+        <td>Grade achieved: {$test->calculateGrade($result, $subject)}</td>
 
         <td>Marks achieved: $result_total</td>
 
