@@ -17,7 +17,14 @@ if (isset($_GET['test']) && !isset($_POST['form_serial'])) {
     $test = Test::retrieveByDetail(Test::ID, $_POST['test'])[0];
     $targets = $test->get(Test::TARGETS);
     if (isset($_POST['bigTextBox'])) {
-        $test->set(Test::TARGETS, explode('<br>', nl2br($_POST['bigTextBox'], false)));
+        $targets = [];
+        foreach (explode('<br>', nl2br($_POST['bigTextBox'], false)) as $line) {
+            if (!preg_match('/\w/', $line)) {
+                continue;
+            }
+            array_push($targets, trim($line));
+        }
+        $test->set(Test::TARGETS, $targets);
         $test->commit();
     } else for ($i = 0; $i < Config::max_targets; $i++) {
         if (!isset($targets[$i])) {
