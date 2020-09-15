@@ -71,7 +71,7 @@ header("content-disposition: attachment;filename=\"feedback-{$test->getName()}-{
     	<div class="container">
 <?php
 $firstPage = true;
-$date = date('Y-m-d');
+$date = date('d/m/Y');
 
 /*
  * Now we need to find the first appropriate target, based on Section B marks.
