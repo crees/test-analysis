@@ -123,7 +123,7 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
             			<select class="form-control" id="teaching_group" name="teaching_group" onchange="this.form.submit()">
 EOF;
                 		    if (!isset($_GET['teaching_group'])) {
-                		        echo "<option selected>Please select a group</option>";
+                		        echo "<option value=\"\" selected>Please select a group</option>";
                 		        unset ($tests);
                 		    }
         		            echo "<option value=\"\">All groups</option>";
