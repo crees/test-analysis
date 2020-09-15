@@ -121,8 +121,12 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
             		<label for="teaching_group" class="col-2 col-form-label">Teaching group</label>
             		<div class="col-10">
             			<select class="form-control" id="teaching_group" name="teaching_group" onchange="this.form.submit()">
-            				<option value="">All groups</option>
 EOF;
+                		    if (!isset($_GET['teaching_group'])) {
+                		        echo "<option selected>Please select a group</option>";
+                		        unset ($tests);
+                		    }
+        		            echo "<option value=\"\">All groups</option>";
             				foreach ($teachingGroups as $g) {
             				    if (isset($_GET['teaching_group']) && $_GET['teaching_group'] === $g->getId()) {
             				        $selected = "selected";
