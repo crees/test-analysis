@@ -25,7 +25,7 @@ if (!class_exists("Config")) {
     /**
      * We start the session timer on creation, and destroy it after that time.
      */
-    $timeout_duration = 1200;
+    $timeout_duration = 6400;
     
     session_name("TestAnalysis");
     
