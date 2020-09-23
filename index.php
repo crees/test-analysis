@@ -151,7 +151,7 @@ EOF;
 		    }
 		    echo <<< eof
         <form method="POST">
-            <input type="submit" class="form-control" value="Save">
+            <input type="submit" class="form-control btn btn-warning" value="Do not forget to save (click me or press Enter)!">
             <div class="table-responsive table-95 table-stickyrow">
             <table class="table table-bordered table-sm table-hover">
                 <thead>
