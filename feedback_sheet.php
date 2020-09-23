@@ -83,7 +83,17 @@ $date = date('d/m/Y');
 
 $test_total = $test->get(Test::TOTAL_A) + $test->get(Test::TOTAL_B);
 
-$marks_to_shift = $test->get(Test::TOTAL_B) / sizeof($test->get(Test::TARGETS));
+/* Count targets */
+
+$number_of_targets = 0;
+
+foreach ($test->get(Test::TARGETS) as $target) {
+    if (!empty($target)) {
+        $number_of_targets++;
+    }
+}
+
+$marks_to_shift = $test->get(Test::TOTAL_B) / $number_of_targets;
 
 $img = 'data:image/jpeg;base64,' . base64_encode(file_get_contents(Config::site_docroot . "/img/dshs.jpg"));
 
