@@ -172,7 +172,7 @@ eof;
 		    echo "</tr>\n<tr>";
 		    
 		    foreach ($tests as $t) {
-		        echo "<td>A</td><td>B</td><td>%</td><td>Grd</td>\n";
+		        echo "<td>A</td><td>B</td><td>A%</td><td>Grd</td>\n";
 		    }
 		    echo "</tr>\n</thead>\n";
 		    
@@ -195,8 +195,19 @@ eof;
 		            if (is_null($result)) {
 		                echo "<td>&nbsp;</td><td>&nbsp;</td>";
 		            } else {
-		                $percent_all = ($result->get(TestResult::SCORE_A)+$result->get(TestResult::SCORE_B)) * 100 / ($t->get(Test::TOTAL_A)+$t->get(Test::TOTAL_B));
-		                echo "<td>" . round($percent_all, 0) . "</td>";
+		                $percent_A = $result->get(TestResult::SCORE_A) * 100 / $t->get(Test::TOTAL_A);
+		                switch (floor($percent_A/33)) {
+		                case 0:
+		                    $sAcolour = "text-danger";
+		                    break;
+		                case 1:
+		                    $sAcolour = "text-warning";
+		                    break;
+		                default:
+		                    $sAcolour = "text-success";
+		                    break;
+		                }
+		                echo "<td class=\"$sAcolour\">" . round($percent_A, 0) . "</td>";
 		                $grade = $t->calculateGrade($result, $subject );
 		                $cellColour = "";
 		                if (!empty($baseline)) {
