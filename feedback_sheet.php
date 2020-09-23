@@ -103,7 +103,8 @@ foreach ($group->getStudents() as $student) {
         continue;
     }
     
-    $result_total = $result->get(TestResult::SCORE_A) + $result->get(TestResult::SCORE_B);
+    $resultA_total = $result->get(TestResult::SCORE_A);
+    $resultB_total = $result->get(TestResult::SCORE_B);
     
     $targets = $test->get(Test::TARGETS);
     $numtargets = 3;
@@ -164,7 +165,7 @@ foreach ($group->getStudents() as $student) {
     <tr>
         <td>Grade achieved: {$test->calculateGrade($result, $subject)}</td>
 
-        <td>Marks achieved: $result_total</td>
+        <td>Marks achieved: A: $resultA_total B: $resultB_total</td>
 
         <td>Marks available: $test_total</td>
     </tr>
