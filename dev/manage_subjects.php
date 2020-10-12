@@ -5,6 +5,8 @@ include "../bin/classes.php";
 
 if (isset($_GET['removeGroup'])) {
     Subject::retrieveByDetail(Subject::ID, $_GET['removeFromSubject'])[0]->removeMember(TeachingGroup::retrieveByDetail(TeachingGroup::ID, $_GET['removeGroup'])[0]);
+    header('Location: manage_subjects.php');
+    die();
 } elseif (isset($_POST['newsubjectcode'])) {
     if (!empty($_POST['newsubjectname'])) {
         (new Subject([
