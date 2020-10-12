@@ -21,3 +21,8 @@ if ($db->dosql("SHOW COLUMNS FROM `Test` LIKE 'Subject_id'")->num_rows > 0) {
     $db->dosql("ALTER TABLE `Test` DROP COLUMN Subject_id;");
     $db->dosql("ALTER TABLE `Subject` DROP COLUMN num_targets;");
 }
+
+/* Version 2 to 3 upgrade */
+// Need a much longer TeachingGroup name- harmless so let's just do it anyway.
+
+$db->dosql("ALTER TABLE `TeachingGroup` MODIFY name VARCHAR(100) NOT NULL;");
