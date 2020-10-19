@@ -185,8 +185,8 @@ eof;
 		        echo "<tr>\n";
 		        echo "<th scope=\"row\"><a href=\"student_individual_scores.php?student=" . $s->getId() . "\">" . $s->getName() . "</a></th>\n";
 		        echo "<td>" . $s->getTeachingGroup($subject) . "</td>";
-		        $baseline = $s->getBaseline($subject);
-		        echo "<td>$baseline</td>";
+		        $baseline = $s->getShortIndicative($subject);
+		        echo "<td>{$s->getShortIndicative($subject)}</td>";
 		        foreach ($tests as $t) {
 		            $result = $t->getResult($s);
 		            echo View::makeTextBoxCell(TestResult::SCORE_A . "-" . $t->getId() . "-" . $s->getId(), is_null($result) ? "" : $result->get(TestResult::SCORE_A), $tabIndex, "number", "min=\"0\" max=\"{$t->get(Test::TOTAL_A)}\"");

@@ -125,7 +125,7 @@ EOF;
 		        echo "<tr>";
 		        echo "<th>{$student->getName()}</th>";
 		        echo "<th>{$student->getTeachingGroup($subject)}</th>";
-		        echo "<th>{$student->getBaseline($subject)}</th>";
+		        echo "<th>{$student->getIgr($subject)}</th>";
 		        foreach ($tests as $test) {
 		            if (is_null($result = $test->getResult($student))) {
 		                for ($i = 0; $i < 4; $i++) {

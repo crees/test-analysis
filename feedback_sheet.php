@@ -145,7 +145,7 @@ foreach ($group->getStudents() as $student) {
     </tr>
 
     <tr>
-        <td>Indicative grade range: <strong>{$student->getBaseline($subject)}</strong></td>
+        <td>Indicative grade range: <strong>{$student->getIgr($subject)}</strong></td>
 
         <td>Most likely grade: <strong>{$student->getMostLikelyGrade($subject)}</strong></td>
 

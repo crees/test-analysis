@@ -52,9 +52,25 @@ class Student extends DatabaseCollection
         
         foreach ($myBaseLines as $b) {
             if ($subject->get(Subject::BASELINE_ID) == $b->get(Baseline::MIS_ASSESSMENT_ID)) {
-                return $b->get(Baseline::GRADE);
+                return $b;
             }
         }
+    }
+    
+    public function getIgr(Subject $subject) {
+        $baseline = $this->getBaseline($subject);
+        if ($baseline instanceOf Baseline) {
+            return $baseline->getIgr();
+        }
+        return "";
+    }
+    
+    public function getShortIndicative(Subject $subject) {
+        $baseline = $this->getBaseline($subject);
+        if ($baseline instanceOf Baseline) {
+            return $baseline->getShortIndicative();
+        }
+        return "";
     }
     
     public function getMostLikelyGrade(Subject $subject) {
