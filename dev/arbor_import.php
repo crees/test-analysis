@@ -2,34 +2,6 @@
 namespace TestAnalysis;
 
 include "../bin/classes.php";
-?>
-<!doctype html>
-<html>
-<head><?php require "../bin/head.php" ?></head>
-<body>
-	<div class="container">
-        <nav class="navbar navbar-expand">
-            <!-- Brand -->
-            <a class="navbar-brand">Navigation</a>
-            
-            <!-- Toggler/collapsibe Button -->
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
-            	<span class="navbar-toggler-icon">collapse</span>
-            </button>
-            
-            <!-- Navbar links -->
-            <div class="collapse navbar-collapse" id="collapsibleNavbar">
-            	<ul class="navbar-nav">
-            		<li class="nav-item">
-                		<a class="nav-link" href="../">Home</a>
-                	</li>
-                	<li class="nav-item">
-                		<a class="nav-link" href="index.php">Database management</a>
-                	</li>
-            	</ul>
-        	</div>
-        </nav>
-<?php
 
 $client = new GraphQLClient();
 
@@ -85,6 +57,8 @@ $query = "query {
     id
     displayName
     allMemberships {
+      startDate
+      endDate
       student {
         id
         lastName
@@ -97,7 +71,33 @@ $query = "query {
 $data = $client->rawQuery($query)->getData();
 
 if (empty($data['AcademicUnit'])) {
-    die("<div class=\"row\">Complete!</div>");
+?>    <!doctype html>
+    <html>
+    <head><?php require "../bin/head.php" ?></head>
+<body>
+	<div class="container">
+        <nav class="navbar navbar-expand">
+            <!-- Brand -->
+            <a class="navbar-brand">Navigation</a>
+            
+            <!-- Toggler/collapsibe Button -->
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+            	<span class="navbar-toggler-icon">collapse</span>
+            </button>
+            
+            <!-- Navbar links -->
+            <div class="collapse navbar-collapse" id="collapsibleNavbar">
+            	<ul class="navbar-nav">
+            		<li class="nav-item">
+                		<a class="nav-link" href="../">Home</a>
+                	</li>
+                	<li class="nav-item">
+                		<a class="nav-link" href="index.php">Database management</a>
+                	</li>
+            	</ul>
+        	</div>
+        </nav>
+<?php die("<div class=\"row\">Complete!</div></div></body></html>");
 }
 
 // Clear old memberships out
@@ -106,7 +106,7 @@ if ($year_page == 0) {
 }
 
 $year_page++;
-echo "<div class=\"row\"><a href=\"?baseline_done=yes&year_page=$year_page\" class=\"btn btn-primary\">Now click for Page $year_page</a></div>";
+//echo "<div class=\"row\"><a href=\"?baseline_done=yes&year_page=$year_page\" class=\"btn btn-primary\">Now click for Page $year_page</a></div>";
 
 foreach ($data['AcademicUnit'] as $group) {
     $displayNames = explode(":", $group['displayName']);
@@ -114,16 +114,19 @@ foreach ($data['AcademicUnit'] as $group) {
     if (!empty($dGroup = TeachingGroup::retrieveByDetail(TeachingGroup::ID, $group['id']))) {
         $dGroup = $dGroup[0];
         $dGroup->setName($displayName);
-        echo "<div class=\"row\">Scanned TeachingGroup: " . $dGroup->getName() . "</div>"; 
+        //echo "<div class=\"row\">Scanned TeachingGroup: " . $dGroup->getName() . "</div>"; 
     } else {
         $group[TeachingGroup::NAME] = $displayName;
         $group[TeachingGroup::ACADEMIC_YEAR] = Config::academic_year;
         $dGroup = new TeachingGroup($group);
-        echo "<div class=\"row\">New TeachingGroup: " . $dGroup->getName() . "</div>";
+        //echo "<div class=\"row\">New TeachingGroup: " . $dGroup->getName() . "</div>";
     }
     $dGroup->commit();
     $numGroupMembers = 0;
     foreach ($group['allMemberships'] as $membership) {
+        if (strtotime($membership['startDate']) > time() || strtotime($membership['endDate']) < time()) {
+            continue;
+        }
         if (!empty($dStudent = Student::retrieveByDetail(Student::ID, $membership['student']['id']))) {
             $dStudent = $dStudent[0];
             $dStudent->setNames($membership['student']['firstName'], $membership['student']['lastName']);
@@ -134,7 +137,7 @@ foreach ($data['AcademicUnit'] as $group) {
                 Student::FIRST_NAME => $membership['student']['firstName'],
                 Student::LAST_NAME  => $membership['student']['lastName'],
             ]);
-            echo "<div class=\"row\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;New Student: " . $dStudent->getName() . "</div>";
+            //echo "<div class=\"row\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;New Student: " . $dStudent->getName() . "</div>";
         }
         $dGroup->addMember($dStudent);
         
@@ -145,9 +148,7 @@ foreach ($data['AcademicUnit'] as $group) {
         // echo "... added to db and membership made</div>";
     }
     
-    echo "<div class=\"row\">Group {$dGroup->getName()} now has $numGroupMembers members.</div>";
+    //echo "<div class=\"row\">Group {$dGroup->getName()} now has $numGroupMembers members.</div>";
 }
-?>
-	</div>
-</body>
-</html>
+
+header("Location: arbor_import.php?baseline_done=yes&year_page=$year_page");
