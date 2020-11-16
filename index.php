@@ -83,7 +83,7 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
         				        die("Oops, somehow you have put in an invalid Subject");
         				    }
         				    $subjectName = $subjectName[0]->getName();
-        				    echo "$subjectName (<a href=\"index.php\">Change this</a>)";
+        				    echo "$subjectName (<a href=\"" . parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH) . "\">Change this</a>)";
         				}
         				?>
         		</div>
