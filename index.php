@@ -172,7 +172,11 @@ eof;
 		    echo "</tr>\n<tr>";
 		    
 		    foreach ($tests as $t) {
-		        echo "<td>A</td><td>B</td><td>A%</td><td>Grd</td>\n";
+		        if ($t->get(Test::TOTAL_A) > 0) {
+		            echo "<td>A</td><td>B</td><td>A%</td><td>Grd</td>\n";
+		        } else {
+		            echo "<td>&nbsp;</td><td>Total</td><td>%</td><td>Grd</td>\n";
+		        }
 		    }
 		    echo "</tr>\n</thead>\n";
 		    
@@ -189,13 +193,21 @@ eof;
 		        echo "<td>{$s->getShortIndicative($subject)}</td>";
 		        foreach ($tests as $t) {
 		            $result = $t->getResult($s);
-		            echo View::makeTextBoxCell(TestResult::SCORE_A . "-" . $t->getId() . "-" . $s->getId(), is_null($result) ? "" : $result->get(TestResult::SCORE_A), $tabIndex, "number", "min=\"0\" max=\"{$t->get(Test::TOTAL_A)}\"");
-		            $tabIndex++;
+		            if ($t->get(Test::TOTAL_A) > 0) {
+    		            echo View::makeTextBoxCell(TestResult::SCORE_A . "-" . $t->getId() . "-" . $s->getId(), is_null($result) ? "" : $result->get(TestResult::SCORE_A), $tabIndex, "number", "min=\"0\" max=\"{$t->get(Test::TOTAL_A)}\"");
+    		            $tabIndex++;
+		            } else {
+		                echo ("<td>&nbsp;<input type=\"hidden\" name=\"" . TestResult::SCORE_A . "-" . $t->getId() . "-" . $s->getId() . "\" value=\"0\"></td>");
+		            }
 		            echo View::makeTextBoxCell(TestResult::SCORE_B . "-" . $t->getId() . "-" . $s->getId(), is_null($result) ? "" : $result->get(TestResult::SCORE_B), $tabIndex, "number", "min=\"0\" max=\"{$t->get(Test::TOTAL_B)}\"");
 		            if (is_null($result)) {
 		                echo "<td>&nbsp;</td><td>&nbsp;</td>";
 		            } else {
-		                $percent_A = $result->get(TestResult::SCORE_A) * 100 / $t->get(Test::TOTAL_A);
+		                if ($t->get(Test::TOTAL_A) > 0) {
+		                    $percent_A = $result->get(TestResult::SCORE_A) * 100 / $t->get(Test::TOTAL_A);
+		                } else {
+		                    $percent_A = $result->get(TestResult::SCORE_B) * 100 / $t->get(Test::TOTAL_B);
+		                }
 		                switch (floor($percent_A/33)) {
 		                case 0:
 		                    $sAcolour = "text-danger";

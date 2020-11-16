@@ -164,9 +164,13 @@ foreach ($group->getStudents() as $student) {
 
     <tr>
         <td>Grade achieved: {$test->calculateGrade($result, $subject)}</td>
-
-        <td>Marks achieved: A: $resultA_total B: $resultB_total</td>
-
+EOF;
+    if ($test->get(Test::TOTAL_A) > 0) {
+        echo "<td>Marks achieved: A: $resultA_total B: $resultB_total</td>";
+    } else {
+        echo "<td>Marks achieved: $resultB_total</td>";
+    }
+    echo <<< EOF
         <td>Marks available: $test_total</td>
     </tr>
 
