@@ -76,7 +76,7 @@ if (isset($_GET['removeTopic'])) {
         for ($i = 1; $i < 20; $i++) {
             $newGrade = $_POST["GradeBoundary-grade-new-for-subject-$sId-$i"];
             $newBoundary = $_POST["GradeBoundary-boundary-new-for-subject-$sId-$i"];
-            if (!empty($newGrade) && !empty($newBoundary)) {
+            if (($newGrade !== "") && ($newBoundary !== "")) {
                 $b = new GradeBoundary([
                     GradeBoundary::NAME => $newGrade,
                     GradeBoundary::BOUNDARY => $newBoundary,
@@ -96,7 +96,7 @@ if (isset($_GET['removeTopic'])) {
             }
             $newGrade = $_POST["GradeBoundary-grade-new-for-test-$tId-$i"];
             $newBoundary = $_POST["GradeBoundary-boundary-new-for-test-$tId-$i"];
-            if (!empty($newGrade) && !empty($newBoundary)) {
+            if ($newGrade !== "" && $newBoundary !== "") {
                 $b = new GradeBoundary([
                     GradeBoundary::NAME => $newGrade,
                     GradeBoundary::BOUNDARY => $newBoundary,
