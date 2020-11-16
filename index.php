@@ -96,25 +96,29 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
 		<form method="GET">
     		<div class="form-group row">
     			<label for="subject" class="col-2 col-form-label">Subject</label>
-      			<div class="col-10">
-        			<select class="form-control" id="subject" name="subject" onchange="this.form.submit()">
         				<?php
         				if (!isset($_GET['subject'])) {
+        				    echo '<div class="col-10">';
+        				    echo '<select class="form-control" id="subject" name="subject" onchange="this.form.submit()">';
         				    echo "<option value=\"\" selected>Please select subject</option>";
-        				}
-        				foreach ($allSubjects as $s) {
-        				    if (sizeof($s->getTests()) == 0) {
-        				        continue;
+            				foreach ($allSubjects as $s) {
+            				    if (sizeof($s->getTests()) == 0) {
+            				        continue;
+            				    }
+            				    echo "<option value=\"" . $s->getId() . "\">" . $s->getName() . "</option>";
+            				}
+            				echo '</select>';
+        				} else {
+        				    echo '<div class="col-10 col-form-label">';
+        				    echo '<input type="hidden" id="subject" name="subject" value="' . $_GET['subject'] . '">';
+        				    $subjectName = Subject::retrieveByDetail(Subject::ID, $_GET['subject']);
+        				    if (sizeof($subjectName) !== 1) {
+        				        die("Oops, somehow you have put in an invalid Subject");
         				    }
-        				    if (isset($_GET['subject']) && $_GET['subject'] === $s->getId()) {
-        				        $selected = "selected";
-        				    } else {
-        				        $selected = "";
-        				    }
-        				    echo "<option value=\"" . $s->getId() . "\" $selected>" . $s->getName() . "</option>";
+        				    $subjectName = $subjectName[0]->getName();
+        				    echo "$subjectName (<a href=\"index.php\">Change this</a>)";
         				}
         				?>
-        			</select>
         		</div>
         		<?php if (isset($_GET['subject'])) {
         		    echo <<< EOF
