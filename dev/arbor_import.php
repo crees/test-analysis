@@ -108,6 +108,8 @@ if ($year_page == 0) {
 $year_page++;
 //echo "<div class=\"row\"><a href=\"?baseline_done=yes&year_page=$year_page\" class=\"btn btn-primary\">Now click for Page $year_page</a></div>";
 
+$_SESSION['students_cache'] = [];
+
 foreach ($data['AcademicUnit'] as $group) {
     $displayNames = explode(":", $group['displayName']);
     $displayName = end($displayNames);
@@ -127,21 +129,26 @@ foreach ($data['AcademicUnit'] as $group) {
         if (strtotime($membership['startDate']) > time() || strtotime($membership['endDate']) < time()) {
             continue;
         }
-        if (!empty($dStudent = Student::retrieveByDetail(Student::ID, $membership['student']['id']))) {
-            $dStudent = $dStudent[0];
-            $dStudent->setNames($membership['student']['firstName'], $membership['student']['lastName']);
-            // echo "<div class=\"row\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Scanned Student: " . $dStudent->getName();
-        } else {
-            $dStudent = new Student([
-                Student::ID         => $membership['student']['id'],
-                Student::FIRST_NAME => $membership['student']['firstName'],
-                Student::LAST_NAME  => $membership['student']['lastName'],
-            ]);
-            //echo "<div class=\"row\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;New Student: " . $dStudent->getName() . "</div>";
+        if (!isset($_SESSION['students_cache'][$membership['student']['id']])) {
+            $dStudent = Student::retrieveByDetail(Student::ID, $membership['student']['id']);
+            if (!empty($dStudent)) {
+                if (is_array($dStudent)) {
+                    $dStudent = $dStudent[0];
+                    $_SESSION['students_cache'][$membership['student']['id']] = $dStudent;
+                }
+                $dStudent->setNames($membership['student']['firstName'], $membership['student']['lastName']);
+                // echo "<div class=\"row\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Scanned Student: " . $dStudent->getName();
+            } else {
+                $dStudent = new Student([
+                    Student::ID         => $membership['student']['id'],
+                    Student::FIRST_NAME => $membership['student']['firstName'],
+                    Student::LAST_NAME  => $membership['student']['lastName'],
+                ]);
+                //echo "<div class=\"row\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;New Student: " . $dStudent->getName() . "</div>";
+            }
+            $dStudent->commit();
         }
-        $dGroup->addMember($dStudent);
-        
-        $dStudent->commit();
+        $dGroup->addMember($_SESSION['students_cache'][$membership['student']['id']]);
         
         $numGroupMembers++;
         
