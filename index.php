@@ -59,40 +59,7 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
 
 <body>
 	<div class="container">
-        <nav class="navbar navbar-expand">
-            <!-- Brand -->
-            <a class="navbar-brand"><?= $auth_user ?></a>
-            
-            <!-- Toggler/collapsibe Button -->
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
-            	<span class="navbar-toggler-icon">collapse</span>
-            </button>
-            
-            <!-- Navbar links -->
-            <div class="collapse navbar-collapse" id="collapsibleNavbar">
-            	<ul class="navbar-nav">
-            		<li class="nav-item">
-                		<a class="nav-link" href="?session_destroy=<?= $_SESSION['SESSION_CREATIONTIME']; ?>">Home</a>
-                	</li>
-
-            		<li class="nav-item">
-                		<a class="nav-link" href="topic_overview.php">Topic overview</a>
-                	</li>
-
-            		<li class="nav-item">
-                		<a class="nav-link" href="skillset_overview.php">Skillset overview</a>
-                	</li>
-            	</ul>
-        	</div>
-    		<span class="navbar-text">
-        		<a class="nav-link" href="dev">Manage database</a>
-        	</span>
-        </nav>
-        
-        <div><img src="img/dshs.jpg" style="width: 30%;" /></div>
-
-		<h3 class="mb-4"><?= Config::site ?></h3>
-		
+		<?php require "bin/navbar.php"; ?>
 		<form method="GET">
     		<div class="form-group row">
     			<label for="subject" class="col-2 col-form-label">Subject</label>
