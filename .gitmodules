@@ -4,3 +4,6 @@
 [submodule "contrib/annotorius"]
 	path = contrib/annotorius
 	url = https://github.com/recogito/annotorious.git
+[submodule "contrib/djaodjin-annotate"]
+	path = contrib/djaodjin-annotate
+	url = https://github.com/crees/djaodjin-annotate
