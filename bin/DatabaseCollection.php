@@ -118,6 +118,7 @@ abstract class DatabaseCollection
         if (!isset($this->details[self::ID]) || is_null($this->getId())) {
             // We don't actually want to replace existing items, we just want a new one if ID is null
             $db->dosql("INSERT INTO " . explode('\\', static::class)[1] . " SET $updatelist;");
+            $this->details['id'] = $db->dosql("SELECT LAST_INSERT_ID();")->fetch_row()[0];
         } else {
             $db->dosql("INSERT INTO " . explode('\\', static::class)[1] .
                 "($columnkeys) VALUES (\"$columnvalues\") ON DUPLICATE KEY UPDATE $updatelist;"
