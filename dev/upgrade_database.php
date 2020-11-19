@@ -26,3 +26,24 @@ if ($db->dosql("SHOW COLUMNS FROM `Test` LIKE 'Subject_id'")->num_rows > 0) {
 // Need a much longer TeachingGroup name- harmless so let's just do it anyway.
 
 $db->dosql("ALTER TABLE `TeachingGroup` MODIFY name VARCHAR(100) NOT NULL;");
+
+/* Version 3 to 4 upgrade */
+// Need somewhere to store uploaded tests
+
+if ($db->dosql("SHOW TABLES LIKE 'ScannedTestPage'")->num_rows < 1) {
+    $db->dosql("CREATE TABLE ScannedTestPage (
+        id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        page_num INT NOT NULL,
+        Test_id INT NOT NULL,
+        Student_id INT NOT NULL,
+        imagedata MEDIUMBLOB NULL,
+        annotations BLOB NULL,
+        page_score INT NULL,
+        CONSTRAINT PRIMARY KEY (id)
+        );");
+}
+
+/* Version 4 to 5 upgrade */
+if ($db->dosql("SHOW COLUMNS FROM `ScannedTestPage` LIKE 'ts_started'")->num_rows > 0) {
+    $db->dosql("ALTER TABLE ScannedTestPage ADD student_annotations BLOB NULL, minutes_allowed INT NULL, ts_started INT NULL;");
+}

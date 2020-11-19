@@ -11,7 +11,7 @@
     <div class="collapse navbar-collapse" id="collapsibleNavbar">
     	<ul class="navbar-nav">
     		<li class="nav-item">
-        		<a class="nav-link" href="?session_destroy=<?= $_SESSION['SESSION_CREATIONTIME']; ?>">Home</a>
+        		<a class="nav-link" href="<?= TestAnalysis\Config::site_url; ?>/index.php?session_destroy=<?= $_SESSION['SESSION_CREATIONTIME']; ?>">Home</a>
         	</li>
 
     		<li class="nav-item">

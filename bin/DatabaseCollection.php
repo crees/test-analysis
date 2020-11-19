@@ -22,21 +22,27 @@ abstract class DatabaseCollection
     
     /**
      * 
-     * @param string $detailType
-     * @param string $detail
+     * @param array $detailType
+     * @param array $detail
      * @param Database $db
      * @return \TestAnalysis\DatabaseCollection[]
      */
-    public static function retrieveByDetail(string $detailType, string $detail, string $orderBy = "") {
+    public static function retrieveByDetails(array $detailType, array $detail, string $orderBy = "") {
         if (is_null(self::$db)) {
             self::$db = new Database();
         }
         $db = self::$db;
         
-        if ($detail == self::OPERATOR_MATCH_ALL) {
+        if ($detail[0] == self::OPERATOR_MATCH_ALL) {
             $where = "";
         } else {
-            $where = " WHERE $detailType = '$detail'";
+            $where = " WHERE ";
+            for ($i = 0; $i < count($detailType); $i++) {
+                if ($i > 0) {
+                    $where .= " AND ";
+                }
+                $where .= "{$detailType[$i]} = '{$detail[$i]}'";
+            }
         }
         
         if ($orderBy === "") {
@@ -58,7 +64,18 @@ abstract class DatabaseCollection
         }
         
         return $ret;
-    }    
+    }
+    
+    /**
+     *
+     * @param string $detailType
+     * @param string $detail
+     * @param Database $db
+     * @return \TestAnalysis\DatabaseCollection[]
+     */
+    public static function retrieveByDetail(string $detailType, string $detail, string $orderBy = "") {
+        return static::retrieveByDetails([$detailType], [$detail], $orderBy);
+    }
     
     public static function retrieveAll(string $orderBy = "") {
         return static::retrieveByDetail("", self::OPERATOR_MATCH_ALL, $orderBy);
