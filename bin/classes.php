@@ -11,6 +11,7 @@ if (!class_exists("Config")) {
     require "Baseline.php";
     require "GradeBoundary.php";
     require "GraphQLClient.php";
+    require "ScannedTest.php";
     require "ScannedTestPage.php";
     require "Student.php";
     require "Subject.php";

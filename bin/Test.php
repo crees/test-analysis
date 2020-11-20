@@ -52,6 +52,10 @@ class Test extends DatabaseCollection
         return $s;
     }
     
+    public function getTotal() {
+        return $this->get(self::TOTAL_A) + $this->get(self::TOTAL_B);
+    }
+    
     /**
      * Returns empty string if there is no test mark recorded.
      * 

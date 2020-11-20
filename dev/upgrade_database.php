@@ -44,6 +44,14 @@ if ($db->dosql("SHOW TABLES LIKE 'ScannedTestPage'")->num_rows < 1) {
 }
 
 /* Version 4 to 5 upgrade */
-if ($db->dosql("SHOW COLUMNS FROM `ScannedTestPage` LIKE 'ts_started'")->num_rows > 0) {
-    $db->dosql("ALTER TABLE ScannedTestPage ADD student_annotations BLOB NULL, minutes_allowed INT NULL, ts_started INT NULL;");
+if ($db->dosql("SHOW COLUMNS FROM `ScannedTestPage` LIKE 'student_annotations'")->num_rows < 1) {
+    $db->dosql("CREATE TABLE ScannedTest (
+        id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        Test_id INT NOT NULL,
+        Student_id INT NOT NULL,
+        minutes_allowed INT NULL,
+        ts_started INT NULL,
+        CONSTRAINT PRIMARY KEY (id)
+        );");
+    $db->dosql("ALTER TABLE ScannedTestPage ADD student_annotations BLOB NULL;");
 }
