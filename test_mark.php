@@ -180,8 +180,8 @@ EOF;
     		  width: $('.container')[0].clientWidth,
     		  height: $('.container')[0].clientWidth * 1.414,
     		  color: "red",           // Color for shape and text
-    		  type : "circle",    // default shape: can be "rectangle", "arrow" or "text"
-			  tools: ['undo', 'unselect', 'circle', 'arrow', 'pen', 'redo'], // Tools
+    		  type : "tick",    // default shape: can be "rectangle", "arrow" or "text"
+			  tools: ['undo', 'tick', 'cross', 'text', 'circle', 'arrow', 'pen', 'redo'], // Tools
     		  images: ["data:image/jpg;base64,<?= base64_encode($testPage->get(ScannedTestPage::IMAGEDATA))?>"],          // Array of images path : ["images/image1.png", "images/image2.png"]
     		  linewidth: 2,           // Line width for rectangle and arrow shapes
     		  fontsize: $('.container')[0].clientWidth * 1.414 * 0.033 + "px",       // font size for text
@@ -191,7 +191,21 @@ EOF;
     		  selectEvent: "change", // listened event on .annotate-image-select selector to select active images
     		  unselectTool: false,   // Add a unselect tool button in toolbar (useful in mobile to enable zoom/scroll)
 			  imageExport: { type: "image/jpg", quality: 1 },
-			  onAnnotate: function() {
+			  onAnnotate: function(tool) {
+				  if (tool === 'text') {
+					  // Don't jump to text box while doing text!
+					  usingTextBox = true;
+				  } else {
+					  usingTextBox = false;
+				  }
+				  if (tool === 'tick') {
+					score = document.getElementById('score');
+					if (score.value == '') {
+						score.value = 1;
+					} else {
+						score.value = parseInt(score.value) + 1;
+					}
+				  }
 				  document.getElementById('savebar').innerHTML = savebutton + dontsavebutton;
 			  },
     };
@@ -201,12 +215,16 @@ EOF;
 	  $('#testpage').annotate(options);
       doButtons();
 	  document.getElementById('top-part').style.display = 'none';
+	  usingTextBox = false;
 	  $(document).keydown( function(event) {
+		  if (usingTextBox) {
+			return 0;
+		  }
 		  if (event.which === 13) {
 		    // "Submit"
 			save();
 		  } else /* if (event.keyCode >= 48 && event.keyCode <= 57) */
-			  if (event.data >= 0 || event.data <= 9) {
+			  if (event.key >= 0 && event.key <= 9) {
 			if (document.activeElement.id !== 'score') {
 				document.getElementById('score').value = '';
 				document.getElementById('score').focus();
