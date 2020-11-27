@@ -119,12 +119,11 @@ EOF;
 	  </div> <!-- #top-part -->
 
 		<?php
-		if (isset($test)) {
+		if (isset($test) && count($students) > 0) {
 		    /* So, do we have any papers? */
 		    $page_num = $_GET['page'] ?? 0;
 		    $student_number = $_GET['student_number'] ?? 0;
-		    /* If we get to the end of the student list, we try from the beginning for the next page.  If we wrap again, we have finished. */
-		    $wrapped = false;
+		    $seen_a_test = false;
 		    for (;;) {
 		        if (isset($students[$student_number])) {
 		            $student = $students[$student_number];
@@ -132,9 +131,10 @@ EOF;
 		                [ScannedTest::STUDENT_ID, ScannedTest::TEST_ID],
 		                [$student->getId(), $test->getId()]);
 		            if (count($scannedTest) != 0) {
+		                $seen_a_test = true;
 		                $testPages = $scannedTest[0]->getPages();
 		                if (!isset($testPages[$page_num])) {
-		                    die("No more pages or students");
+		                    die ("<div>No more tests remaining.  <a class=\"btn btn-success\" href=\"test_scanned_scores.php?subject={$subject->getId()}&teaching_group={$teaching_group}&test={$test->getId()}\">Get results</div>");
 		                }
 		                $testPage = $testPages[$page_num];
 		                // Do not put up a test for marking until the timer is up.
@@ -148,12 +148,12 @@ EOF;
 		            }
 		            $student_number++;
 		        } else {
-		            if ($wrapped) {
-		                die("No more pages or students");
+		            if ($seen_a_test) {
+    		            $student_number = 0;
+    		            $page_num++;
+		            } else {
+		                die ("No tests have been set for this group.");
 		            }
-		            $wrapped = true;
-		            $student_number = 0;
-		            $page_num++;
 		        }
 		    }
 		    $testPage = $testPages[$page_num];
@@ -161,7 +161,7 @@ EOF;
             echo "<div class=\"form-inline form-group\">";
             echo "<label for=\"skipMarked\">Skip already marked tests: </label>";
             if (isset($_GET['skipMarked'])) {
-                $skipMarked = 'selected';
+                $skipMarked = 'checked';
             } else {
                 $skipMarked = '';
             }
