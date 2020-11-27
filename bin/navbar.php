@@ -15,12 +15,23 @@
         	</li>
 
     		<li class="nav-item">
-        		<a class="nav-link" href="topic_overview.php">Topic overview</a>
+        		<a class="nav-link" href="<?= TestAnalysis\Config::site_url; ?>/topic_overview.php">Topic overview</a>
         	</li>
 
     		<li class="nav-item">
-        		<a class="nav-link" href="skillset_overview.php">Skillset overview</a>
+        		<a class="nav-link" href="<?= TestAnalysis\Config::site_url; ?>/skillset_overview.php">Skillset overview</a>
         	</li>
+        	
+        	<li class="nav-item dropdown">
+        		<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          			Online papers
+        		</a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="<?= TestAnalysis\Config::site_url; ?>/test_upload.php">Upload tests</a>
+                    <a class="dropdown-item" href="<?= TestAnalysis\Config::site_url; ?>/test_mark.php">Mark tests</a>
+                    <a class="dropdown-item" href="<?= TestAnalysis\Config::site_url; ?>/test_scanned_scores.php">Review test scores</a>
+                </div>
+              </li>
     	</ul>
 	</div>
 	<span class="navbar-text">
