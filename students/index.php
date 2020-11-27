@@ -3,8 +3,47 @@ namespace TestAnalysis;
 
 require "../bin/classes.php";
 
-/* TODO Look up kid's ID from email address */
-$student_id = 566;
+if (Config::is_staff($auth_user)) {
+    if (isset($_GET['masquerade'])) {
+        $auth_user = $_GET['masquerade'];
+    } else {
+        session_destroy();
+        echo "<html><head></head><body><h3>Need to masquerade as a student?  Please put in their username:</h3>";
+        die ("<p><form method=\"get\"><input type=\"text\" name=\"masquerade\"><input type=\"submit\"></form></body></html>");
+    }
+}
+
+/* Look up kid's ID from email address */
+if (!isset($_SESSION['student_id'])) {
+    $emailAddress = $auth_user . "@" . Config::site_emaildomain;
+    $emailQuery = "{ EmailAddress (emailAddress: \"$emailAddress\") { emailAddressOwner { id }}}";
+    $client = new GraphQLClient();
+    try {
+        $qEmailAddress = $client->rawQuery($emailQuery)->getData()['EmailAddress'];
+    } catch (\Exception $e) {
+        die("<h3>Sorry, Arbor has not responded to finding out who you are.  Please try refreshing.</h3>");
+    }
+    Config::debug("Student::__construct: query complete");
+    if (!isset($qEmailAddress[0])) {
+        die("Your email address $emailAddress appears unrecognised.");
+    }
+    if (isset($qEmailAddress[1])) {
+        die("Your email address appears to have more than one owner.  This cannot possibly be right");
+    }
+    if ($qEmailAddress[0]['emailAddressOwner']['entityType'] != 'Student') {
+        die("Your email address $emailAddress appears not to belong to a student.");
+    }
+    $_SESSION['student_id'] = $qEmailAddress[0]['emailAddressOwner']['id'];
+}
+
+$student_id = $_SESSION['student_id'];
+$student = Student::retrieveByDetail(Student::ID, $student_id);
+
+if (!isset($student[0])) {
+    die("Your email address $emailAddress does not appear to match any student in this database.");
+}
+
+$student = $student[0];
 
 if (isset($_GET['getpdf']) && !empty($_GET['test'])) {
     $pdf = new \Imagick();
@@ -15,8 +54,6 @@ if (isset($_GET['getpdf']) && !empty($_GET['test'])) {
         $pdf->readimageblob($page->get(ScannedTestPage::IMAGEDATA));
         $pdf->scaleimage(0, 842);
         $pdf->setImageFormat('pdf');
-    }
-    foreach ($pdf as $page) {
     }
     
     header("Content-type:application/pdf");
@@ -47,7 +84,9 @@ if (!isset($_GET['test'])) {
     foreach ($scannedTests as $st) {
         $time_left = round($st->secondsRemaining() / 60, 0);
         if ($time_left > 0) {
-            array_push($tests_to_complete, $st);
+            if ($st->get(ScannedTest::TS_UNLOCKED) < time()) {
+                array_push($tests_to_complete, $st);
+            }
         } else {
             // Check the scores:
             array_push($tests_marked, $st);
@@ -60,12 +99,12 @@ if (!isset($_GET['test'])) {
         }
     }
     
-    echo '<div class="h4">Tests to complete:</div><ul class="list-group">';
+    echo "<div class=\"h4\">Hello {$student->getName()}.  You have these tests to complete:</div><ul class=\"list-group\">";
     foreach ($tests_to_complete as $st) {
         $testId = $st->get(ScannedTest::TEST_ID);
         $test_name = Test::retrieveByDetail(Test::ID, $testId)[0]->getName();
         echo "<li class=\"list-group-item\">";
-        echo "<a href=\"?test={$st->get(ScannedTest::TEST_ID)}\">$test_name, {$time_left} minutes allowed</a>";
+        echo "<a href=\"?test={$st->get(ScannedTest::TEST_ID)}&masquerade={$auth_user}\">$test_name, {$time_left} minutes allowed</a>";
         echo "</li>";
     }
     echo '</ul>';
@@ -74,7 +113,7 @@ if (!isset($_GET['test'])) {
         $testId = $st->get(ScannedTest::TEST_ID);
         $test_name = Test::retrieveByDetail(Test::ID, $testId)[0]->getName();
         echo "<li class=\"list-group-item\">";
-        echo "<a href=\"?test={$st->get(ScannedTest::TEST_ID)}&getpdf=yes\">$test_name</a>";
+        echo "<a href=\"?test={$st->get(ScannedTest::TEST_ID)}&getpdf=yes&masquerade={$auth_user}\">$test_name</a>";
         echo "</li>";
     }
     echo '</ul>';
@@ -93,8 +132,16 @@ if (!isset($_GET['test'])) {
 $page_num = $_GET['page'] ?? 0;
 $testId = $_GET['test'];
 
-$test = Test::retrieveByDetail(Test::ID, $testId)[0];
-$st = ScannedTest::retrieveByDetails([ScannedTest::STUDENT_ID, ScannedTest::TEST_ID], [$student_id, $test->getId()])[0];
+try {
+    $test = Test::retrieveByDetail(Test::ID, $testId)[0];
+    $st = ScannedTest::retrieveByDetails([ScannedTest::STUDENT_ID, ScannedTest::TEST_ID], [$student_id, $test->getId()])[0];
+    $st->getId();
+} catch (\Error $e) {
+    die("You appear to be trying to retrieve a nonexistent test.");
+}
+if ($st->get(ScannedTest::TS_UNLOCKED) > time()) {
+    die("The test is not unlocked yet!");
+}
 
 $testPage = ScannedTestPage::retrieveByDetails([ScannedTestPage::SCANNEDTEST_ID, ScannedTestPage::PAGE_NUM], [$st->getId(), $page_num]);
 if (!isset($testPage[0])) {
@@ -125,11 +172,11 @@ echo "<br /><br /><div id=\"testpage\"></div>";
     		  height: $('.container')[0].clientWidth * 1.414,
     		  color: "blue",           // Color for shape and text
     		  type : "text",    // default shape: can be "rectangle", "arrow" or "text"
-			  tools: ['undo', 'unselect', 'rectangle-filled', 'circle', 'text', 'arrow', 'pen', 'redo'], // Tools
+			  tools: ['undo', 'unselect', 'tick', 'rectangle-filled', 'circle', 'text', 'arrow', 'pen', 'redo'], // Tools
     		  images: ["data:image/jpg;base64,<?= base64_encode($testPage->get(ScannedTestPage::IMAGEDATA))?>"],          // Array of images path : ["images/image1.png", "images/image2.png"]
     		  linewidth: 2,           // Line width for rectangle and arrow shapes
-    		  fontsize: $('.container')[0].clientWidth * 1.414 * 0.033 + "px",       // font size for text
-			  lineheight: $('.container')[0].clientWidth * 1.414 * 0.033,
+    		  fontsize: $('.container')[0].clientWidth * 1.414 * 0.033 / 2 + "px",       // font size for text
+			  lineheight: $('.container')[0].clientWidth * 1.414 * 0.033 / 2,
     		  bootstrap: true,       // Bootstrap theme design
     		  position: "top",       // Position of toolbar (available only with bootstrap)
     		  selectEvent: "change", // listened event on .annotate-image-select selector to select active images
@@ -145,9 +192,9 @@ echo "<br /><br /><div id=\"testpage\"></div>";
     if (currentPage == 0) {
     	prevbutton = '';
     } else {
-        prevbutton = '<a class="btn btn-warning" href="?page=' + (currentPage-1) + '&test=<?= $testId ?>">Previous page</a>';
+        prevbutton = '<a class="btn btn-warning" href="?page=' + (currentPage-1) + '&test=<?= $testId ?>&masquerade=<?= $auth_user ?>">Previous page</a>';
     }
-    nextbutton = '<a class="btn btn-primary" href="?page=<?= ($page_num + 1) ?>&test=<?= $testId ?>">Next page</a>';
+    nextbutton = '<a class="btn btn-primary" href="?page=<?= ($page_num + 1) ?>&test=<?= $testId ?>&masquerade=<?= $auth_user ?>">Next page</a>';
 
 	$(document).ready(function(){
 	  $('#testpage').annotate(options);
