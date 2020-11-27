@@ -55,3 +55,8 @@ if ($db->dosql("SHOW COLUMNS FROM `ScannedTestPage` LIKE 'student_annotations'")
         );");
     $db->dosql("ALTER TABLE ScannedTestPage ADD student_annotations BLOB NULL;");
 }
+
+/* Version 5 to 6 upgrade */
+if ($db->dosql("SHOW COLUMNS FROM `ScannedTest` LIKE 'ts_unlocked'")->num_rows < 1) {
+    $db->dosql("ALTER TABLE `ScannedTest` ADD ts_unlocked INT NOT NULL DEFAULT 0;");
+}

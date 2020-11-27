@@ -36,29 +36,39 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
                     ScannedTest::delete($st->getId());
                 }
             }
-            if (isset($_FILES["input-file-{$s->getId()}"])) {
-                $f = $_FILES["input-file-{$s->getId()}"];
-                if ($f['size'] > 0) {
-                    $im = new \Imagick();
-                    $im->setresolution(150, 150);
-                    $im->readimage($f['tmp_name']);
+        }
+        if (isset($_FILES["input-file"])) {
+            $f = $_FILES["input-file"];
+            $pages = [];
+            if ($f['size'] > 0) {
+                $im = new \Imagick();
+                $im->setresolution(150, 150);
+                $im->readimage($f['tmp_name']);
+                for ($i = 0; $i < $im->getnumberimages(); $i++) {
+                    $im->setiteratorindex($i);
+                    $im->setimageformat('jpg');
+                    $im->setImageAlphaChannel(\Imagick::ALPHACHANNEL_REMOVE);
+                    array_push($pages, addslashes($im->getimageblob()));
+                }
+                $im->destroy();
+            }
+            foreach ($students as $s) {
+                if (isset($_POST["set-for-{$s->getId()}"])) {
                     $scannedTest = new ScannedTest([
-                            ScannedTest::TEST_ID => $test->getId(),
-                            ScannedTest::STUDENT_ID => $s->getId(),
-                            ScannedTest::MINUTES_ALLOWED => $_POST["input-minutes-{$s->getId()}"],
+                        ScannedTest::TEST_ID => $test->getId(),
+                        ScannedTest::STUDENT_ID => $s->getId(),
+                        ScannedTest::MINUTES_ALLOWED => $_POST["input-minutes-{$s->getId()}"],
+                        ScannedTest::TS_UNLOCKED => strtotime($_POST['unlock_date']),
                         ]);
                     $scannedTest->commit();
-                    for ($i = 0; $i < $im->getnumberimages(); $i++) {
-                        $im->setiteratorindex($i);
-                        $im->setimageformat('jpg');
+                    foreach ($pages as $num => $p) {
                         $page = new ScannedTestPage([
                             ScannedTestPage::SCANNEDTEST_ID => $scannedTest->getId(),
-                            ScannedTestPage::PAGE_NUM => $i,
-                            ScannedTestPage::IMAGEDATA => addslashes($im->getimageblob()),
+                            ScannedTestPage::PAGE_NUM => $num,
+                            ScannedTestPage::IMAGEDATA => $p,
                         ]);
                         $page->commit();
-                    }
-                    $im->destroy();
+                    }   
                 }
             }
         }
@@ -154,14 +164,18 @@ EOF;
 		if (isset($test)) {
 		    echo <<< eof
         <form method="POST" enctype="multipart/form-data">
-            <input type="submit" class="form-control btn btn-warning" value="Do not forget to submit (click me or press Enter)!">
+            <input type="submit" class="form-control btn btn-warning" value="Submit (click me or press Enter)!">
+            <input type="file" class="form-control-file" name="input-file">
+            <div class=\"form-group\"><input class="form-control" type="date" id="date-input" name="unlock_date">
+		        <label class=\"form-label\" for=\"date-input">Date to unlock test</label><div>
+
             <div class="table-responsive table-95 table-stickyrow">
             <table class="table table-bordered table-sm table-hover">
                 <thead>
                     <tr>
                         <th rowspan="2" scope="col">Name</th>
                         <th rowspan="2" scope="col">Group</th>
-                        <th rowspan="2" scope="col">Test file to upload</th>
+                        <th rowspan="2" scope="col">Assign to this student</th>
                         <th rowspan="2" scope="col">Time allowed for test in minutes (default total marks for test)</th>
                     </tr>
                 </thead>
@@ -171,10 +185,10 @@ eof;
 		        echo "<td>" . $s->getName() . "</td>";
 		        echo "<td>" . $s->getTeachingGroup($subject) . "</td>";
 		        if (!empty(ScannedTest::retrieveByDetails([ScannedTest::TEST_ID, ScannedTest::STUDENT_ID], [$test->getId(), $s->getId()]))) {
-		            echo "<td><div class=\"form-check text-danger\"><input class=\"form-check-input\" type=\"checkbox\" name=\"delete-for-" . $s->getId() . "\" id=\"delete-for-" . $s->getId() . "\">";
+		            echo "<td>&nbsp;</td><td><div class=\"form-check text-danger\"><input class=\"form-check-input\" type=\"checkbox\" name=\"delete-for-" . $s->getId() . "\" id=\"delete-for-" . $s->getId() . "\">";
 		            echo "<label class=\"form-check-label\" for=\"delete-for-" . $s->getId() . "\">Delete uploaded {$test->getName()}</label><div></td>";
 		        } else {
-		            echo "<td><input type=\"file\" class=\"form-control-file\" name=\"input-file-" . $s->getId() . "\"></td>";
+		            echo "<td><div class=\"form-check\"><input type=\"checkbox\" class=\"form-check-input\" name=\"set-for-" . $s->getId() . "\"></div></td>";
 		            echo "<td><input type=\"number\" class=\"form-control-input\" name=\"input-minutes-{$s->getId()}\" value=\"{$test->getTotal()}\"></td>";
 		        }
 		        echo "</tr>\n";

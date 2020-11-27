@@ -8,6 +8,7 @@ class ScannedTest extends DatabaseCollection
     const MINUTES_ALLOWED = 'minutes_allowed';
     /* Hopefully before 2038... */
     const TS_STARTED = 'ts_started';
+    const TS_UNLOCKED = 'ts_unlocked';
     
     public function __construct(array $details)
     {
@@ -21,6 +22,7 @@ class ScannedTest extends DatabaseCollection
                     self::STUDENT_ID,
                     self::MINUTES_ALLOWED,
                     self::TS_STARTED,
+                    self::TS_UNLOCKED,
                 ] as $d) {
             if (false && isset($details[$d])) {
                 $this->details[$d] = null;
