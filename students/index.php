@@ -52,7 +52,7 @@ if (isset($_GET['getpdf']) && !empty($_GET['test'])) {
     $scannedTest = ScannedTest::retrieveByDetails([ScannedTest::TEST_ID, ScannedTest::STUDENT_ID], [$test->getId(), $student_id])[0];
     foreach (ScannedTestPage::retrieveByDetail(ScannedTestPage::SCANNEDTEST_ID, $scannedTest->getId(), ScannedTestPage::PAGE_NUM) as $page) {
         $pdf->readimageblob($page->get(ScannedTestPage::IMAGEDATA));
-        $pdf->scaleimage(0, 842);
+        $pdf->scaleimage(0, 1700);
         $pdf->setImageFormat('pdf');
     }
     
