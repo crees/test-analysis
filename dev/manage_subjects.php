@@ -12,6 +12,7 @@ if (isset($_GET['removeGroup'])) {
         (new Subject([
             Subject::NAME => $_POST['newsubjectname'],
             Subject::CODE => $_POST['newsubjectcode'],
+            Subject::DEPARTMENT_ID => 0, // Stub default department for now
         ]))->commit();
     }
     

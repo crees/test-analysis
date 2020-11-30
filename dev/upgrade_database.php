@@ -60,3 +60,17 @@ if ($db->dosql("SHOW COLUMNS FROM `ScannedTestPage` LIKE 'student_annotations'")
 if ($db->dosql("SHOW COLUMNS FROM `ScannedTest` LIKE 'ts_unlocked'")->num_rows < 1) {
     $db->dosql("ALTER TABLE `ScannedTest` ADD ts_unlocked INT NOT NULL DEFAULT 0;");
 }
+
+/* Version 6 to 7 upgrade */
+
+if ($db->dosql("SHOW TABLES LIKE 'Department'")->num_rows < 1) {
+    $db->dosql("CREATE TABLE Department (
+        id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        name VARCHAR(30) NOT NULL,
+        CONSTRAINT PRIMARY KEY (id)
+        );");
+    
+    $db->dosql("ALTER TABLE Subject ADD Department_id INT NOT NULL;");
+    
+    $db->dosql("UPDATE Subject SET Department_id = 1;");
+}

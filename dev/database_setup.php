@@ -20,6 +20,11 @@ if (isset(Config::$maintenance) && Config::$maintenance) {
         grade VARCHAR(10) NOT NULL,
         CONSTRAINT PRIMARY KEY (id)
     );
+    CREATE TABLE Department (
+        id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        name VARCHAR(30) NOT NULL,
+        CONSTRAINT PRIMARY KEY (id)
+    );
     CREATE TABLE GradeBoundary (
         id INT UNSIGNED NOT NULL AUTO_INCREMENT,
         Test_id INT NOT NULL,
@@ -37,6 +42,7 @@ if (isset(Config::$maintenance) && Config::$maintenance) {
         id INT UNSIGNED NOT NULL AUTO_INCREMENT,
         name VARCHAR(30) NOT NULL,
         code VARCHAR(2) NOT NULL,
+        Department_id INT NOT NULL,
         Baseline_id INT UNSIGNED DEFAULT NULL,
         CONSTRAINT PRIMARY KEY (id)
     );
