@@ -1,9 +1,6 @@
 [submodule "contrib/php-graphql-client"]
 	path = contrib/php-graphql-client
 	url = https://github.com/mghoneimy/php-graphql-client
-[submodule "contrib/annotorius"]
-	path = contrib/annotorius
-	url = https://github.com/recogito/annotorious.git
 [submodule "contrib/djaodjin-annotate"]
 	path = contrib/djaodjin-annotate
 	url = https://github.com/crees/djaodjin-annotate
