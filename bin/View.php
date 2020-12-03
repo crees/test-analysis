@@ -15,7 +15,7 @@ abstract class View
         }
         $ret = "";
         $ret .= "<td style=\"padding: 0\">";
-        $ret .= "<input class=\"form-control border-0 px-1\" type=\"$type\" name=\"$name\" value=\"$value\" $tabindex $extras>";
+        $ret .= "<input class=\"form-control border-0 px-1\" type=\"$type\" name=\"$name\" id=\"$name\" value=\"$value\" $tabindex $extras>";
         $ret .= "</td>\n";
         return $ret;
     }

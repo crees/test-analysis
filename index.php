@@ -129,7 +129,7 @@ EOF;
 		    }
 		    echo <<< eof
         <form method="POST">
-            <input type="submit" class="form-control btn btn-warning" value="Do not forget to save (click me or press Enter)!">
+            <input type="submit" class="form-control btn btn-warning" value="No need to save any more!  Click here and *let CMR know if new results don't go green.*">
             <div class="table-responsive table-95 table-stickyrow">
             <table class="table table-bordered table-sm table-hover">
                 <thead>
@@ -172,12 +172,12 @@ eof;
 		        foreach ($tests as $t) {
 		            $result = $t->getResult($s);
 		            if ($t->get(Test::TOTAL_A) > 0) {
-    		            echo View::makeTextBoxCell(TestResult::SCORE_A . "-" . $t->getId() . "-" . $s->getId(), is_null($result) ? "" : $result->get(TestResult::SCORE_A), $tabIndex, "number", "min=\"0\" max=\"{$t->get(Test::TOTAL_A)}\"");
+    		            echo View::makeTextBoxCell(TestResult::SCORE_A . "-" . $t->getId() . "-" . $s->getId(), is_null($result) ? "" : $result->get(TestResult::SCORE_A), $tabIndex, "number", "min=\"0\" max=\"{$t->get(Test::TOTAL_A)}\" onchange=\"save('{$t->getId()}', '{$s->getId()}', '" . TestResult::SCORE_A . "')\"");
     		            $tabIndex++;
 		            } else {
 		                echo ("<td>&nbsp;<input type=\"hidden\" name=\"" . TestResult::SCORE_A . "-" . $t->getId() . "-" . $s->getId() . "\" value=\"0\"></td>");
 		            }
-		            echo View::makeTextBoxCell(TestResult::SCORE_B . "-" . $t->getId() . "-" . $s->getId(), is_null($result) ? "" : $result->get(TestResult::SCORE_B), $tabIndex, "number", "min=\"0\" max=\"{$t->get(Test::TOTAL_B)}\"");
+		            echo View::makeTextBoxCell(TestResult::SCORE_B . "-" . $t->getId() . "-" . $s->getId(), is_null($result) ? "" : $result->get(TestResult::SCORE_B), $tabIndex, "number", "min=\"0\" max=\"{$t->get(Test::TOTAL_B)}\" onchange=\"save('{$t->getId()}', '{$s->getId()}', '" . TestResult::SCORE_B . "')\"");
 		            if (is_null($result)) {
 		                echo "<td>&nbsp;</td><td>&nbsp;</td>";
 		            } else {
@@ -258,6 +258,56 @@ eof;
 		}
 		?>
 	</div>
+	
+<script>
+function save(testId, studentId) {
+	// Get both
+	const scoreA = '<?= TestResult::SCORE_A; ?>';
+	const scoreB = '<?= TestResult::SCORE_B; ?>';
+	
+	elementA = $('#' + scoreA + '-' + testId + '-' + studentId);
+	elementB = $('#' + scoreB + '-' + testId + '-' + studentId);
+
+	if (elementA.length == 0) {
+		// There is no element A
+		resultA = 0;
+	} else {
+		resultA = elementA[0].value;
+	}
+	resultB = elementB[0].value;
+
+	if (resultA === '' || resultB === '') {
+		return;
+	}
+
+	if (resultA != 0) {
+		elementA[0].style.color = '#FF0000';
+	}
+	elementB[0].style.color = '#FF0000';
+
+	var xhr = new XMLHttpRequest();
+    xhr.open("POST", 'async/newscore.php', true);
+    
+    //Send the proper header information along with the request
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          saved(elementA, elementB);
+        }
+    };
+    xhr.send("studentId=" + studentId + "&testId=" + testId + "&a=" + resultA + "&b=" + resultB);
+	
+	console.log(name + ' has now changed to ' + resultA + " " + resultB);
+}
+
+function saved(a, b) {
+	if (a.length != 0) {
+		a[0].style.color = '#00ff00';
+	}
+	b.style.color = '#00ff00';
+}
+
+</script>
 </body>
 
 </html>
