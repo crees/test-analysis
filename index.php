@@ -296,8 +296,6 @@ function save(testId, studentId) {
         }
     };
     xhr.send("studentId=" + studentId + "&testId=" + testId + "&a=" + resultA + "&b=" + resultB);
-	
-	console.log(name + ' has now changed to ' + resultA + " " + resultB);
 }
 
 function saved(a, b) {
