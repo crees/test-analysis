@@ -63,6 +63,10 @@ class Subject extends DatabaseCollection
         $this->details[self::CODE] = $code;
     }
     
+    public function setDepartmentId(int $dId) {
+        $this->details[self::DEPARTMENT_ID] = $dId;
+    }
+    
     public function addTest(Test $test) {
         $membership = new TestSubjectMembership(
             [

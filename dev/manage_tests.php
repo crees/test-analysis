@@ -21,6 +21,7 @@ if (isset($_GET['removeTopic'])) {
             $detail[Test::NAME] = $_POST[Test::NAME . "-$tId"];
             $detail[Test::TOTAL_A] = $_POST[Test::TOTAL_A . "-$tId"];
             $detail[Test::TOTAL_B] = $_POST[Test::TOTAL_B . "-$tId"];
+            $detail[Test::DEPARTMENT_ID] = $_POST["test-department-{$t->getid()}"];
             if (isset($_POST[Test::CUSTOM_GRADE_BOUNDARIES . "-$tId"])) {
                 $detail[Test::CUSTOM_GRADE_BOUNDARIES] = 1;
             } else {
@@ -141,6 +142,7 @@ $tests = Test::retrieveAll(Test::NAME);
 <table class="table table-hover table-bordered table-sm">
 <thead>
 	<tr>
+		<th>Department</th>
 		<th>Test name</th>
 		<th>Total sect A</th>
 		<th>Total sect B</th>
@@ -152,52 +154,72 @@ $tests = Test::retrieveAll(Test::NAME);
 
 <?php
 $orphanedTopics = TestTopic::retrieveAll(TestTopic::NAME);
-foreach ($tests as $t) {
-    $tId = $t->getId();
-    echo "<tr>";    
-    // Test name
-    echo View::makeTextBoxCell(Test::NAME . "-$tId", $t->get(Test::NAME));
-    // Total score
-    echo View::makeTextBoxCell(Test::TOTAL_A . "-$tId", $t->get(Test::TOTAL_A));
-    echo View::makeTextBoxCell(Test::TOTAL_B . "-$tId", $t->get(Test::TOTAL_B));
-    // Custom grade boundaries?
-    if ($t->get(Test::CUSTOM_GRADE_BOUNDARIES)) {
-        $checked = "checked";
-    } else {
-        $checked = "";
-    }
-    echo "<td><div class=\"custom-control custom-checkbox\">";
-    echo "<input type=\"checkbox\" class=\"custom-control-input\" id=\"custom-$tId\" name=\"" . Test::CUSTOM_GRADE_BOUNDARIES . "-$tId\" $checked>";
-    echo "<label class=\"custom-control-label\" for=\"custom-$tId\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>";
-    echo "</div></td>";
-    echo "<td><a href=\"manage_targets.php?test=$tId\">Edit targets</a></td>";
-    $allTopics = TestTopic::retrieveAll(TestTopic::NAME);
-    $names = [];
-    foreach ($t->getTopics() as $topic) {
-        array_push($names, "<a href=\"?removeTopic=" . $topic->getId() . "&removeFromTest=$tId\">" . $topic->getName() . "</a>");
-        unset($allTopics[array_search($topic, $allTopics)]);
-        if (($o = array_search($topic, $orphanedTopics)) !== FALSE) {
-            unset($orphanedTopics[$o]);
+$departments = Department::retrieveAll(Department::NAME);
+foreach ($departments as $department) {
+    foreach (Test::retrieveByDetail(Test::DEPARTMENT_ID, $department->getId(), Test::NAME) as $t) {
+        $tId = $t->getId();
+        echo "<tr>";
+        echo "<td>";
+        echo "<select name=\"test-department-{$t->getid()}\" onchange=\"this.form.submit()\">";
+        foreach ($departments as $dept) {
+            if ($dept == $department) {
+                $selected = "selected";
+            } else {
+                $selected = "";
+            }
+            echo "<option value=\"" . $dept->getId() . "\" $selected>" . $dept->getName() . "</option>";
         }
+        echo "</select>";
+        echo "</td>";
+        // Test name
+        echo View::makeTextBoxCell(Test::NAME . "-$tId", $t->get(Test::NAME));
+        // Total score
+        echo View::makeTextBoxCell(Test::TOTAL_A . "-$tId", $t->get(Test::TOTAL_A));
+        echo View::makeTextBoxCell(Test::TOTAL_B . "-$tId", $t->get(Test::TOTAL_B));
+        // Custom grade boundaries?
+        if ($t->get(Test::CUSTOM_GRADE_BOUNDARIES)) {
+            $checked = "checked";
+        } else {
+            $checked = "";
+        }
+        echo "<td><div class=\"custom-control custom-checkbox\">";
+        echo "<input type=\"checkbox\" class=\"custom-control-input\" id=\"custom-$tId\" name=\"" . Test::CUSTOM_GRADE_BOUNDARIES . "-$tId\" $checked>";
+        echo "<label class=\"custom-control-label\" for=\"custom-$tId\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>";
+        echo "</div></td>";
+        echo "<td><a href=\"manage_targets.php?test=$tId\">Edit targets</a></td>";
+        $allTopics = TestTopic::retrieveAll(TestTopic::NAME);
+        $names = [];
+        foreach ($t->getTopics() as $topic) {
+            array_push($names, "<a href=\"?removeTopic=" . $topic->getId() . "&removeFromTest=$tId\">" . $topic->getName() . "</a>");
+            unset($allTopics[array_search($topic, $allTopics)]);
+            if (($o = array_search($topic, $orphanedTopics)) !== FALSE) {
+                unset($orphanedTopics[$o]);
+            }
+        }
+        
+        echo "<td>" . implode(', ', $names) . "</td>";
+        
+        echo "<td><select name=\"test-add-topic-to-{$t->getid()}\" onchange=\"this.form.submit()\">";
+        
+        echo "<option value=\"\" selected>Add Topic to " . $t->getName() . "</option>";
+        
+        foreach ($allTopics as $topic) {
+            echo "<option value=\"" . $topic->getId() . "\">" . $topic->getName() . "</option>";
+        }
+        
+        echo "</select></td>";
+        
+        echo "</tr>";
     }
-    
-    echo "<td>" . implode(', ', $names) . "</td>";
-    
-    echo "<td><select name=\"test-add-topic-to-{$t->getid()}\" onchange=\"this.form.submit()\">";
-    
-    echo "<option value=\"\" selected>Add Topic to " . $t->getName() . "</option>";
-    
-    foreach ($allTopics as $topic) {
-        echo "<option value=\"" . $topic->getId() . "\">" . $topic->getName() . "</option>";
-    }
-    
-    echo "</select></td>";
-    
-    echo "</tr>";
 }
 ?>
 <tr>
 	<?php
+	echo "<td><select name=\"newtest-" . Test::DEPARTMENT_ID . "\">";
+	foreach ($departments as $dept) {
+	    echo "<option value=\"" . $dept->getId() . "\">" . $dept->getName() . "</option>";
+	}
+	echo "</select></td>";
 	echo View::makeTextBoxCell("newtest-" . Test::NAME, "");
 
 	echo View::makeTextBoxCell("newtest-" . Test::TOTAL_A, "");
@@ -220,86 +242,90 @@ foreach ($tests as $t) {
 
 <?php
 // Subject grade boundaries
-foreach ($subjects as $s) {
-    echo "<table class=\"table table-hover table-bordered table-sm\">";
-    $gradeArray = [];
-    $boundaryArray = [];
-    $columns = 0;
-    // We'll give whatever's already there + 20 columns; that should be enough!
-    foreach (GradeBoundary::retrieveByDetail(GradeBoundary::TEST_ID, -$s->getId(), GradeBoundary::BOUNDARY) as $b) {
-        array_push($gradeArray, View::makeTextBoxCell("GradeBoundary-grade-" . $b->getId(), $b->get(GradeBoundary::NAME)));
-        array_push($boundaryArray, View::makeTextBoxCell("GradeBoundary-boundary-" . $b->getId(), $b->get(GradeBoundary::BOUNDARY)));
-        $columns++;
+foreach ($departments as $department) {
+    echo "<div class=\"row\"><div class=\"h3\">{$department->getName()}</div></div>";
+    foreach (Subject::retrieveByDetail(Subject::DEPARTMENT_ID, $department->getId(), Subject::NAME) as $s) {
+        echo "<table class=\"table table-hover table-bordered table-sm\">";
+        $gradeArray = [];
+        $boundaryArray = [];
+        $columns = 0;
+        // We'll give whatever's already there + 20 columns; that should be enough!
+        foreach (GradeBoundary::retrieveByDetail(GradeBoundary::TEST_ID, -$s->getId(), GradeBoundary::BOUNDARY) as $b) {
+            array_push($gradeArray, View::makeTextBoxCell("GradeBoundary-grade-" . $b->getId(), $b->get(GradeBoundary::NAME)));
+            array_push($boundaryArray, View::makeTextBoxCell("GradeBoundary-boundary-" . $b->getId(), $b->get(GradeBoundary::BOUNDARY)));
+            $columns++;
+        }
+        for ($i = 1; $i < 20; $i++) {
+            array_push($gradeArray, View::makeTextBoxCell("GradeBoundary-grade-new-for-subject-". $s->getId() . "-$i", ""));
+            array_push($boundaryArray, View::makeTextBoxCell("GradeBoundary-boundary-new-for-subject-". $s->getId() . "-$i", ""));
+            $columns++;
+        }
+        echo "<thead><tr><th>" . $s->getName() . "</th>";
+        while ($columns-- != 0) {
+            echo "<th class=\"th-sm\">&nbsp;</th>";
+        }
+        echo "</tr></thead>";
+        echo "<tr><th>Grade</th>";
+        echo implode("", $gradeArray);
+        echo "</tr>";
+        echo "<tr><th>Minimum section B %</th>";
+        echo implode("", $boundaryArray);
+        echo "</tr>";
+        echo "</table>";
     }
-    for ($i = 1; $i < 20; $i++) {
-        array_push($gradeArray, View::makeTextBoxCell("GradeBoundary-grade-new-for-subject-". $s->getId() . "-$i", ""));
-        array_push($boundaryArray, View::makeTextBoxCell("GradeBoundary-boundary-new-for-subject-". $s->getId() . "-$i", ""));
-        $columns++;
-    }
-    echo "<thead><tr><th>" . $s->getName() . "</th>";
-    while ($columns-- != 0) {
-        echo "<th class=\"th-sm\">&nbsp;</th>";
-    }
-    echo "</tr></thead>";
-    echo "<tr><th>Grade</th>";
-    echo implode("", $gradeArray);
-    echo "</tr>";
-    echo "<tr><th>Minimum section B %</th>";
-    echo implode("", $boundaryArray);
-    echo "</tr>";
-    echo "</table>";
 }
 
 // Test grade boundaries
-$explain = "<div class=\"row\">You can now set custom grade boundaries for tests that have custom grades enabled (these are on RAW SCORE for Section B):</div>";
-foreach ($tests as $t) {
-    if (!$t->get(Test::CUSTOM_GRADE_BOUNDARIES)) {
-        continue;
-    }
-    echo $explain;
-    $explain = '';
-    echo "<table class=\"table table-hover table-bordered table-sm\">";
-    $gradeArray = [];
-    $boundaryArray = [];
-    $columns = 0;
-    // We'll give whatever's already there + 20 columns; that should be enough!
-    $existingBoundaries = GradeBoundary::retrieveByDetail(GradeBoundary::TEST_ID, $t->getId(), GradeBoundary::BOUNDARY);
-    if (empty($existingBoundaries)) {
-        // Arbitrarily base off the first subject match for the test
-        $membership = TestSubjectMembership::retrieveByDetail(TestSubjectMembership::TEST_ID, $t->getId())[0];
-        $subject = Subject::retrieveByDetail(Subject::ID, $membership->get(TestSubjectMembership::SUBJECT_ID))[0];
-        foreach ($t->getGradeBoundaries($subject, true) as $b) {
-            (new GradeBoundary([
-                GradeBoundary::TEST_ID => $t->getId(),
-                GradeBoundary::NAME => $b->get(GradeBoundary::NAME),
-                GradeBoundary::BOUNDARY => $b->get(GradeBoundary::BOUNDARY)
-            ]))->commit();
+echo "<div class=\"row\">You can now set custom grade boundaries for tests that have custom grades enabled (these are on RAW SCORE for Section B):</div>";
+foreach ($departments as $department) {
+    echo "<div class=\"row\"><div class=\"h3\">{$department->getName()}</div></div>";
+    foreach (Test::retrieveByDetail(Test::DEPARTMENT_ID, $department->getId(), Test::NAME) as $t) {
+        if (!$t->get(Test::CUSTOM_GRADE_BOUNDARIES)) {
+            continue;
         }
+        echo "<table class=\"table table-hover table-bordered table-sm\">";
+        $gradeArray = [];
+        $boundaryArray = [];
+        $columns = 0;
+        // We'll give whatever's already there + 20 columns; that should be enough!
         $existingBoundaries = GradeBoundary::retrieveByDetail(GradeBoundary::TEST_ID, $t->getId(), GradeBoundary::BOUNDARY);
+        if (empty($existingBoundaries)) {
+            // Arbitrarily base off the first subject match for the test
+            $membership = TestSubjectMembership::retrieveByDetail(TestSubjectMembership::TEST_ID, $t->getId())[0];
+            $subject = Subject::retrieveByDetail(Subject::ID, $membership->get(TestSubjectMembership::SUBJECT_ID))[0];
+            foreach ($t->getGradeBoundaries($subject, true) as $b) {
+                (new GradeBoundary([
+                    GradeBoundary::TEST_ID => $t->getId(),
+                    GradeBoundary::NAME => $b->get(GradeBoundary::NAME),
+                    GradeBoundary::BOUNDARY => $b->get(GradeBoundary::BOUNDARY)
+                ]))->commit();
+            }
+            $existingBoundaries = GradeBoundary::retrieveByDetail(GradeBoundary::TEST_ID, $t->getId(), GradeBoundary::BOUNDARY);
+        }
+        
+        foreach ($existingBoundaries as $b) {
+            array_push($gradeArray, View::makeTextBoxCell("GradeBoundary-grade-" . $b->getId(), $b->get(GradeBoundary::NAME)));
+            array_push($boundaryArray, View::makeTextBoxCell("GradeBoundary-boundary-" . $b->getId(), $b->get(GradeBoundary::BOUNDARY)));
+            $columns++;
+        }
+        for ($i = 1; $i < 20; $i++) {
+            array_push($gradeArray, View::makeTextBoxCell("GradeBoundary-grade-new-for-test-". $t->getId() . "-$i", ""));
+            array_push($boundaryArray, View::makeTextBoxCell("GradeBoundary-boundary-new-for-test-". $t->getId() . "-$i", ""));
+            $columns++;
+        }
+        echo "<thead><tr><th>" . $t->getName() . "</th>";
+        while ($columns-- != 0) {
+            echo "<th class=\"th-sm\">&nbsp;</th>";
+        }
+        echo "</tr></thead>";
+        echo "<tr><th>Grade</th>";
+        echo implode("", $gradeArray);
+        echo "</tr>";
+        echo "<tr><th>Minimum section B mark</th>";
+        echo implode("", $boundaryArray);
+        echo "</tr>";
+        echo "</table>";
     }
-    
-    foreach ($existingBoundaries as $b) {
-        array_push($gradeArray, View::makeTextBoxCell("GradeBoundary-grade-" . $b->getId(), $b->get(GradeBoundary::NAME)));
-        array_push($boundaryArray, View::makeTextBoxCell("GradeBoundary-boundary-" . $b->getId(), $b->get(GradeBoundary::BOUNDARY)));
-        $columns++;
-    }
-    for ($i = 1; $i < 20; $i++) {
-        array_push($gradeArray, View::makeTextBoxCell("GradeBoundary-grade-new-for-test-". $t->getId() . "-$i", ""));
-        array_push($boundaryArray, View::makeTextBoxCell("GradeBoundary-boundary-new-for-test-". $t->getId() . "-$i", ""));
-        $columns++;
-    }
-    echo "<thead><tr><th>" . $t->getName() . "</th>";
-    while ($columns-- != 0) {
-        echo "<th class=\"th-sm\">&nbsp;</th>";
-    }
-    echo "</tr></thead>";
-    echo "<tr><th>Grade</th>";
-    echo implode("", $gradeArray);
-    echo "</tr>";
-    echo "<tr><th>Minimum section B mark</th>";
-    echo implode("", $boundaryArray);
-    echo "</tr>";
-    echo "</table>";
 }
 ?>
 <input type="hidden" name="form_serial" value="<?= $_SESSION['form_serial']; ?>">

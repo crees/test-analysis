@@ -71,6 +71,7 @@ if (isset(Config::$maintenance) && Config::$maintenance) {
         total_b INT NOT NULL,
         custom_grade_boundaries BOOLEAN NOT NULL DEFAULT FALSE,
         targets VARCHAR(65000) NULL,
+        Department_id INT NOT NULL,
         CONSTRAINT PRIMARY KEY (id)
     );
     CREATE TABLE TestResult (

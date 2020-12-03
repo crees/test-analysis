@@ -157,8 +157,7 @@ EOF;
 		        }
 		    }
 		    $testPage = $testPages[$page_num];
-		    echo "<div class=\"row\">";
-            echo "<div class=\"col-3\"><span id=\"savebar\"></span>";
+            echo "<span id=\"savebar\"></span>";
             echo "<div class=\"form-inline form-group\">";
             echo "<label for=\"skipMarked\">Skip already marked tests: </label>";
             if (isset($_GET['skipMarked'])) {
@@ -169,25 +168,24 @@ EOF;
             echo "<input class=\"form-control\" type=\"checkbox\" id=\"skipMarked\" $skipMarked onchange=\"doButtons()\">";
             echo "<label for=\"score\">Total page score: </label>";
             echo "<input class=\"form-control\" type=\"number\" id=\"score\" value=\"{$testPage->get(ScannedTestPage::PAGE_SCORE)}\">";
-		    echo '</div></div>';
-		    echo '<div class="col-9"><br /><br />';
+		    echo '</div>';
+		    echo '<br /><br />';
 		    echo '<div id="testpage"></div>';
-		    echo "</div>";
 		    echo '</div>';
 		}
 ?>
 
 <script>
     options = {
-    		  width: $('.container')[0].clientWidth * 0.8,
-    		  height: $('.container')[0].clientWidth * 0.8 * 1.414,
+    		  width: $('.container')[0].clientWidth,
+    		  height: $('.container')[0].clientWidth * 1.414,
     		  color: "red",           // Color for shape and text
     		  type : "tick",    // default shape: can be "rectangle", "arrow" or "text"
 			  tools: ['undo', 'tick', 'cross', 'text', 'circle', 'arrow', 'pen', 'redo'], // Tools
     		  images: ["data:image/jpg;base64,<?= base64_encode($testPage->get(ScannedTestPage::IMAGEDATA))?>"],          // Array of images path : ["images/image1.png", "images/image2.png"]
     		  linewidth: 2,           // Line width for rectangle and arrow shapes
-    		  fontsize: $('.container')[0].clientWidth * 1.414 * 0.022 + "px",       // font size for text
-			  lineheight: $('.container')[0].clientWidth * 1.414 * 0.022,
+    		  fontsize: $('.container')[0].clientWidth * 1.414 * 0.033 + "px",       // font size for text
+			  lineheight: $('.container')[0].clientWidth * 1.414 * 0.033,
     		  bootstrap: true,       // Bootstrap theme design
     		  position: "top",       // Position of toolbar (available only with bootstrap)
     		  selectEvent: "change", // listened event on .annotate-image-select selector to select active images
@@ -222,7 +220,6 @@ EOF;
 		  if (usingTextBox) {
 			return 0;
 		  }
-		  tool = null;
 		  if (event.which === 13) {
 		    // "Submit"
 			save();
@@ -232,19 +229,6 @@ EOF;
 				document.getElementById('score').value = '';
 				document.getElementById('score').focus();
 			}
-		  } else switch (event.key) {
-		  	case 'z':
-		    	tool = $("[name='tool_option_testpage'][data-tool='tick']");
-		    	break;
-		  	case 'x':
-			  	tool = $("[name='tool_option_testpage'][data-tool='cross']");
-			  	break;
-			default:
-				break;
-		  }
-		  if (tool != null) {
-		  	tool.prop("checked", true);
-		  	tool.click();
 		  }
 		});
 	});
@@ -254,10 +238,10 @@ EOF;
 		if (document.getElementById('skipMarked').checked) {
 			getvars += '&skipMarked=yes';
 		}
-	    savebutton = '<a class="btn btn-success" onclick="save()">Save page</a>';
+	    savebutton = '<a class="btn btn-success" onclick="save()">Save this page</a>';
 	    dontsavebutton = '<a class="btn btn-danger" onclick="dontsave()">Do not save</a>';
 		currentPage = <?= $page_num ?>;
-	    prevbutton = '<a class="btn btn-secondary" onclick="visibleTop()">Change test/class</a><a class="btn btn-danger" href="?' + getvars + '&page=' + currentPage + '&student_number=<?= $student_number-1 ?>"><i class="fa fa-arrow-left"></i>Previous student</a>';
+	    prevbutton = '<a class="btn btn-secondary" onclick="visibleTop()">Select a different test/class</a><a class="btn btn-danger" href="?' + getvars + '&page=' + currentPage + '&student_number=<?= $student_number-1 ?>"><i class="fa fa-arrow-left"></i>Previous student</a>';
 	    if (currentPage > 0) {
 	        prevbutton += '<a class="btn btn-warning" href="?' + getvars + '&page=' + (currentPage-1) + '&student_number=<?= $student_number ?>"><i class="fa fa-arrow-up"></i>Previous page</a>';
 	    }

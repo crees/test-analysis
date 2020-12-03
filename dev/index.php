@@ -36,6 +36,8 @@ require "../bin/classes.php";
     
     			<div class="card-text"><a href="arbor_import.php" class="btn btn-success" role="button">Refresh from Arbor (might take ten minutes or so, be patient!)</a></div>
     
+    			<div class="card-text"><a href="manage_departments.php" class="btn btn-primary" role="button">Manage departments</a></div>
+    
     			<div class="card-text"><a href="manage_subjects.php" class="btn btn-primary" role="button">Manage subjects and groups</a></div>
     
     			<div class="card-text"><a href="manage_topics.php" class="btn btn-primary" role="button">Manage topics</a></div>

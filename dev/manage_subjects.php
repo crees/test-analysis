@@ -12,7 +12,7 @@ if (isset($_GET['removeGroup'])) {
         (new Subject([
             Subject::NAME => $_POST['newsubjectname'],
             Subject::CODE => $_POST['newsubjectcode'],
-            Subject::DEPARTMENT_ID => 0, // Stub default department for now
+            Subject::DEPARTMENT_ID => $_POST['newsubjectdept'],
         ]))->commit();
     }
     
@@ -20,7 +20,13 @@ if (isset($_GET['removeGroup'])) {
         if (!empty($value)) {
             if (str_contains($k, "subject-add-group-")) {
                 $subject = Subject::retrieveByDetail(Subject::ID, str_replace("subject-add-group-", "", $k))[0];
-                $subject->addMember(TeachingGroup::retrieveByDetail(TeachingGroup::ID, $value)[0]);
+                foreach ($value as $gp) {
+                    $tGroups = TeachingGroup::retrieveByDetail(TeachingGroup::ID, $gp);
+                    if (empty($tGroups)) {
+                        break;
+                    }
+                    $subject->addMember($tGroups[0]);
+                }
             } elseif (str_contains($k, "subject-baseline-")) {
                 $subject = Subject::retrieveByDetail(Subject::ID, str_replace("subject-baseline-", "", $k))[0];
                 $subject->setBaseLine($value);
@@ -32,6 +38,10 @@ if (isset($_GET['removeGroup'])) {
             } elseif (str_contains($k, "subject-name-")) {
                 $subject = Subject::retrieveByDetail(Subject::ID, str_replace("subject-name-", "", $k))[0];
                 $subject->setName($value);
+                $subject->commit();
+            } elseif (str_contains($k, "subject-dept-")) {
+                $subject = Subject::retrieveByDetail(Subject::ID, str_replace("subject-dept-", "", $k))[0];
+                $subject->setDepartmentId($value);
                 $subject->commit();
             }
         }
@@ -65,7 +75,7 @@ if (isset($_GET['removeGroup'])) {
     </nav>
 <form method="post">
 <table class="table table-sm table-hover">
-<thead><tr><th>Code</th><th>Name</th><th>Baseline source</th><th>Groups (click to remove)</th><th>Add group</th></tr></thead>
+<thead><tr><th>Code</th><th>Name</th><th>Department</th><th>Baseline source</th><th>Groups (click to remove)</th><th>Add group</th><th>Save</th></tr></thead>
 <?php
 
 // Let's get the List of baseline subject IDs
@@ -81,49 +91,75 @@ foreach (Baseline::retrieveAll(Baseline::MIS_ASSESSMENT_ID) as $b) {
 }
 
 $orphanedGroups = TeachingGroup::retrieveAll(TeachingGroup::NAME);
-foreach (Subject::retrieveAll(Subject::NAME) as $s) {
-    $allGroups = TeachingGroup::retrieveAll(TeachingGroup::NAME);
-    echo "<tr>";
-    echo View::makeTextBoxCell("subject-code-{$s->getId()}", $s->get(Subject::CODE));
-    echo View::makeTextBoxCell("subject-name-{$s->getId()}", $s->get(Subject::NAME));
-    $names = [];
-    foreach ($s->getTeachingGroups() as $g) {
-        array_push($names, "<a href=\"?removeGroup=" . $g->getId() . "&removeFromSubject=" . $s->getId() . "\">" . $g->getName() . "</a>");
-        unset($allGroups[array_search($g, $allGroups)]);
-        if (($o = array_search($g, $orphanedGroups)) !== FALSE) {
-            unset($orphanedGroups[$o]);
+$departments = Department::retrieveAll(Department::NAME);
+foreach ($departments as $department) {
+    foreach (Subject::retrieveByDetail(Subject::DEPARTMENT_ID, $department->getId(), Subject::NAME) as $s) {
+        $allGroups = TeachingGroup::retrieveAll(TeachingGroup::NAME);
+        echo "<tr>";
+        echo View::makeTextBoxCell("subject-code-{$s->getId()}", $s->get(Subject::CODE));
+        echo View::makeTextBoxCell("subject-name-{$s->getId()}", $s->get(Subject::NAME));
+        echo "<td>";
+        echo "<select name=\"subject-dept-{$s->getid()}\" onchange=\"this.form.submit()\">";
+        foreach ($departments as $dept) {
+            if ($dept == $department) {
+                $selected = "selected";
+            } else {
+                $selected = "";
+            }
+            echo "<option value=\"" . $dept->getId() . "\" $selected>" . $dept->getName() . "</option>";
         }
-    }
-    echo "<td><select name=\"subject-baseline-" . $s->getId() . "\" onchange=\"this.form.submit()\">";
-    if (empty($s->get(Subject::BASELINE_ID))) {
-        echo "<option value=\"\" selected>No baseline selected</option>";
-    }
-    foreach ($baselines as $bId => $bName) {
-        if ($s->get(Subject::BASELINE_ID) == $bId) {
-            $selected = "selected";
-        } else {
-            $selected = "";
+        echo "</select>";
+        echo "</td>";
+        $names = [];
+        foreach ($s->getTeachingGroups() as $g) {
+            array_push($names, "<a href=\"?removeGroup=" . $g->getId() . "&removeFromSubject=" . $s->getId() . "\">" . $g->getName() . "</a>");
+            unset($allGroups[array_search($g, $allGroups)]);
+            if (($o = array_search($g, $orphanedGroups)) !== FALSE) {
+                unset($orphanedGroups[$o]);
+            }
         }
-        echo "<option value=\"$bId\" $selected>$bName</option>";
+        echo "<td><select name=\"subject-baseline-" . $s->getId() . "\" onchange=\"this.form.submit()\">";
+        if (empty($s->get(Subject::BASELINE_ID))) {
+            echo "<option value=\"\" selected>No baseline selected</option>";
+        }
+        foreach ($baselines as $bId => $bName) {
+            if ($s->get(Subject::BASELINE_ID) == $bId) {
+                $selected = "selected";
+            } else {
+                $selected = "";
+            }
+            echo "<option value=\"$bId\" $selected>$bName</option>";
+        }
+        echo "</select></td>";
+        
+        echo "<td>" . implode(", ", $names) . "</td>";
+
+        echo "<td><select name=\"subject-add-group-" . $s->getId() . "[]\" multiple>";
+        echo "<option value=\"\" selected>Add Group to " . $s->getName() . "</option>";
+        foreach ($allGroups as $g) {
+            echo "<option value=\"" . $g->getId() . "\">" . $g->getName() . "</option>";
+        }
+        echo "</select></td>";
+        
+        echo "<td><input type=\"submit\" value=\"Attach selected groups\"></td>";
+
+        echo "</tr>";
     }
-    echo "</select></td>";
-    
-    echo "<td>" . implode(", ", $names) . "</td>";
-    
-    echo "<td><select name=\"subject-add-group-" . $s->getId() . "\" onchange=\"this.form.submit()\">";
-    echo "<option value=\"\" selected>Add Group to " . $s->getName() . "</option>";
-    foreach ($allGroups as $g) {
-        echo "<option value=\"" . $g->getId() . "\">" . $g->getName() . "</option>";
-    }
-    echo "</select></td>";
-    echo "</tr>";
 }
 ?>
 <tr>
 	<td><input class="form-control" type="text" name="newsubjectcode"></td>
 
 	<td><input class="form-control" type="text" name="newsubjectname"></td>
-	
+<?php
+        echo "<td>";
+        echo "<select name=\"newsubjectdept\">";
+        foreach ($departments as $dept) {
+            echo "<option value=\"" . $dept->getId() . "\">" . $dept->getName() . "</option>";
+        }
+        echo "</select>";
+        echo "</td>";
+?>
 	<td><input class="form-control" type="submit" value="Add subject"></td>
 	
 	<td>&nbsp;</td>

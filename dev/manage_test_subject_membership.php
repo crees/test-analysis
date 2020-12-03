@@ -48,42 +48,30 @@ if (isset($_GET['removeTest'])) {
 <table class="table table-sm table-hover">
 <thead><tr><th>Test</th><th>Subjects (click to remove)</th><th>Add subject</th></tr></thead>
 <?php
-
-$orphanedSubjects = Subject::retrieveAll(Subject::NAME);
-foreach (Test::retrieveAll(Subject::NAME) as $t) {
-    $allSubjects = Subject::retrieveAll(Subject::NAME);
-    echo "<tr>";
-    echo "<td>{$t->getName()}";
-    $names = [];
-    foreach ($t->getSubjects() as $s) {
-        array_push($names, "<a href=\"?removeTest=" . $t->getId() . "&removeFromSubject=" . $s->getId() . "\">" . $s->getName() . "</a>");
-        unset($allSubjects[array_search($s, $allSubjects)]);
-        if (($o = array_search($s, $orphanedSubjects)) !== FALSE) {
-            unset($orphanedSubjects[$o]);
+foreach (Department::retrieveAll(Department::NAME) as $dept) {
+    foreach (Test::retrieveByDetail(Test::DEPARTMENT_ID, $dept->getId(), Test::NAME) as $t) {
+        $allSubjects = Subject::retrieveByDetail(Subject::DEPARTMENT_ID, $dept->getId(), Subject::NAME);
+        echo "<tr>";
+        echo "<td>{$t->getName()}";
+        $names = [];
+        foreach ($t->getSubjects() as $s) {
+            array_push($names, "<a href=\"?removeTest=" . $t->getId() . "&removeFromSubject=" . $s->getId() . "\">" . $s->getName() . "</a>");
+            unset($allSubjects[array_search($s, $allSubjects)]);
         }
+        echo "<td>" . implode(", ", $names) . "</td>";
+        
+        echo "<td><select name=\"subject-add-test-" . $t->getId() . "\" onchange=\"this.form.submit()\">";
+        echo "<option value=\"\" selected>Add subject to " . $t->getName() . "</option>";
+        foreach ($allSubjects as $s) {
+            echo "<option value=\"" . $s->getId() . "\">" . $s->getName() . "</option>";
+        }
+        echo "</select></td>";
+        echo "</tr>";
     }
-    echo "<td>" . implode(", ", $names) . "</td>";
-    
-    echo "<td><select name=\"subject-add-test-" . $t->getId() . "\" onchange=\"this.form.submit()\">";
-    echo "<option value=\"\" selected>Add subject to " . $t->getName() . "</option>";
-    foreach ($allSubjects as $s) {
-        echo "<option value=\"" . $s->getId() . "\">" . $s->getName() . "</option>";
-    }
-    echo "</select></td>";
-    echo "</tr>";
 }
 ?>
 </table>
 </form>
-<?php
-if (!empty($orphanedSubjects)) {
-    echo "<div>Subjects not assigned any tests:</div>";
-
-    foreach ($orphanedSubjects as $s) {
-        echo "<div>" . $s->getName() . "</div>";
-    }
-}
-?>
 </div>
 </body>
 </html>

@@ -4,6 +4,7 @@ namespace TestAnalysis;
 class Test extends DatabaseCollection
 {
     const CUSTOM_GRADE_BOUNDARIES = 'custom_grade_boundaries';
+    const DEPARTMENT_ID = 'Department_id';
     const TOTAL_A = 'total_a';
     const TOTAL_B = 'total_b';
     const TARGETS = 'targets';
@@ -12,6 +13,7 @@ class Test extends DatabaseCollection
     {
         $this->details[self::ID] = $details[self::ID] ?? null;
         $this->details[self::NAME] = $details[self::NAME];
+        $this->details[self::DEPARTMENT_ID] = $details[self::DEPARTMENT_ID];
         $this->details[self::TOTAL_A] = $details[self::TOTAL_A];
         $this->details[self::TOTAL_B] = $details[self::TOTAL_B];
         $this->details[self::CUSTOM_GRADE_BOUNDARIES] = self::parseBoolean($details, self::CUSTOM_GRADE_BOUNDARIES);

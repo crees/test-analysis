@@ -4,7 +4,14 @@ namespace TestAnalysis;
 require "bin/classes.php";
 require "dev/upgrade_database.php";
 
-$allSubjects = Subject::retrieveAll(Subject::NAME);
+$departments = Department::retrieveAll(Department::NAME);
+$allSubjects = [];
+foreach ($departments as $d) {
+    foreach (Subject::retrieveByDetail(Subject::DEPARTMENT_ID, $d->getId(), Subject::NAME) as $s) {
+        $s->setName("{$d->getName()}: {$s->getName()}");
+        array_push($allSubjects, $s);
+    }
+}
 
 if (isset($_GET['subject']) && !empty($_GET['subject'])) {
     $subject = Subject::retrieveByDetail(Subject::ID, $_GET['subject'])[0];

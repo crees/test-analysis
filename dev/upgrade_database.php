@@ -74,3 +74,9 @@ if ($db->dosql("SHOW TABLES LIKE 'Department'")->num_rows < 1) {
     
     $db->dosql("UPDATE Subject SET Department_id = 1;");
 }
+
+/* Version 7 to 8 upgrade */
+
+if ($db->dosql("SHOW COLUMNS FROM `Test` LIKE 'Department_id'")->num_rows < 1) {
+    $db->dosql("ALTER TABLE `Test` ADD Department_id INT NOT NULL DEFAULT 0;");
+}
