@@ -242,7 +242,7 @@ eof;
 		                    }
 		                }
 		            }
-		            echo "<td $cellColour>$grade</td>";
+		            echo "<td id=\"mlg-{$s->getId()}\" $cellColour>$grade</td>";
 		        } else {
 		            echo "<td>&nbsp;</td>";
 		        }
@@ -268,7 +268,8 @@ function save(testId, studentId) {
 	
 	elementA = $('#' + scoreA + '-' + testId + '-' + studentId);
 	elementB = $('#' + scoreB + '-' + testId + '-' + studentId);
-
+	mlg = $('#' + 'mlg-' + studentId)
+	
 	if (elementA.length == 0) {
 		// There is no element A
 		resultA = 0;
@@ -293,6 +294,10 @@ function save(testId, studentId) {
 		return;
 	}	
 	elementB[0].style.color = '#FFfa00';
+
+	if (mlg.length > 0) {
+		mlg[0].innerHTML = '';
+	}
 
 	var xhr = new XMLHttpRequest();
     xhr.open("POST", 'async/newscore.php', true);
