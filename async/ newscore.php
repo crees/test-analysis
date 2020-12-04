@@ -6,7 +6,7 @@ require "../bin/classes.php";
 if (!isset($_POST['studentId']) || !isset($_POST['testId'])) {
     die("Why are you trying to open this?");
 }
-// studentId=" + studentId + "&testId=" + testId + "&a=" + resultA + "&b=" + resultB
+// studentId=" + studentId + "&testId=" + testId + "&a=" + resultA + "&b=" + resultB + "&subjectId=" + $subjectId
 
 $studentId = $_POST['studentId'];
 
@@ -14,11 +14,64 @@ if (!Config::is_staff($auth_user)) {
     die("nope");
 }
 
-(new TestResult([
+$subject = Subject::retrieveByDetail(Subject::ID, $_POST['subjectId'])[0];
+$student = Student::retrieveByDetail(Student::ID, $_POST['studentId'])[0];
+$t = Test::retrieveByDetail(Test::ID, $_POST['testId']);
+
+if (empty($t)) {
+    die("Other failure");
+}
+
+$t = $t[0];
+
+if ($_POST['a'] > $t->get(Test::TOTAL_A) || $_POST['b'] > $t->get(Test::TOTAL_B)) {
+    die("Total out of range");
+}
+
+$oldResult = $t->getResult($student);
+
+$result = new TestResult([
     TestResult::ID => null,
     TestResult::SCORE_A => $_POST['a'],
     TestResult::SCORE_B => $_POST['b'],
     TestResult::STUDENT_ID => $_POST['studentId'],
     TestResult::TEST_ID => $_POST['testId']
-]))->commit();
-    
+]);
+
+$result->commit();
+
+// If the old result was put in less than five minutes ago, we'll just overwrite
+
+if (!is_null($oldResult) && strtotime($oldResult->get(TestResult::RECORDED_TS)) + 43200 > time()) {
+    echo "Deleting {$oldResult->getId()}";
+    TestResult::delete($oldResult->getId());
+}
+
+if ($t->get(Test::TOTAL_A) > 0) {
+    echo ("percent-{$t->getId()}-$studentId:" . ($_POST['a'] * 100 / $t->get(Test::TOTAL_A)) . ",");
+} else {
+    echo ("percent-{$t->getId()}-$studentId:" . ($_POST['b'] * 100 / $t->get(Test::TOTAL_B)) . ",");
+}
+
+$baseline = $student->getShortIndicative($subject);
+$grade = $t->calculateGrade($result, $subject);
+
+if (!empty($baseline)) {
+    if ($grade == $baseline) {
+        $cellColour = "table-warning";
+    } else {
+        foreach ($t->getGradeBoundaries($subject) as $boundary) {
+            if ($baseline == $boundary->getName()) {
+                $cellColour = "table-danger";
+                break;
+            }
+            if ($grade == $boundary->getName()) {
+                // Greater
+                $cellColour = "table-success";
+                break;
+            }
+        }
+    }
+}
+
+echo ("grade-{$t->getId()}-$studentId:$grade:$cellColour");

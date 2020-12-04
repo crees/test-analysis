@@ -179,13 +179,14 @@ eof;
 		            }
 		            echo View::makeTextBoxCell(TestResult::SCORE_B . "-" . $t->getId() . "-" . $s->getId(), is_null($result) ? "" : $result->get(TestResult::SCORE_B), $tabIndex, "number", "min=\"0\" max=\"{$t->get(Test::TOTAL_B)}\" onchange=\"save('{$t->getId()}', '{$s->getId()}', '" . TestResult::SCORE_B . "')\"");
 		            if (is_null($result)) {
-		                echo "<td>&nbsp;</td><td>&nbsp;</td>";
+		                echo "<td id=\"percent-{$t->getId()}-{$s->getId()}\">&nbsp;</td><td id=\"grade-{$t->getId()}-{$s->getId()}\">&nbsp;</td>";
 		            } else {
 		                if ($t->get(Test::TOTAL_A) > 0) {
 		                    $percent_A = $result->get(TestResult::SCORE_A) * 100 / $t->get(Test::TOTAL_A);
 		                } else {
 		                    $percent_A = $result->get(TestResult::SCORE_B) * 100 / $t->get(Test::TOTAL_B);
 		                }
+		                // Don't forget the Javascript below must match!
 		                switch (floor($percent_A/33)) {
 		                case 0:
 		                    $sAcolour = "text-danger";
@@ -197,8 +198,8 @@ eof;
 		                    $sAcolour = "text-success";
 		                    break;
 		                }
-		                echo "<td class=\"$sAcolour\">" . round($percent_A, 0) . "</td>";
-		                $grade = $t->calculateGrade($result, $subject );
+		                echo "<td id=\"percent-{$t->getId()}-{$s->getId()}\" class=\"$sAcolour\">" . round($percent_A, 0) . "</td>";
+		                $grade = $t->calculateGrade($result, $subject);
 		                $cellColour = "";
 		                if (!empty($baseline)) {
 		                    if ($grade == $baseline) {
@@ -217,7 +218,7 @@ eof;
 		                        }
 		                    }
 		                }
-		                echo "<td $cellColour>$grade</td>";
+		                echo "<td $cellColour id=\"grade-{$t->getId()}-{$s->getId()}\">$grade</td>";
 		            }
 		            $tabIndex += $studentCount;
 		        }
@@ -272,18 +273,26 @@ function save(testId, studentId) {
 		// There is no element A
 		resultA = 0;
 	} else {
-		resultA = elementA[0].value;
+		resultA = parseInt(elementA[0].value);
 	}
-	resultB = elementB[0].value;
+	resultB = parseInt(elementB[0].value);
 
-	if (resultA === '' || resultB === '') {
+	if (isNaN(resultA) || isNaN(resultB)) {
 		return;
 	}
 
 	if (resultA != 0) {
-		elementA[0].style.color = '#FF0000';
+		if ((resultA > elementA[0].max) || (resultA < elementA[0].min)) {
+			elementA[0].style.color = '#FF0000';
+			return;
+		}
+		elementA[0].style.color = '#FFfa00';
 	}
-	elementB[0].style.color = '#FF0000';
+	if (resultB > elementB[0].max || resultB < elementB[0].min) {
+		elementB[0].style.color = '#FF0000';
+		return;
+	}	
+	elementB[0].style.color = '#FFfa00';
 
 	var xhr = new XMLHttpRequest();
     xhr.open("POST", 'async/newscore.php', true);
@@ -292,17 +301,54 @@ function save(testId, studentId) {
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     xhr.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
-          saved(elementA, elementB);
+          saved(elementA, elementB, this.responseText);
         }
+        console.log(this.responseText);
     };
-    xhr.send("studentId=" + studentId + "&testId=" + testId + "&a=" + resultA + "&b=" + resultB);
+    xhr.send("studentId=" + studentId + "&testId=" + testId + "&a=" + resultA + "&b=" + resultB + "&subjectId=<?= $subject->getId() ?>");
 }
 
-function saved(a, b) {
+function saved(a, b, responseText) {
+	if (responseText.includes('Total out of range')) {
+		if (a.length != 0) {
+			a[0].style.color = '#ffa500';
+		}
+		b[0].style.color = '#ffa500';
+		return;
+	}
+	if (responseText.includes('Other failure')) {
+		window.alert('Save failed for the red scores.  Please email <?= Config::site_supportemail ?> and say what you were trying to do.');
+		return;
+	}
 	if (a.length != 0) {
 		a[0].style.color = '#00ff00';
 	}
-	b.style.color = '#00ff00';
+	b[0].style.color = '#00ff00';
+	changes = responseText.split(',');
+	for (i = 0; i < changes.length; i++) {
+		change = changes[i].split(':');
+		$('#' + change[0])[0].innerHTML = change[1];
+		colourise(change);
+	}
+}
+
+function colourise(arr) {
+	element = $('#' + arr[0])[0];
+	if (arr[0].includes('percent')) {
+		switch(Math.trunc(arr[1] / 33)) {
+		case 0:
+			element.className = 'text-danger';
+			break;
+		case 1:
+			element.className = 'text-warning';
+			break;
+		default:
+			element.className = 'text-success';
+			break;
+		}
+	} else if (arr[0].includes('grade')) {
+		element.className = arr[2];
+	}
 }
 
 </script>
