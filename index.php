@@ -169,8 +169,16 @@ eof;
 		        echo "<td>" . $s->getTeachingGroup($subject) . "</td>";
 		        $baseline = $s->getShortIndicative($subject);
 		        echo "<td>{$s->getShortIndicative($subject)}</td>";
+		        $results = TestResult::retrieveByDetail(TestResult::STUDENT_ID, $s->getId(), TestResult::RECORDED_TS . ' DESC');
 		        foreach ($tests as $t) {
-		            $result = $t->getResult($s);
+		            $result = null;
+		            foreach ($results as $r) {
+		                // Results are sorted by latest timestamp first, so just take first result
+		                if ($r->get(TestResult::TEST_ID) == $t->getId()) {
+		                    $result = $r;
+		                    break;
+		                }
+		            }
 		            if ($t->get(Test::TOTAL_A) > 0) {
     		            echo View::makeTextBoxCell(TestResult::SCORE_A . "-" . $t->getId() . "-" . $s->getId(), is_null($result) ? "" : $result->get(TestResult::SCORE_A), $tabIndex, "number", "min=\"0\" max=\"{$t->get(Test::TOTAL_A)}\" onchange=\"save('{$t->getId()}', '{$s->getId()}', '" . TestResult::SCORE_A . "')\"");
     		            $tabIndex++;
