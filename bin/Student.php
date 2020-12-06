@@ -46,15 +46,11 @@ class Student extends DatabaseCollection
         }
         
         // Get all baselines
-        $myBaseLines = Baseline::retrieveByDetail(Baseline::STUDENT_ID, $this->getId());
+        $myBaseLines = Baseline::retrieveByDetails([Baseline::STUDENT_ID, Baseline::MIS_ASSESSMENT_ID], [$this->getId(), $subject->get(Subject::BASELINE_ID)]);
         
         // Now, find the baseline for the Subject
         
-        foreach ($myBaseLines as $b) {
-            if ($subject->get(Subject::BASELINE_ID) == $b->get(Baseline::MIS_ASSESSMENT_ID)) {
-                return $b;
-            }
-        }
+        return $myBaseLines[0] ?? "";
     }
     
     public function getIgr(Subject $subject) {
