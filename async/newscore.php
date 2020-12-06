@@ -48,9 +48,9 @@ if (!is_null($oldResult) && strtotime($oldResult->get(TestResult::RECORDED_TS)) 
 }
 
 if ($t->get(Test::TOTAL_A) > 0) {
-    echo ("percent-{$t->getId()}-$studentId:" . ($_POST['a'] * 100 / $t->get(Test::TOTAL_A)) . ",");
+    echo ("percent-{$t->getId()}-$studentId:" . round($_POST['a'] * 100 / $t->get(Test::TOTAL_A), 0) . ",");
 } else {
-    echo ("percent-{$t->getId()}-$studentId:" . ($_POST['b'] * 100 / $t->get(Test::TOTAL_B)) . ",");
+    echo ("percent-{$t->getId()}-$studentId:" . round($_POST['b'] * 100 / $t->get(Test::TOTAL_B), 0) . ",");
 }
 
 $baseline = $student->getShortIndicative($subject);
