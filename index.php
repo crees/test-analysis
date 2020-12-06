@@ -168,7 +168,7 @@ eof;
 		        echo "<th scope=\"row\"><a href=\"student_individual_scores.php?student=" . $s->getId() . "\">" . $s->getName() . "</a></th>\n";
 		        echo "<td>" . $s->getTeachingGroup($subject) . "</td>";
 		        $baseline = $s->getShortIndicative($subject);
-		        echo "<td>{$s->getShortIndicative($subject)}</td>";
+		        echo "<td>$baseline</td>";
 		        $results = TestResult::retrieveByDetail(TestResult::STUDENT_ID, $s->getId(), TestResult::RECORDED_TS . ' DESC');
 		        foreach ($tests as $t) {
 		            $result = null;
