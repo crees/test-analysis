@@ -10,6 +10,7 @@ abstract class DatabaseCollection
     protected static $db = null; 
     
     protected $details;
+    protected $tmplabels;
     
     public static function parseBoolean(Array $details, String $key) {
         if (isset($details[$key])) {
@@ -133,6 +134,21 @@ abstract class DatabaseCollection
     
     public function setName(String $name) { $this->details[self::NAME] = $name; }
 
+    public function setLabel($name, $data) {
+        if (empty($this->tmplabels)) {
+            $this->tmplabels = [];
+        }
+        $this->tmplabels[$name] = $data;
+    }
+    
+    public function getLabels() {
+        return $this->tmplabels;
+    }
+    
+    public function getLabel($name) {
+        return $this->getLabels()[$name] ?? null;
+    }
+    
     public function __construct()
     {}
 

@@ -19,10 +19,16 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
     $tests = $subject->getTests();
     
     if (isset($_GET['teaching_group']) && !empty($_GET['teaching_group'])) {
-        $teaching_group = $_GET['teaching_group'];
-        $students = TeachingGroup::retrieveByDetail(TeachingGroup::ID, $teaching_group)[0]->getStudents();
+        $teaching_group = TeachingGroup::retrieveByDetail(TeachingGroup::ID, $_GET['teaching_group'])[0];
+        $students = $teaching_group->getStudents();
     } else {
-        $students = $subject->getStudents();
+        $students = [];
+        foreach ($teachingGroups as $group) {
+            foreach ($group->getStudents() as $gStudent) {
+                $gStudent->setLabel('group', $group);
+                array_push($students, $gStudent);
+            }
+        }
     }
     if (isset($_POST['form_serial']) && $_POST['form_serial'] == $_SESSION['form_serial'] - 1) {
         foreach ($tests as $t) {
@@ -140,7 +146,7 @@ EOF;
 eof;
 		    foreach ($tests as $t) {
 		        if (isset($teaching_group)) {
-		          $link = "feedback_sheet.php?teaching_group=$teaching_group&subject={$subject->getId()}&test={$t->getId()}";
+		            $link = "feedback_sheet.php?teaching_group={$teaching_group->getId()}&subject={$subject->getId()}&test={$t->getId()}";
 		          echo "<th colspan=\"4\" class=\"text-center\"><a href=\"$link\">{$t->getName()}</a></th>\n";
 		        } else {
 		          echo "<th colspan=\"4\" class=\"text-center\">{$t->getName()}</th>\n";
@@ -166,7 +172,9 @@ eof;
 		        $tabIndex = $firstTabIndex;
 		        echo "<tr>\n";
 		        echo "<th scope=\"row\"><a href=\"student_individual_scores.php?student=" . $s->getId() . "\">" . $s->getName() . "</a></th>\n";
-		        echo "<td>" . $s->getTeachingGroup($subject) . "</td>";
+		        echo "<td>";
+		        echo ($s->getLabel('group') ?? $teaching_group)->getName();
+		        echo "</td>";
 		        $baseline = $s->getShortIndicative($subject);
 		        echo "<td>$baseline</td>";
 		        $results = TestResult::retrieveByDetail(TestResult::STUDENT_ID, $s->getId(), TestResult::RECORDED_TS . ' DESC');
