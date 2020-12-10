@@ -30,36 +30,6 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
             }
         }
     }
-    if (isset($_POST['form_serial']) && $_POST['form_serial'] == $_SESSION['form_serial'] - 1) {
-        foreach ($tests as $t) {
-            $testId = $t->getId();
-            foreach ($students as $s) {
-                $studentId = $s->getId();
-                $currentResult = $t->getResult($s);
-                $newscore = [];
-                foreach ([TestResult::SCORE_A, TestResult::SCORE_B] as $res) {
-                    if ($_POST["$res-$testId-$studentId"] !== "") {
-                        $newscore[$res] = $_POST["$res-$testId-$studentId"];
-                    }
-                }
-                if (isset($newscore[TestResult::SCORE_A]) && isset($newscore[TestResult::SCORE_B])) {
-                    // New scores entered
-                    if (is_null($currentResult) ||
-                        $currentResult->get(TestResult::SCORE_A) != $newscore[TestResult::SCORE_A] ||
-                        $currentResult->get(TestResult::SCORE_B) != $newscore[TestResult::SCORE_B]
-                        )
-                        (new TestResult([
-                                        TestResult::ID => null,
-                                        TestResult::SCORE_A => $newscore[TestResult::SCORE_A],
-                                        TestResult::SCORE_B => $newscore[TestResult::SCORE_B],
-                                        TestResult::STUDENT_ID => $studentId,
-                                        TestResult::TEST_ID => $testId
-                            ])
-                        )->commit();
-                }
-            }
-        }
-    }
 }
 
 ?>
@@ -134,8 +104,6 @@ EOF;
 		        return;
 		    }
 		    echo <<< eof
-        <form method="POST">
-            <input type="submit" class="form-control btn btn-warning" value="No need to save any more!  Click here and *let CMR know if new results don't go green.*">
             <div class="table-responsive table-95 table-stickyrow">
             <table class="table table-bordered table-sm table-hover">
                 <thead>
@@ -185,7 +153,7 @@ eof;
 		            if ($t->get(Test::TOTAL_A) > 0) {
 		                echo "<td class=\"score-input\" id=\"" . TestResult::SCORE_A . "-{$t->getId()}-{$s->getId()}\">" . (is_null($result) ? "" : $result->get(TestResult::SCORE_A)) . "</td>";
 		            } else {
-		                echo ("<td>&nbsp;<input type=\"hidden\" name=\"" . TestResult::SCORE_A . "-" . $t->getId() . "-" . $s->getId() . "\" value=\"0\"></td>");
+		                echo ("<td>&nbsp;</td>");
 		            }
 		            echo "<td class=\"score-input\" id=\"" . TestResult::SCORE_B . "-{$t->getId()}-{$s->getId()}\">" . (is_null($result) ? "" : $result->get(TestResult::SCORE_B)) . "</td>";
 		            if (is_null($result)) {
@@ -250,8 +218,6 @@ eof;
 		    echo <<< eof
             </table>
             </div>
-            <input type="hidden" name="form_serial" value="{$_SESSION['form_serial']}">
-        </form>
 eof;
 		}
 		?>
