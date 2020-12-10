@@ -120,7 +120,7 @@ eof;
 		          echo "<th colspan=\"4\" class=\"text-center\">{$t->getName()}</th>\n";
 		        }
 		    }
-		    echo "<th scope=\"col\">MLG</th>";
+		    echo "<th scope=\"col\">CWAG</th>";
 		    echo "</tr>\n<tr><th scope=\"col\">Name</th><th>Group</th><th>Ind.</th>";
 		    
 		    foreach ($tests as $t) {
@@ -188,7 +188,7 @@ eof;
 		            }
 		        }
 		        if (!is_null($grade = $s->getMostLikelyGrade($subject))) {
-		            // MLG
+		            // CWAG
 		            $cellColour = "";
 		            if (!empty($baseline)) {
 		                if ($grade == $baseline) {
@@ -207,7 +207,7 @@ eof;
 		                    }
 		                }
 		            }
-		            echo "<td id=\"mlg-{$s->getId()}\" $cellColour>$grade</td>";
+		            echo "<td id=\"cwag-{$s->getId()}\" $cellColour>$grade</td>";
 		        } else {
 		            echo "<td>&nbsp;</td>";
 		        }
@@ -260,7 +260,7 @@ function save(testId, studentId) {
 	// Get both
 	elementA = $('input#' + scoreA + '-' + testId + '-' + studentId);
 	elementB = $('input#' + scoreB + '-' + testId + '-' + studentId);
-	mlg = $('#' + 'mlg-' + studentId);
+	cwag = $('#' + 'cwag-' + studentId);
 	
 	if (elementA.length == 0) {
 		// There is no element A
@@ -279,8 +279,8 @@ function save(testId, studentId) {
 	}
 	elementB[0].style.color = '#FFfa00';
 
-	if (mlg.length > 0) {
-		mlg[0].innerHTML = '';
+	if (cwag.length > 0) {
+		cwag[0].innerHTML = '';
 	}
 
 	var xhr = new XMLHttpRequest();

@@ -69,7 +69,7 @@ class Student extends DatabaseCollection
         return "";
     }
     
-    public function getMostLikelyGrade(Subject $subject) {
+    public function getAverageGrade(Subject $subject) {
         $percentages_b = [];
         foreach ($subject->getTests() as $t) {
             $result = $t->getResult($this);
