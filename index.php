@@ -108,9 +108,9 @@ EOF;
             <table class="table table-bordered table-sm table-hover">
                 <thead>
                     <tr>
-                        <th rowspan="2" scope="col">Name</th>
-                        <th rowspan="2" scope="col">Group</th>
-                        <th rowspan="2" scope="col">Ind.</th>
+                        <th scope="col">&nbsp;</th>
+                        <th scope="col">&nbsp;</th>
+                        <th scope="col">&nbsp;</th>
 eof;
 		    foreach ($tests as $t) {
 		        if (isset($teaching_group)) {
@@ -120,8 +120,8 @@ eof;
 		          echo "<th colspan=\"4\" class=\"text-center\">{$t->getName()}</th>\n";
 		        }
 		    }
-		    echo "<th rowspan=\"2\" scope=\"col\">MLG</th>";
-		    echo "</tr>\n<tr>";
+		    echo "<th scope=\"col\">MLG</th>";
+		    echo "</tr>\n<tr><th scope=\"col\">Name</th><th>Group</th><th>Ind.</th>";
 		    
 		    foreach ($tests as $t) {
 		        if ($t->get(Test::TOTAL_A) > 0) {
@@ -130,7 +130,7 @@ eof;
 		            echo "<td>&nbsp;</td><td>Total</td><td>%</td><td>Grd</td>\n";
 		        }
 		    }
-		    echo "</tr>\n</thead>\n";
+		    echo "<td>&nbsp;</td></tr>\n</thead>\n";
 		    
 		    foreach ($students as $s) {
 		        echo "<tr>\n";
