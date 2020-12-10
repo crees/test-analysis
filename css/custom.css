@@ -88,6 +88,10 @@ table a:hover {
 	padding: .3rem 1.25rem;
 }
 
+td.nopadding {
+	padding: 0;
+}
+
 /* Remove spinners from number inputs */
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,

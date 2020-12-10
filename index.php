@@ -70,7 +70,7 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
 <?php require "bin/head.php"; ?>
 </head>
 
-<body>
+<body onload="inputify()">
 	<div class="container">
 		<?php require "bin/navbar.php"; ?>
 		<form method="GET">
@@ -146,7 +146,7 @@ EOF;
 eof;
 		    foreach ($tests as $t) {
 		        if (isset($teaching_group)) {
-		            $link = "feedback_sheet.php?teaching_group={$teaching_group->getId()}&subject={$subject->getId()}&test={$t->getId()}";
+		          $link = "feedback_sheet.php?teaching_group={$teaching_group->getId()}&subject={$subject->getId()}&test={$t->getId()}";
 		          echo "<th colspan=\"4\" class=\"text-center\"><a href=\"$link\">{$t->getName()}</a></th>\n";
 		        } else {
 		          echo "<th colspan=\"4\" class=\"text-center\">{$t->getName()}</th>\n";
@@ -164,12 +164,7 @@ eof;
 		    }
 		    echo "</tr>\n</thead>\n";
 		    
-		    $firstTabIndex = 0;
-		    $studentCount = count($students);
-		    
 		    foreach ($students as $s) {
-		        $firstTabIndex++;
-		        $tabIndex = $firstTabIndex;
 		        echo "<tr>\n";
 		        echo "<th scope=\"row\"><a href=\"student_individual_scores.php?student=" . $s->getId() . "\">" . $s->getName() . "</a></th>\n";
 		        echo "<td>";
@@ -188,12 +183,11 @@ eof;
 		                }
 		            }
 		            if ($t->get(Test::TOTAL_A) > 0) {
-    		            echo View::makeTextBoxCell(TestResult::SCORE_A . "-" . $t->getId() . "-" . $s->getId(), is_null($result) ? "" : $result->get(TestResult::SCORE_A), $tabIndex, "number", "min=\"0\" max=\"{$t->get(Test::TOTAL_A)}\" onchange=\"save('{$t->getId()}', '{$s->getId()}', '" . TestResult::SCORE_A . "')\"");
-    		            $tabIndex++;
+		                echo "<td class=\"score-input\" id=\"" . TestResult::SCORE_A . "-{$t->getId()}-{$s->getId()}\">" . (is_null($result) ? "" : $result->get(TestResult::SCORE_A)) . "</td>";
 		            } else {
 		                echo ("<td>&nbsp;<input type=\"hidden\" name=\"" . TestResult::SCORE_A . "-" . $t->getId() . "-" . $s->getId() . "\" value=\"0\"></td>");
 		            }
-		            echo View::makeTextBoxCell(TestResult::SCORE_B . "-" . $t->getId() . "-" . $s->getId(), is_null($result) ? "" : $result->get(TestResult::SCORE_B), $tabIndex, "number", "min=\"0\" max=\"{$t->get(Test::TOTAL_B)}\" onchange=\"save('{$t->getId()}', '{$s->getId()}', '" . TestResult::SCORE_B . "')\"");
+		            echo "<td class=\"score-input\" id=\"" . TestResult::SCORE_B . "-{$t->getId()}-{$s->getId()}\">" . (is_null($result) ? "" : $result->get(TestResult::SCORE_B)) . "</td>";
 		            if (is_null($result)) {
 		                echo "<td id=\"percent-{$t->getId()}-{$s->getId()}\">&nbsp;</td><td id=\"grade-{$t->getId()}-{$s->getId()}\">&nbsp;</td>";
 		            } else {
@@ -202,19 +196,7 @@ eof;
 		                } else {
 		                    $percent_A = $result->get(TestResult::SCORE_B) * 100 / $t->get(Test::TOTAL_B);
 		                }
-		                // Don't forget the Javascript below must match!
-		                switch (floor($percent_A/33)) {
-		                case 0:
-		                    $sAcolour = "text-danger";
-		                    break;
-		                case 1:
-		                    $sAcolour = "text-warning";
-		                    break;
-		                default:
-		                    $sAcolour = "text-success";
-		                    break;
-		                }
-		                echo "<td id=\"percent-{$t->getId()}-{$s->getId()}\" class=\"$sAcolour\">" . round($percent_A, 0) . "</td>";
+		                echo "<td id=\"percent-{$t->getId()}-{$s->getId()}\">" . round($percent_A, 0) . "</td>";
 		                $grade = $t->calculateGrade($result, $subject);
 		                $cellColour = "";
 		                if (!empty($baseline)) {
@@ -236,7 +218,6 @@ eof;
 		                }
 		                echo "<td $cellColour id=\"grade-{$t->getId()}-{$s->getId()}\">$grade</td>";
 		            }
-		            $tabIndex += $studentCount;
 		        }
 		        if (!is_null($grade = $s->getMostLikelyGrade($subject))) {
 		            // MLG
@@ -277,14 +258,43 @@ eof;
 	</div>
 	
 <script>
+const scoreA = '<?= TestResult::SCORE_A; ?>';
+const scoreB = '<?= TestResult::SCORE_B; ?>';
+const tests = [<?php foreach ($tests as $t) { echo "{$t->getId()}, ";} ?>];
+const students = [<?php foreach ($students as $s) { echo "{$s->getId()}, ";} ?>]
+
+function inputify() {
+	tds = $('td.score-input');
+	tabindex = 1;
+	for (t of tests) {
+		for (s of students) {
+			for (score of [scoreA, scoreB]) {
+    			id = [score, t, s].join('-');
+				elements = $('td#' + id)
+				if (elements.length == 0) {
+					continue;
+				}
+    			val = elements[0].innerHTML;
+    			if (val.match('[<>]')) {
+					// HTML present, something already there-- not sure how this can happen
+					console.log("Already HTML in " + id + ", weird!");
+					continue;
+    			}
+                //echo val, tabindex, "number", onchange=\"save('{$t->getId()}', '{$s->getId()}', '" . TestResult::SCORE_A . "')\"");
+    			elements[0].innerHTML = '<input class="form-control border-0 px-1" tabindex="' + tabindex + '" value="' + val + '" type="number" id="' + id + '" onchange="save(\'' + t + '\', \'' + s + '\')">';
+				elements[0].classList.add('nopadding');
+				tabindex++;
+    		}
+    		colourise([['percent', t, s].join('-')]);
+		}
+	}
+}
+
 function save(testId, studentId) {
 	// Get both
-	const scoreA = '<?= TestResult::SCORE_A; ?>';
-	const scoreB = '<?= TestResult::SCORE_B; ?>';
-	
-	elementA = $('#' + scoreA + '-' + testId + '-' + studentId);
-	elementB = $('#' + scoreB + '-' + testId + '-' + studentId);
-	mlg = $('#' + 'mlg-' + studentId)
+	elementA = $('input#' + scoreA + '-' + testId + '-' + studentId);
+	elementB = $('input#' + scoreB + '-' + testId + '-' + studentId);
+	mlg = $('#' + 'mlg-' + studentId);
 	
 	if (elementA.length == 0) {
 		// There is no element A
@@ -299,16 +309,8 @@ function save(testId, studentId) {
 	}
 
 	if (resultA != 0) {
-		if ((resultA > elementA[0].max) || (resultA < elementA[0].min)) {
-			elementA[0].style.color = '#FF0000';
-			return;
-		}
 		elementA[0].style.color = '#FFfa00';
 	}
-	if (resultB > elementB[0].max || resultB < elementB[0].min) {
-		elementB[0].style.color = '#FF0000';
-		return;
-	}	
 	elementB[0].style.color = '#FFfa00';
 
 	if (mlg.length > 0) {
@@ -356,7 +358,11 @@ function saved(a, b, responseText) {
 function colourise(arr) {
 	element = $('#' + arr[0])[0];
 	if (arr[0].includes('percent')) {
-		switch(Math.trunc(arr[1] / 33)) {
+		percent = parseInt(element.innerText);
+		if (isNaN(percent)) {
+			return;
+		}
+		switch(Math.trunc(percent / 33)) {
 		case 0:
 			element.className = 'text-danger';
 			break;
