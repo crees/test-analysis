@@ -53,25 +53,6 @@ if ($t->get(Test::TOTAL_A) > 0) {
     echo ("percent-{$t->getId()}-$studentId:" . round($_POST['b'] * 100 / $t->get(Test::TOTAL_B), 0) . ",");
 }
 
-$baseline = $student->getShortIndicative($subject);
 $grade = $t->calculateGrade($result, $subject);
 
-if (!empty($baseline)) {
-    if ($grade == $baseline) {
-        $cellColour = "table-warning";
-    } else {
-        foreach ($t->getGradeBoundaries($subject) as $boundary) {
-            if ($baseline == $boundary->getName()) {
-                $cellColour = "table-danger";
-                break;
-            }
-            if ($grade == $boundary->getName()) {
-                // Greater
-                $cellColour = "table-success";
-                break;
-            }
-        }
-    }
-}
-
-echo ("grade-{$t->getId()}-$studentId:$grade:$cellColour");
+echo ("grade-{$t->getId()}-$studentId:$grade");

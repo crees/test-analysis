@@ -40,7 +40,7 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
 <?php require "bin/head.php"; ?>
 </head>
 
-<body onload="inputify()">
+<body onload="colouriseAll()">
 	<div class="container">
 		<?php require "bin/navbar.php"; ?>
 		<form method="GET">
@@ -104,8 +104,10 @@ EOF;
 		        return;
 		    }
 		    echo <<< eof
+            <input type="button" id="editbutton" class="form-control btn btn-success" value="Edit values" onclick="inputify()">
+            <input type="button" id="exportbutton" class="form-control btn btn-warning" value="Export to Excel" onclick="excel_export()">
             <div class="table-responsive table-95 table-stickyrow">
-            <table class="table table-bordered table-sm table-hover">
+            <table class="table table-bordered table-sm table-hover" id="data-table">
                 <thead>
                     <tr>
                         <th scope="col">&nbsp;</th>
@@ -139,7 +141,7 @@ eof;
 		        echo ($s->getLabel('group') ?? $teaching_group)->getName();
 		        echo "</td>";
 		        $baseline = $s->getShortIndicative($subject);
-		        echo "<td>$baseline</td>";
+		        echo "<td id=\"baseline-{$s->getId()}\">&nbsp;$baseline</td>";
 		        $results = TestResult::retrieveByDetail(TestResult::STUDENT_ID, $s->getId(), TestResult::RECORDED_TS . ' DESC');
 		        foreach ($tests as $t) {
 		            $result = null;
@@ -166,30 +168,12 @@ eof;
 		                }
 		                echo "<td id=\"percent-{$t->getId()}-{$s->getId()}\">" . round($percent_A, 0) . "</td>";
 		                $grade = $t->calculateGrade($result, $subject);
-		                $cellColour = "";
-		                if (!empty($baseline)) {
-		                    if ($grade == $baseline) {
-		                        $cellColour = "class=\"table-warning\"";
-		                    } else {
-		                        foreach ($t->getGradeBoundaries($subject) as $boundary) {
-		                            if ($baseline == $boundary->getName()) {
-		                                $cellColour = "class=\"table-danger\"";
-		                                break;
-		                            }
-		                            if ($grade == $boundary->getName()) {
-		                                // Greater
-		                                $cellColour = "class=\"table-success\"";
-		                                break;
-		                            }
-		                        }
-		                    }
-		                }
-		                echo "<td $cellColour id=\"grade-{$t->getId()}-{$s->getId()}\">$grade</td>";
+		                echo "<td id=\"grade-{$t->getId()}-{$s->getId()}\">&nbsp;$grade</td>";
 		            }
 		        }
-		        if (!is_null($grade = $s->getMostLikelyGrade($subject))) {
+		        if (!is_null($grade = $s->getAverageGrade($subject))) {
 		            // CWAG
-		            $cellColour = "";
+		            /*$cellColour = "";
 		            if (!empty($baseline)) {
 		                if ($grade == $baseline) {
 		                    $cellColour = "class=\"table-warning\"";
@@ -206,8 +190,8 @@ eof;
 		                        }
 		                    }
 		                }
-		            }
-		            echo "<td id=\"cwag-{$s->getId()}\" $cellColour>$grade</td>";
+		            }*/
+		            echo "<td id=\"cwag-{$s->getId()}\">&nbsp;$grade</td>";
 		        } else {
 		            echo "<td>&nbsp;</td>";
 		        }
@@ -228,8 +212,21 @@ const scoreA = '<?= TestResult::SCORE_A; ?>';
 const scoreB = '<?= TestResult::SCORE_B; ?>';
 const tests = [<?php foreach ($tests as $t) { echo "{$t->getId()}, ";} ?>];
 const students = [<?php foreach ($students as $s) { echo "{$s->getId()}, ";} ?>]
+const gradeboundaries = {
+<?php
+foreach ($tests as $t) {
+    echo "{$t->getId()}: {";
+    foreach ($t->getGradeBoundaries($subject) as $boundary) {
+        echo "'{$boundary->getName()}': {$boundary->get(GradeBoundary::BOUNDARY)}, ";
+    }
+    echo "},\n";
+}
+?>
+};
 
 function inputify() {
+	$('input#editbutton')[0].hidden=true;
+	$('input#exportbutton')[0].hidden=true;
 	tds = $('td.score-input');
 	tabindex = 1;
 	for (t of tests) {
@@ -251,7 +248,20 @@ function inputify() {
 				elements[0].classList.add('nopadding');
 				tabindex++;
     		}
-    		colourise([['percent', t, s].join('-')]);
+		}
+	}
+}
+
+function excel_export() {
+	var table = $('table#data-table')[0];
+    window.open('data:application/vnd.ms-excel,' + encodeURIComponent(table.outerHTML));
+}
+
+function colouriseAll() {
+	for (t of tests) {
+		for (s of students) {
+			colourise([['percent', t, s].join('-')]);
+			colourise([['grade', t, s].join('-')]);
 		}
 	}
 }
@@ -330,17 +340,32 @@ function colourise(arr) {
 		}
 		switch(Math.trunc(percent / 33)) {
 		case 0:
-			element.className = 'text-danger';
+			element.style.color = '#dc3545';
 			break;
 		case 1:
-			element.className = 'text-warning';
+			element.style.color = '#ffc107';
 			break;
 		default:
-			element.className = 'text-success';
+			element.style.color = '#28a745';
 			break;
 		}
 	} else if (arr[0].includes('grade')) {
-		element.className = arr[2];
+		grade = element.innerText.trim();
+		if (grade.length == 0) {
+			return;
+		}
+		[_bogus, testId, studentId] = arr[0].split('-')
+		baseline = $('td#baseline-' + studentId)[0].innerText.trim();
+		// We find the boundary for each grade
+		gradeb = gradeboundaries[testId][grade] ?? 0;
+		baselineb = gradeboundaries[testId][baseline];
+		if (gradeb == baselineb) {
+			element.style.backgroundColor = '#ffeeba';
+		} else if (gradeb > baselineb) {
+			element.style.backgroundColor = '#c3e6cb';
+		} else {
+			element.style.backgroundColor = '#f5c6cb';
+		}
 	}
 }
 
