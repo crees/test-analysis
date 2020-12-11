@@ -113,7 +113,7 @@ foreach ($data['AcademicUnit'] as $group) {
     $displayName = end($displayNames);
     if (!empty($dGroup = TeachingGroup::retrieveByDetail(TeachingGroup::ID, $group['id']))) {
         $dGroup = $dGroup[0];
-        $dGroup->setName($displayName);
+        $dGroup->setName(trim($displayName));
         //echo "<div class=\"row\">Scanned TeachingGroup: " . $dGroup->getName() . "</div>"; 
     } else {
         $group[TeachingGroup::NAME] = $displayName;
