@@ -69,7 +69,7 @@ $student = $student[0];
 				</tr>
 			</thead>
 			<?php
-			foreach (TestResult::retrieveByDetail(TestResult::STUDENT_ID, $student->getId(), TestResult::TEST_ID . ', ' . TestResult::RECORDED_TS) as $r) {
+			foreach (TestResult::retrieveByDetail(TestResult::STUDENT_ID, $student->getId(), TestResult::RECORDED_TS . ' DESC') as $r) {
                 $link = "<a href=\"?student=" . $student->getId() . "&resultToDelete=" . $r->getid() . "\" class=\"stretched-link\">";
 			    echo "<tr>";
                 echo "<td>$link" . $r->getTest()[0]->getName() . "</a></td>";
