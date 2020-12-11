@@ -113,6 +113,7 @@ EOF;
                         <th scope="col">&nbsp;</th>
                         <th scope="col">&nbsp;</th>
                         <th scope="col">&nbsp;</th>
+                        <th scope="col">&nbsp;</th>
 eof;
 		    foreach ($tests as $t) {
 		        if (isset($teaching_group)) {
@@ -122,8 +123,7 @@ eof;
 		          echo "<th colspan=\"4\" class=\"text-center\">{$t->getName()}</th>\n";
 		        }
 		    }
-		    echo "<th scope=\"col\">CWAG</th>";
-		    echo "</tr>\n<tr class=\"excel-filtered\"><th scope=\"col\">Name</th><th>Group</th><th>Ind.</th>";
+		    echo "</tr>\n<tr class=\"excel-filtered\"><th scope=\"col\">Name</th><th>Group</th><th>Ind.</th><th>CWAG</th>";
 		    
 		    foreach ($tests as $t) {
 		        if ($t->get(Test::TOTAL_A) > 0) {
@@ -132,7 +132,7 @@ eof;
 		            echo "<td>&nbsp;</td><td>Total</td><td>%</td><td>Grd</td>\n";
 		        }
 		    }
-		    echo "<td>&nbsp;</td></tr>\n</thead>\n";
+		    echo "</tr>\n</thead>\n";
 		    
 		    foreach ($students as $s) {
 		        echo "<tr>\n";
@@ -142,6 +142,10 @@ eof;
 		        echo "</td>";
 		        $baseline = $s->getShortIndicative($subject);
 		        echo "<td id=\"baseline-{$s->getId()}\">$baseline</td>";
+		        
+		        $cwag = $s->getAverageGrade($subject) ?? '&nbsp';
+		        echo "<td id=\"cwag-0-{$s->getId()}\">$cwag</td>";
+		        
 		        $results = TestResult::retrieveByDetail(TestResult::STUDENT_ID, $s->getId(), TestResult::RECORDED_TS . ' DESC');
 		        foreach ($tests as $t) {
 		            $result = null;
@@ -171,12 +175,6 @@ eof;
 		                echo "<td id=\"grade-{$t->getId()}-{$s->getId()}\">$grade</td>";
 		            }
 		        }
-		        if (!is_null($grade = $s->getAverageGrade($subject))) {
-		            echo "<td id=\"cwag-0-{$s->getId()}\">&nbsp;$grade</td>";
-		        } else {
-		            echo "<td>&nbsp;</td>";
-		        }
-		        
 		        echo "</tr>\n";
 		    }
 		    
@@ -244,10 +242,13 @@ function excel_export() {
 	for (th of $('tr.excel-filtered')[0].children) {
 		th.setAttribute('filter', 'ALL');
 	}
-	for (t of tests) {
-		for (s of students) {
-			$('td#' + ['grade', t, s].join('-'))[0].innerHTML = '="' + $('td#' + ['grade', t, s].join('-'))[0].innerHTML + '"';
+	for (s of students) {
+		for (t of tests) {
+			cell = $('td#' + ['grade', t, s].join('-'))[0]
+			cell.innerHTML = '="' + cell.innerHTML + '"';
 		}
+		cell = $('td#' + ['cwag', 0, s].join('-'))[0]
+		cell.innerHTML = '="' + cell.innerHTML + '"';
 	}
     window.open('data:application/vnd.ms-excel,' + encodeURIComponent(table.outerHTML));
     location.reload();
@@ -356,7 +357,6 @@ function colourise(arr) {
 		if (grade.length == 0) {
 			return;
 		}
-		
 		baseline = $('td#baseline-' + studentId)[0].innerText.trim();
 		// We find the boundary for each grade
 		gradeb = gradeboundaries[testId][grade] ?? 0;
