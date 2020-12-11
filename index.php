@@ -123,7 +123,7 @@ eof;
 		        }
 		    }
 		    echo "<th scope=\"col\">CWAG</th>";
-		    echo "</tr>\n<tr><th scope=\"col\">Name</th><th>Group</th><th>Ind.</th>";
+		    echo "</tr>\n<tr class=\"excel-filtered\"><th scope=\"col\">Name</th><th>Group</th><th>Ind.</th>";
 		    
 		    foreach ($tests as $t) {
 		        if ($t->get(Test::TOTAL_A) > 0) {
@@ -254,6 +254,10 @@ function inputify() {
 
 function excel_export() {
 	var table = $('table#data-table')[0];
+	// Grab the title rows and add filter element.
+	for (th of $('tr.excel-filtered')[0].children) {
+		th.setAttribute('filter', 'ALL');
+	}
     window.open('data:application/vnd.ms-excel,' + encodeURIComponent(table.outerHTML));
 }
 
