@@ -56,6 +56,9 @@ $query = "query {
   AcademicUnit (academicYear__code: \"" . Config::academic_year . "\" page_size: 100 page_num: $year_page) {
     id
     displayName
+    dependantUnits {
+      id
+    }
     allMemberships {
       startDate
       endDate
@@ -108,7 +111,12 @@ if ($year_page == 0) {
 $year_page++;
 //echo "<div class=\"row\"><a href=\"?baseline_done=yes&year_page=$year_page\" class=\"btn btn-primary\">Now click for Page $year_page</a></div>";
 
+$allStudents = Student::retrieveAll();
+
 foreach ($data['AcademicUnit'] as $group) {
+    if (count($group['dependantUnits']) > 0) {
+        continue;
+    }
     $displayNames = explode(":", $group['displayName']);
     $displayName = end($displayNames);
     if (!empty($dGroup = TeachingGroup::retrieveByDetail(TeachingGroup::ID, $group['id']))) {
@@ -116,34 +124,38 @@ foreach ($data['AcademicUnit'] as $group) {
         $dGroup->setName(trim($displayName));
         //echo "<div class=\"row\">Scanned TeachingGroup: " . $dGroup->getName() . "</div>"; 
     } else {
-        $group[TeachingGroup::NAME] = $displayName;
+        $group[TeachingGroup::NAME] = trim($displayName);
         $group[TeachingGroup::ACADEMIC_YEAR] = Config::academic_year;
+        $group[TeachingGroup::ID] = 
         $dGroup = new TeachingGroup($group);
         //echo "<div class=\"row\">New TeachingGroup: " . $dGroup->getName() . "</div>";
     }
     $dGroup->commit();
-    $numGroupMembers = 0;
+
     foreach ($group['allMemberships'] as $membership) {
         if (strtotime($membership['startDate']) > time() || strtotime($membership['endDate']) < time()) {
             continue;
         }
-        if (!empty($dStudent = Student::retrieveByDetail(Student::ID, $membership['student']['id']))) {
-            $dStudent = $dStudent[0];
-            $dStudent->setNames($membership['student']['firstName'], $membership['student']['lastName']);
-            // echo "<div class=\"row\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Scanned Student: " . $dStudent->getName();
-        } else {
+        $dStudent = null;
+        foreach ($allStudents as $student) {
+            if ($student->getId() == $membership['student']['id']) {
+                $dStudent = $student;
+                $dStudent->setNames($membership['student']['firstName'], $membership['student']['lastName']);
+                break;
+            }
+        }
+        if (is_null($dStudent)) {
             $dStudent = new Student([
                 Student::ID         => $membership['student']['id'],
                 Student::FIRST_NAME => $membership['student']['firstName'],
                 Student::LAST_NAME  => $membership['student']['lastName'],
             ]);
             //echo "<div class=\"row\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;New Student: " . $dStudent->getName() . "</div>";
+            array_push($allStudents, $dStudent);
         }
         $dGroup->addMember($dStudent);
         
         $dStudent->commit();
-        
-        $numGroupMembers++;
         
         // echo "... added to db and membership made</div>";
     }
