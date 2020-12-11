@@ -358,9 +358,15 @@ function colourise(arr) {
 			return;
 		}
 		baseline = $('td#baseline-' + studentId)[0].innerText.trim();
+		if (baseline.length == 0) {
+			return;
+		}
 		// We find the boundary for each grade
 		gradeb = gradeboundaries[testId][grade] ?? 0;
-		baselineb = gradeboundaries[testId][baseline];
+		baselineb = gradeboundaries[testId][baseline] ?? null;
+		if (baselineb == null) {
+			return;
+		}
 		if (gradeb == baselineb) {
 			element.style.backgroundColor = '#ffeeba';
 		} else if (gradeb > baselineb) {
