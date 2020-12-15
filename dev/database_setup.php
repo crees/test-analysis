@@ -67,22 +67,29 @@ if (isset(Config::$maintenance) && Config::$maintenance) {
     CREATE TABLE Test (
         id INT UNSIGNED NOT NULL AUTO_INCREMENT,
         name VARCHAR(30) NOT NULL,
-        total_a INT NOT NULL,
-        total_b INT NOT NULL,
         custom_grade_boundaries BOOLEAN NOT NULL DEFAULT FALSE,
         targets VARCHAR(65000) NULL,
         Department_id INT NOT NULL,
         CONSTRAINT PRIMARY KEY (id)
     );
-    CREATE TABLE TestResult (
+    CREATE TABLE TestComponent (
         id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-        Student_id INT NOT NULL,
+        name VARCHAR(10) NOT NULL,
         Test_id INT NOT NULL,
-        recorded_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        score_a INT NOT NULL,
-        score_b INT NOT NULL,
+        total INT NOT NULL,
+        included_in_percent BOOLEAN NOT NULL DEFAULT FALSE,
+        included_in_grade BOOLEAN NOT NULL DEFAULT FALSE,
+        included_for_targets BOOLEAN NOT NULL DEFAULT FALSE,
         CONSTRAINT PRIMARY KEY (id)
     );
+    CREATE TABLE TestComponentResult (
+        id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        Student_id INT NOT NULL,
+        TestComponent_id INT NOT NULL,
+        score INT NOT NULL,
+        recorded_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT PRIMARY KEY (id)
+        );
     CREATE TABLE TestSubjectMembership (
         id INT UNSIGNED NOT NULL AUTO_INCREMENT,
         Test_id INT NOT NULL,

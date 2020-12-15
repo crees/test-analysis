@@ -16,7 +16,7 @@ if (!isset($student[0])) {
 }
 
 if (isset($_GET['resultToDelete'])) {
-    TestResult::delete($_GET['resultToDelete']);
+    TestComponentResult::delete($_GET['resultToDelete']);
 }
 
 $student = $student[0];
@@ -69,13 +69,14 @@ $student = $student[0];
 				</tr>
 			</thead>
 			<?php
-			foreach (TestResult::retrieveByDetail(TestResult::STUDENT_ID, $student->getId(), TestResult::RECORDED_TS . ' DESC') as $r) {
+			foreach (TestComponentResult::retrieveByDetail(TestComponentResult::STUDENT_ID, $student->getId(), TestComponentResult::RECORDED_TS . ' DESC') as $r) {
                 $link = "<a href=\"?student=" . $student->getId() . "&resultToDelete=" . $r->getid() . "\" class=\"stretched-link\">";
 			    echo "<tr>";
-                echo "<td>$link" . $r->getTest()[0]->getName() . "</a></td>";
-                echo "<td>$link" . $r->get(TestResult::SCORE_A) . "</a></td>";
-                echo "<td>$link" . $r->get(TestResult::SCORE_B) . "</a></td>";
-                echo "<td>$link" . date("Y-m-d H:i:s", $r->get(TestResult::RECORDED_TS)) . "</a></td>";
+                $component = TestComponent::retrieveByDetail(TestComponent::ID, $r->get(TestComponentResult::TESTCOMPONENT_ID))[0];
+			    $test = Test::retrieveByDetail(Test::ID, $component->get(TestComponent::TEST_ID))[0];
+                echo "<td>$link{$test->getName()}: {$component->getName()}</a></td>";
+                echo "<td>$link" . $r->get(TestComponentResult::SCORE) . "</a></td>";
+                echo "<td>$link" . date("Y-m-d H:i:s", $r->get(TestComponentResult::RECORDED_TS)) . "</a></td>";
                 echo "</tr>";
 			}
 			?>

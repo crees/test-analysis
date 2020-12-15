@@ -116,21 +116,21 @@ EOF;
                         <th scope="col">&nbsp;</th>
 eof;
 		    foreach ($tests as $t) {
+		        $colspan = count($t->getTestComponents()) + 2;
 		        if (isset($teaching_group)) {
 		          $link = "feedback_sheet.php?teaching_group={$teaching_group->getId()}&subject={$subject->getId()}&test={$t->getId()}";
-		          echo "<th colspan=\"4\" class=\"text-center\"><a href=\"$link\">{$t->getName()}</a></th>\n";
+		          echo "<th colspan=\"$colspan\" class=\"text-center\"><a href=\"$link\">{$t->getName()}</a></th>\n";
 		        } else {
-		          echo "<th colspan=\"4\" class=\"text-center\">{$t->getName()}</th>\n";
+		          echo "<th colspan=\"$colspan\" class=\"text-center\">{$t->getName()}</th>\n";
 		        }
 		    }
 		    echo "</tr>\n<tr class=\"excel-filtered\"><th scope=\"col\">Name</th><th>Group</th><th>Ind.</th><th>CWAG</th>";
 		    
 		    foreach ($tests as $t) {
-		        if ($t->get(Test::TOTAL_A) > 0) {
-		            echo "<td>A</td><td>B</td><td>A%</td><td>Grd</td>\n";
-		        } else {
-		            echo "<td>&nbsp;</td><td>Total</td><td>%</td><td>Grd</td>\n";
+		        foreach ($t->getTestComponents() as $c) {
+		            echo "<td>{$c->getName()}</td>";
 		        }
+		        echo "<td>%</td><td>Grd</td>\n";
 		    }
 		    echo "</tr>\n</thead>\n";
 		    
@@ -146,34 +146,22 @@ eof;
 		        $cwag = $s->getAverageGrade($subject) ?? '&nbsp';
 		        echo "<td id=\"cwag-0-{$s->getId()}\">$cwag</td>";
 		        
-		        $results = TestResult::retrieveByDetail(TestResult::STUDENT_ID, $s->getId(), TestResult::RECORDED_TS . ' DESC');
+		        $results = TestComponentResult::retrieveByDetail(TestComponentResult::STUDENT_ID, $s->getId(), TestComponentResult::RECORDED_TS . ' DESC');
 		        foreach ($tests as $t) {
-		            $result = null;
-		            foreach ($results as $r) {
-		                // Results are sorted by latest timestamp first, so just take first result
-		                if ($r->get(TestResult::TEST_ID) == $t->getId()) {
-		                    $result = $r;
-		                    break;
+		            $result_components = [];
+		            foreach ($t->getTestComponents() as $c) {
+		                $resultForThisComponent = null;
+		                foreach ($results as $r) {
+		                    if ($r->get(TestComponentResult::TESTCOMPONENT_ID) == $c->getId()) {
+		                        $resultForThisComponent = $r;
+		                        break;
+		                    }
 		                }
+		                array_push($result_components, $resultForThisComponent);
+		                echo "<td class=\"score-input\" id=\"" . TestComponentResult::SCORE . "-{$c->getId()}-{$s->getId()}\">" . (is_null($resultForThisComponent) ? "" : $resultForThisComponent->get(TestComponentResult::SCORE)) . "</td>";
 		            }
-		            if ($t->get(Test::TOTAL_A) > 0) {
-		                echo "<td class=\"score-input\" id=\"" . TestResult::SCORE_A . "-{$t->getId()}-{$s->getId()}\">" . (is_null($result) ? "" : $result->get(TestResult::SCORE_A)) . "</td>";
-		            } else {
-		                echo ("<td>&nbsp;</td>");
-		            }
-		            echo "<td class=\"score-input\" id=\"" . TestResult::SCORE_B . "-{$t->getId()}-{$s->getId()}\">" . (is_null($result) ? "" : $result->get(TestResult::SCORE_B)) . "</td>";
-		            if (is_null($result)) {
-		                echo "<td id=\"percent-{$t->getId()}-{$s->getId()}\">&nbsp;</td><td id=\"grade-{$t->getId()}-{$s->getId()}\">&nbsp;</td>";
-		            } else {
-		                if ($t->get(Test::TOTAL_A) > 0) {
-		                    $percent_A = $result->get(TestResult::SCORE_A) * 100 / $t->get(Test::TOTAL_A);
-		                } else {
-		                    $percent_A = $result->get(TestResult::SCORE_B) * 100 / $t->get(Test::TOTAL_B);
-		                }
-		                echo "<td id=\"percent-{$t->getId()}-{$s->getId()}\">" . round($percent_A, 0) . "</td>";
-		                $grade = $t->calculateGrade($result, $subject);
-		                echo "<td id=\"grade-{$t->getId()}-{$s->getId()}\">$grade</td>";
-		            }
+		            echo "<td id=\"percent-{$t->getId()}-{$s->getId()}\">{$t->calculatePercent($s)}</td>";
+		            echo "<td id=\"grade-{$t->getId()}-{$s->getId()}\">{$t->calculateGrade($s, $subject)}</td>";
 		        }
 		        echo "</tr>\n";
 		    }
@@ -187,9 +175,19 @@ eof;
 	</div>
 	
 <script>
-const scoreA = '<?= TestResult::SCORE_A; ?>';
-const scoreB = '<?= TestResult::SCORE_B; ?>';
+const score = '<?= TestComponentResult::SCORE; ?>';
 const tests = [<?php foreach ($tests as $t) { echo "{$t->getId()}, ";} ?>];
+const testWithComponents = {<?php 
+foreach ($tests as $t) {
+    echo "{$t->getId()}: [";
+    foreach ($t->getTestComponents() as $c) {
+        echo "{$c->getId()}, ";
+    }
+    echo "], ";
+}
+?>};
+
+const testComponents = [<?php foreach ($tests as $t) { foreach ($t->getTestComponents() as $c) { echo "{$c->getId()}, ";}} ?>];
 const students = [<?php foreach ($students as $s) { echo "{$s->getId()}, ";} ?>]
 const gradeboundaries = {
 <?php
@@ -215,22 +213,22 @@ function inputify() {
 	tabindex = 1;
 	for (t of tests) {
 		for (s of students) {
-			for (score of [scoreA, scoreB]) {
-    			id = [score, t, s].join('-');
-				elements = $('td#' + id)
-				if (elements.length == 0) {
-					continue;
-				}
+			for (tc of testWithComponents[t]) {
+    			id = [score, tc, s].join('-');
+    			elements = $('td#' + id)
+    			if (elements.length == 0) {
+    				continue;
+    			}
     			val = elements[0].innerHTML;
     			if (val.match('[<>]')) {
-					// HTML present, something already there-- not sure how this can happen
-					console.log("Already HTML in " + id + ", weird!");
-					continue;
+    				// HTML present, something already there-- not sure how this can happen
+    				console.log("Already HTML in " + id + ", weird!");
+    				continue;
     			}
                 //echo val, tabindex, "number", onchange=\"save('{$t->getId()}', '{$s->getId()}', '" . TestResult::SCORE_A . "')\"");
-    			elements[0].innerHTML = '<input class="form-control border-0 px-1" tabindex="' + tabindex + '" value="' + val + '" type="number" id="' + id + '" onchange="save(\'' + t + '\', \'' + s + '\')">';
-				elements[0].classList.add('nopadding');
-				tabindex++;
+    			elements[0].innerHTML = '<input class="form-control border-0 px-1" tabindex="' + tabindex + '" value="' + val + '" type="number" id="' + id + '" onchange="save(\'' + tc + '\', \'' + s + '\')">';
+    			elements[0].classList.add('nopadding');
+    			tabindex++;
     		}
 		}
 	}
@@ -264,30 +262,20 @@ function colouriseAll() {
 	}
 }
 
-function save(testId, studentId) {
-	// Get both
-	elementA = $('input#' + scoreA + '-' + testId + '-' + studentId);
-	elementB = $('input#' + scoreB + '-' + testId + '-' + studentId);
-	cwag = $('#' + ['cwag', 0, studentId].join('-'));
-	
-	if (elementA.length == 0) {
-		// There is no element A
-		resultA = 0;
-	} else {
-		resultA = parseInt(elementA[0].value);
-	}
-	resultB = parseInt(elementB[0].value);
+function save(testComponentId, studentId) {
 
-	if (isNaN(resultA) || isNaN(resultB)) {
+	element = $('input#' + score + '-' + testComponentId + '-' + studentId);
+	//cwag = $('#' + ['cwag', 0, studentId].join('-'));
+	
+	result = parseInt(element[0].value);
+
+	if (isNaN(result)) {
 		return;
 	}
 
-	if (resultA != 0) {
-		elementA[0].style.color = '#FFfa00';
-	}
-	elementB[0].style.color = '#FFfa00';
+	element[0].style.color = '#FFfa00';
 
-	if (cwag.length > 0) {
+	if (false && cwag.length > 0) {
 		cwag[0].innerHTML = '';
 	}
 
@@ -298,29 +286,23 @@ function save(testId, studentId) {
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     xhr.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
-          saved(elementA, elementB, this.responseText);
+          saved(element[0], this.responseText);
         }
         console.log(this.responseText);
     };
-    xhr.send("studentId=" + studentId + "&testId=" + testId + "&a=" + resultA + "&b=" + resultB + "&subjectId=<?= $subject->getId() ?>");
+    xhr.send("studentId=" + studentId + "&testComponentId=" + testComponentId + "&result=" + result + "&subjectId=<?= $subject->getId() ?>");
 }
 
-function saved(a, b, responseText) {
+function saved(element, responseText) {
 	if (responseText.includes('Total out of range')) {
-		if (a.length != 0) {
-			a[0].style.color = '#ffa500';
-		}
-		b[0].style.color = '#ffa500';
+		element.style.color = '#ffa500';
 		return;
 	}
 	if (responseText.includes('Other failure')) {
 		window.alert('Save failed for the red scores.  Please email <?= Config::site_supportemail ?> and say what you were trying to do.');
 		return;
 	}
-	if (a.length != 0) {
-		a[0].style.color = '#00ff00';
-	}
-	b[0].style.color = '#00ff00';
+	element.style.color = '#00ff00';
 	changes = responseText.split(',');
 	for (i = 0; i < changes.length; i++) {
 		change = changes[i].split(':');

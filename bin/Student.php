@@ -70,6 +70,8 @@ class Student extends DatabaseCollection
     }
     
     public function getAverageGrade(Subject $subject) {
+        // TODO Fix
+        return null;
         $percentages_b = [];
         foreach ($subject->getTests() as $t) {
             $result = $t->getResult($this);

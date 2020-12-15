@@ -81,7 +81,7 @@ $date = date('d/m/Y');
  * We then shift, except the top three are just the top three.  Clear?  Good.
  */
 
-$test_total = $test->get(Test::TOTAL_A) + $test->get(Test::TOTAL_B);
+$test_total = $test->getTotal();
 
 /* Count targets */
 
@@ -93,22 +93,47 @@ foreach ($test->get(Test::TARGETS) as $target) {
     }
 }
 
-$marks_to_shift = $test->get(Test::TOTAL_B) / $number_of_targets;
+$marks_to_shift = 0;
+
+foreach ($test->getTestComponents() as $c) {
+    if ($c->get(TestComponent::INCLUDED_FOR_TARGETS)) {
+        $marks_to_shift += $c->get(TestComponent::TOTAL);
+    }
+}
+
+$marks_to_shift /= $number_of_targets;
 
 $img = 'data:image/jpeg;base64,' . base64_encode(file_get_contents(Config::site_docroot . "/img/dshs.jpg"));
 
 foreach ($group->getStudents() as $student) {
-    $result = $test->getResult($student);
-    if (is_null($result)) {
+    $results = [];
+    $shiftmarks = 0;
+    $marksText = [];
+    foreach ($test->getTestComponents() as $c) {
+        $r = TestComponentResult::retrieveByDetails(
+            [TestComponentResult::STUDENT_ID, TestComponentResult::TESTCOMPONENT_ID],
+            [$student->getId(), $c->getId()],
+            TestComponentResult::RECORDED_TS . ' DESC'
+            );
+        if (empty($r)) {
+            $results = null;
+            break;
+        }
+        $r = $r[0];
+        array_push($results, $r);
+        if ($c->get(TestComponent::INCLUDED_FOR_TARGETS)) {
+            $shiftmarks += $r->get(TestComponentResult::SCORE);
+        }
+        array_push($marksText, "{$c->getName()}: {$r->get(TestComponentResult::SCORE)}");
+    }
+    if (is_null($results)) {
         continue;
     }
     
-    $resultA_total = $result->get(TestResult::SCORE_A);
-    $resultB_total = $result->get(TestResult::SCORE_B);
+    $marksText = implode(', ', $marksText);
     
     $targets = $test->get(Test::TARGETS);
-    $numtargets = 3;
-    $shiftmarks = $result->get(TestResult::SCORE_B);
+    $numtargets = 3;    
     
     while (($shiftmarks = $shiftmarks - $marks_to_shift) >= 0) {
         if ($numtargets >= 1) {
@@ -163,14 +188,10 @@ foreach ($group->getStudents() as $student) {
     </tr>
 
     <tr>
-        <td>Grade achieved: {$test->calculateGrade($result, $subject)}</td>
-EOF;
-    if ($test->get(Test::TOTAL_A) > 0) {
-        echo "<td>Marks achieved: A: $resultA_total B: $resultB_total</td>";
-    } else {
-        echo "<td>Marks achieved: $resultB_total</td>";
-    }
-    echo <<< EOF
+        <td>Grade achieved: {$test->calculateGrade($student, $subject)}</td>
+
+        <td>Marks achieved: $marksText</td>
+
         <td>Marks available: $test_total</td>
     </tr>
 

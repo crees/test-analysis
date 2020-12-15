@@ -1,6 +1,9 @@
 <?php
 
 namespace TestAnalysis;
+ini_set('display_startup_errors', 1);
+ini_set('display_errors', 1);
+error_reporting(-1);
 
 /* Have we been called before? */
 if (!class_exists("Config")) {
@@ -18,7 +21,8 @@ if (!class_exists("Config")) {
     require "Subject.php";
     require "TeachingGroup.php";
     require "Test.php";
-    require "TestResult.php";
+    require "TestComponent.php";
+    require "TestComponentResult.php";
     require "TestSubjectMembership.php";
     require "TestTopic.php";
     require "TestTestTopic.php";

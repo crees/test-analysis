@@ -80,3 +80,63 @@ if ($db->dosql("SHOW TABLES LIKE 'Department'")->num_rows < 1) {
 if ($db->dosql("SHOW COLUMNS FROM `Test` LIKE 'Department_id'")->num_rows < 1) {
     $db->dosql("ALTER TABLE `Test` ADD Department_id INT NOT NULL DEFAULT 0;");
 }
+
+/* Version 8 to 9 upgrade */
+
+if ($db->dosql("SHOW TABLES LIKE 'TestComponent'")->num_rows < 1) {
+    /* Create testcomponents table */
+    $db->dosql("CREATE TABLE TestComponent (
+        id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        name VARCHAR(10) NULL,
+        Test_id INT NOT NULL,
+        total INT NOT NULL,
+        included_in_percent BOOLEAN NOT NULL DEFAULT FALSE,
+        included_in_grade BOOLEAN NOT NULL DEFAULT FALSE,
+        included_for_targets BOOLEAN NOT NULL DEFAULT FALSE,
+        CONSTRAINT PRIMARY KEY (id)
+        );");
+    $db->dosql("CREATE TABLE TestComponentResult (
+        id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        Student_id INT NOT NULL,
+        TestComponent_id INT NOT NULL,
+        score INT NOT NULL,
+        recorded_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT PRIMARY KEY (id)
+        );");
+    foreach ($db->dosql("SELECT id, name, total_a, total_b FROM `Test`;")->fetch_all() as $test) {
+        if ($test[2] == 0) {
+            // One section test
+            $db->dosql("INSERT INTO `TestComponent` (Test_id, name, total, included_in_percent, included_in_grade, included_for_targets) VALUES ({$test[0]}, NULL, {$test[3]}, TRUE, TRUE, TRUE);");
+            $testComponentId = $db->dosql("SELECT id FROM `TestComponent` WHERE Test_id = {$test[0]};")->fetch_all()[0][0];
+            foreach ($db->dosql("SELECT score_a, score_b, Student_id, recorded_ts FROM `TestResult` WHERE Test_id = '{$test[3]}';")->fetch_all() as $result) {
+                if (is_null($result)) {
+                    continue;
+                }
+                $db->dosql("INSERT INTO `TestComponentResult` (Student_id, TestComponent_id, score, recorded_ts) VALUES ({$result[2]}, $testComponentId, {$result[1]}, '{$result[3]}');");
+            }
+        } else {
+            // Sections A and B
+            $db->dosql("INSERT INTO `TestComponent` (Test_id, name, total, included_in_percent) VALUES ({$test[0]}, 'A', {$test[2]}, TRUE);");
+            $db->dosql("INSERT INTO `TestComponent` (Test_id, name, total, included_in_grade, included_for_targets) VALUES ({$test[0]}, 'B', {$test[3]}, TRUE, TRUE);");
+            foreach ($db->dosql("SELECT score_a, score_b, Student_id, recorded_ts FROM `TestResult` WHERE Test_id = '{$test[0]}';")->fetch_all() as $result) {
+                print_r($result);
+                if (is_null($result)) {
+                    continue;
+                }
+                $testComponents = $db->dosql("SELECT id, name FROM `TestComponent` WHERE Test_id = {$test[0]};")->fetch_all();
+                if ($testComponents[0][1] == 'A') {
+                    $testComponentAId = $testComponents[0][0];
+                    $testComponentBId = $testComponents[1][0];
+                } else {
+                    $testComponentAId = $testComponents[1][0];
+                    $testComponentBId = $testComponents[0][0];
+                }
+                $db->dosql("INSERT INTO `TestComponentResult` (Student_id, TestComponent_id, score, recorded_ts) VALUES ({$result[2]}, $testComponentAId, {$result[0]}, '{$result[3]}');");
+                $db->dosql("INSERT INTO `TestComponentResult` (Student_id, TestComponent_id, score, recorded_ts) VALUES ({$result[2]}, $testComponentBId, {$result[1]}, '{$result[3]}');");
+            }
+        }
+    }
+    $db->dosql("DROP TABLE `TestResult`;");
+    $db->dosql("ALTER TABLE `Test` DROP COLUMN total_a;");
+    $db->dosql("ALTER TABLE `Test` DROP COLUMN total_b;");
+}

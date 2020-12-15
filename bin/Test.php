@@ -5,17 +5,16 @@ class Test extends DatabaseCollection
 {
     const CUSTOM_GRADE_BOUNDARIES = 'custom_grade_boundaries';
     const DEPARTMENT_ID = 'Department_id';
-    const TOTAL_A = 'total_a';
-    const TOTAL_B = 'total_b';
     const TARGETS = 'targets';
+    
+    protected $components;
     
     public function __construct(array $details)
     {
+        $this->components = null;
         $this->details[self::ID] = $details[self::ID] ?? null;
         $this->details[self::NAME] = $details[self::NAME];
         $this->details[self::DEPARTMENT_ID] = $details[self::DEPARTMENT_ID];
-        $this->details[self::TOTAL_A] = $details[self::TOTAL_A];
-        $this->details[self::TOTAL_B] = $details[self::TOTAL_B];
         $this->details[self::CUSTOM_GRADE_BOUNDARIES] = self::parseBoolean($details, self::CUSTOM_GRADE_BOUNDARIES);
         if (isset($details[self::TARGETS])) {
             if (is_array($details[self::TARGETS])) {
@@ -26,6 +25,20 @@ class Test extends DatabaseCollection
         } else {
             $this->details[self::TARGETS] = '';
         }
+    }
+    
+    public function addTestComponent(array $details) {
+        $details[TestComponent::TEST_ID] = $this->getId();
+        $component = new TestComponent($details);
+        $component->commit();
+        $this->components = null;
+    }
+    
+    public function getTestComponents() {
+        if (is_null($this->components)) {
+            $this->components = TestComponent::retrieveByDetail(TestComponent::TEST_ID, $this->getId(), TestComponent::NAME);
+        }
+        return $this->components;
     }
     
     public function get(String $detail) {
@@ -55,42 +68,63 @@ class Test extends DatabaseCollection
     }
     
     public function getTotal() {
-        return $this->get(self::TOTAL_A) + $this->get(self::TOTAL_B);
+        $total = 0;
+        foreach ($this->getTestComponents() as $c) {
+            $total += $c->get(TestComponent::TOTAL);
+        }
+        return $total;
     }
     
     /**
-     * Returns empty string if there is no test mark recorded.
+     * Get the *latest* grade for the student
      * 
-     * If multiple test scores recorded, return latest
-     * 
-     * @param Student $s
-     * @return TestResult
+     * @param Student $student
+     * @param Subject $subject
+     * @return String grade
      */
-    public function getResult(Student $s) {
-        $latest = 0;
-        $result = null;
-        foreach(TestResult::retrieveByDetail(TestResult::STUDENT_ID, $s->getId()) as $r) {
-            if ($r->getTestId() == $this->getId()) {
-                $ts = $r->get(TestResult::RECORDED_TS);
-                if ($ts > $latest) {
-                    $latest = $ts;
-                    $result = $r;
+    public function calculateGrade(Student $student, Subject $subject) {
+        $score = 0;
+        foreach ($this->getTestComponents() as $c) {
+            if ($c->get(TestComponent::INCLUDED_IN_GRADE)) {
+                $r = TestComponentResult::retrieveByDetails([TestComponentResult::STUDENT_ID, TestComponentResult::TESTCOMPONENT_ID], [$student->getId(), $c->getId()], TestComponentResult::RECORDED_TS . ' DESC');
+                if (!isset($r[0])) {
+                    return '';
                 }
+                $score += $r[0]->get(TestComponentResult::SCORE);
             }
         }
-        return $result;
-    }
-    
-    public function calculateGrade(TestResult $result, Subject $subject) {
         $grade = 0;
         // First, get the grades ordered by highest to lowest
         foreach ($this->getGradeBoundaries($subject) as $g) {
-            if ($g->get(GradeBoundary::BOUNDARY) <= $result->get(TestResult::SCORE_B)) {
+            if ($g->get(GradeBoundary::BOUNDARY) <= $score) {
                 $grade = $g->getName();
                 break;
             }
         }
         return $grade;
+    }
+    
+    /**
+     * Get the *latest* grade for the student
+     *
+     * @param Student $student
+     * @param Subject $subject
+     * @return String grade
+     */
+    public function calculatePercent(Student $student) {
+        $score = 0;
+        $percentTotal = 0;
+        foreach ($this->getTestComponents() as $c) {
+            if ($c->get(TestComponent::INCLUDED_IN_PERCENT)) {
+                $r = TestComponentResult::retrieveByDetails([TestComponentResult::STUDENT_ID, TestComponentResult::TESTCOMPONENT_ID], [$student->getId(), $c->getId()], TestComponentResult::RECORDED_TS . ' DESC');
+                if (!isset($r[0])) {
+                    return '';
+                }
+                $score += $r[0]->get(TestComponentResult::SCORE);
+                $percentTotal += $c->get(TestComponent::TOTAL);
+            }
+        }
+        return round($score * 100.0 / $percentTotal, 0);
     }
     
     public function getGradeBoundaries(Subject $subject, bool $forceForSubject = false) {
@@ -106,9 +140,15 @@ class Test extends DatabaseCollection
         } else {
             $id_to_use = -$subject->getId();
             $ret = [];
+            $total_for_grade = 0;
+            foreach ($this->getTestComponents() as $c) {
+                if ($c->get(TestComponent::INCLUDED_IN_GRADE)) {
+                    $total_for_grade += $c->get(TestComponent::TOTAL);
+                }
+            }
             foreach (GradeBoundary::retrieveByDetail(GradeBoundary::TEST_ID, $id_to_use, GradeBoundary::BOUNDARY . ' DESC') as $g) {
                 array_push($ret, new GradeBoundary([
-                    GradeBoundary::BOUNDARY => round($g->get(GradeBoundary::BOUNDARY) * $this->get(self::TOTAL_B) / 100.0, 0),
+                    GradeBoundary::BOUNDARY => round($g->get(GradeBoundary::BOUNDARY) * $total_for_grade / 100.0, 0),
                     GradeBoundary::ID       => $g->get(GradeBoundary::ID),
                     GradeBoundary::NAME     => $g->get(GradeBoundary::NAME),
                     GradeBoundary::TEST_ID  => $g->get(GradeBoundary::TEST_ID)
