@@ -10,6 +10,9 @@ class TestComponentResult extends DatabaseCollection
     
     public function __construct(array $details)
     {
+        if (isset($details[self::ID])) {
+            $this->details[self::ID] = $details[self::ID];
+        }
         $this->details[self::STUDENT_ID] = $details[self::STUDENT_ID];
         $this->details[self::TESTCOMPONENT_ID] = $details[self::TESTCOMPONENT_ID];
         $this->details[self::NAME] = null;
