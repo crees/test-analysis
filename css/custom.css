@@ -8,13 +8,18 @@ body {
 	src: url("NeutraText-Book.otf") format("opentype");
 }
 
+@font-face {
+	font-family: "Neutraface-Bold";
+	src: url("NeutraText-Bold.otf") format("opentype");
+}
+
 h1, h2, h3, h4, h5, h6,
 .h1, .h2, .h3, .h4, .h5, .h6 {
 	margin-bottom: 0.5rem;
-	font-family: inherit;
+	font-family: Neutraface-Bold;
 	font-weight: 300;
 	line-height: 1.2;
-	color: inherit;
+	color: #388cbd;
 }
 
 .bigger-text {

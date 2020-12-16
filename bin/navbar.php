@@ -39,4 +39,5 @@
 	</span>
 </nav>
 
-<div class="h3"><img src="img/dshs.jpg" style="width: 30%;" /><?= \TestAnalysis\Config::site ?></div>
+<div class="h3 text-center"><img src="img/dshs.jpg" style="width: 30%;" /></div>
+<div class="h3 text-center"><?= \TestAnalysis\Config::site ?></div>
