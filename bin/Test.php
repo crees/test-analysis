@@ -34,8 +34,9 @@ class Test extends DatabaseCollection
         $this->components = null;
     }
     
-    public function getTestComponents() {
-        if (is_null($this->components)) {
+    // TODO Get commit() to handle this gracefully.
+    public function getTestComponents($invalidate = false) {
+        if (is_null($this->components) || $invalidate) {
             $this->components = TestComponent::retrieveByDetail(TestComponent::TEST_ID, $this->getId(), TestComponent::NAME);
         }
         return $this->components;

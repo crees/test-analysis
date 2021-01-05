@@ -52,7 +52,7 @@ if (isset($_GET['test']) && !isset($_POST['form_serial'])) {
                 TestComponent::TOTAL => $_POST['component-total-new'],
                 TestComponent::TEST_ID => $test->getId(),
             ]))->commit();
-            $components = $test->getTestComponents();
+            $components = $test->getTestComponents(true);
         }
         
         if (isset($_POST['custom_boundaries'])) {
