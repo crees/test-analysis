@@ -44,6 +44,7 @@ if (isset($_POST['newtest-name']) && isset($_POST['form_serial']) && $_POST['for
             if (str_contains($k, "newtest-")) {
                 $k = str_replace('newtest-', '', $k);
             }
+            $newTestDetails[$k] = $v;
         }
         $t = new Test($newTestDetails);
         $t->commit();
