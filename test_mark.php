@@ -131,7 +131,6 @@ EOF;
 		                [ScannedTest::STUDENT_ID, ScannedTest::TEST_ID],
 		                [$student->getId(), $test->getId()]);
 		            if (count($scannedTest) != 0) {
-		                $seen_a_test = true;
 		                $testPages = $scannedTest[0]->getPages();
 		                if (!isset($testPages[$page_num])) {
 		                    die ("<div>No more tests remaining.  <a class=\"btn btn-success\" href=\"test_scanned_scores.php?subject={$subject->getId()}&teaching_group={$teaching_group}&test={$test->getId()}\">Get results</div>");
@@ -152,7 +151,8 @@ EOF;
     		            $student_number = 0;
     		            $page_num++;
 		            } else {
-		                die ("No tests have been set for this group.");
+		                $page_num++;
+		                die ("No tests have been set for this group.  This could be a bug-- if so, click <a href=\"?subject={$_GET['subject']}&teaching_group=$teaching_group&test={$_GET['test']}&page=$page_num&student_number=0\">here</a> for the next page.");
 		            }
 		        }
 		    }
@@ -166,10 +166,12 @@ EOF;
             } else {
                 $skipMarked = '';
             }
-            echo "<input class=\"form-control\" type=\"checkbox\" id=\"skipMarked\" $skipMarked onchange=\"doButtons()\">";
+            echo "<input class=\"form-control\" type=\"checkbox\" id=\"skipMarked\" $skipMarked onchange=\"doButtons()\"><br>";
             echo "<label for=\"score\">Total page score: </label>";
             echo "<input class=\"form-control\" type=\"number\" id=\"score\" value=\"{$testPage->get(ScannedTestPage::PAGE_SCORE)}\">";
-		    echo '</div></div>';
+		    echo '</div>';
+            echo "<div>Shortcut keys: Z for ticks, X for crosses.  Every tick placed increments the total by one.  Press Enter to save, or type a number (no clicks necessary) to jump to the score box.  Mark title page as zero!</div>";
+		    echo '</div>';
 		    echo '<div class="col-9"><br /><br />';
 		    echo '<div id="testpage"></div>';
 		    echo "</div>";
