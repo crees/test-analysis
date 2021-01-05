@@ -3,6 +3,7 @@ namespace TestAnalysis;
 
 include "../bin/classes.php";
 
+/*
 if (isset($_GET['removeTopic'])) {
     // Remove removeTopic removeFromTest
     foreach (TestTestTopic::retrieveByDetail(TestTestTopic::TESTTOPIC_ID, $_GET['removeTopic']) as $ttt) {
@@ -11,7 +12,10 @@ if (isset($_GET['removeTopic'])) {
             break;
         }
     }
-} else if (isset($_POST['newtest-name']) && isset($_POST['form_serial']) && $_POST['form_serial'] == $_SESSION['form_serial']-1) {
+} else 
+*/
+
+if (isset($_POST['newtest-name']) && isset($_POST['form_serial']) && $_POST['form_serial'] == $_SESSION['form_serial']-1) {
     foreach (Test::retrieveAll() as $t) {
         $tId = $t->getId();
         // Test modifications
@@ -24,12 +28,14 @@ if (isset($_GET['removeTopic'])) {
             
             $newTest->commit();
         }
+/*        
         if (!empty($topicToAdd = $_POST["test-add-topic-to-{$t->getId()}"])) {
             (new TestTestTopic([
                 TestTestTopic::TESTTOPIC_ID => $topicToAdd,
                 TestTestTopic::TEST_ID => $t->getId()
             ]))->commit();
         }
+*/
     }
     
     if (!empty($_POST['newtest-name'])) {
@@ -115,7 +121,7 @@ if (isset($_GET['removeTopic'])) {
 </thead>
 
 <?php
-$orphanedTopics = TestTopic::retrieveAll(TestTopic::NAME);
+// $orphanedTopics = TestTopic::retrieveAll(TestTopic::NAME);
 $departments = Department::retrieveAll(Department::NAME);
 foreach ($departments as $department) {
     foreach (Test::retrieveByDetail(Test::DEPARTMENT_ID, $department->getId(), Test::NAME) as $t) {
