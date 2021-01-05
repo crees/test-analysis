@@ -41,16 +41,43 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
             $f = $_FILES["input-file"];
             $pages = [];
             if ($f['size'] > 0) {
-                $im = new \Imagick();
-                $im->setresolution(150, 150);
-                $im->readimage($f['tmp_name']);
-                for ($i = 0; $i < $im->getnumberimages(); $i++) {
-                    $im->setiteratorindex($i);
-                    $im->setimageformat('jpg');
-                    $im->setImageAlphaChannel(\Imagick::ALPHACHANNEL_REMOVE);
-                    array_push($pages, addslashes($im->getimageblob()));
+                switch (substr($f['name'], -4, 4)) {
+                case ".pdf":
+                    try {
+                        $im = new \Imagick();
+                        $im->setresolution(150, 150);
+                        $im->readimage($f['tmp_name']);
+                        for ($i = 0; $i < $im->getnumberimages(); $i++) {
+                            $im->setiteratorindex($i);
+                            $im->setimageformat('jpg');
+                            $im->setImageAlphaChannel(\Imagick::ALPHACHANNEL_REMOVE);
+                            array_push($pages, addslashes($im->getimageblob()));
+                        }
+                        $im->destroy();
+                    } catch (\ImagickException $e) {
+                        die('Well, that\'s a shame.  For some reason, we can\'t extract pdf files, so please use <a href="https://www.ilovepdf.com/pdf_to_jpg">a pdf converter</a> to turn your pdf into a zipfile of images and try uploading that.');
+                    }
+                    break;
+                case ".zip":
+                    /* Deal with zipped images in alphabetical order.  Very primitive :( */
+                    $zip = new \ZipArchive();
+                    $zip->open($f['tmp_name']);
+                    $zipcontents = [];
+                    for ($i = 0; $i < $zip->numFiles; $i++) {
+                        $n = $zip->getNameIndex($i);
+                        if (preg_match('/[.]jpe?g$/', $n) == 1) {
+                            array_push($zipcontents, $n);
+                        }
+                    }
+                    sort($zipcontents);
+                    foreach ($zipcontents as $name) {
+                        array_push($pages, addslashes($zip->getFromName($name)));
+                    }
+                    break;
+                default:
+                    die("Sorry, only pdfs or zips are accepted");
+                    break;
                 }
-                $im->destroy();
             }
             foreach ($students as $s) {
                 if (isset($_POST["set-for-{$s->getId()}"])) {
@@ -188,7 +215,7 @@ eof;
 		            echo "<td>&nbsp;</td><td><div class=\"form-check text-danger\"><input class=\"form-check-input\" type=\"checkbox\" name=\"delete-for-" . $s->getId() . "\" id=\"delete-for-" . $s->getId() . "\">";
 		            echo "<label class=\"form-check-label\" for=\"delete-for-" . $s->getId() . "\">Delete uploaded {$test->getName()}</label><div></td>";
 		        } else {
-		            echo "<td><div class=\"form-check\"><input type=\"checkbox\" class=\"form-check-input\" name=\"set-for-" . $s->getId() . "\"></div></td>";
+		            echo "<td><div class=\"form-check\"><input type=\"checkbox\" class=\"form-check-input\" name=\"set-for-" . $s->getId() . "\" checked></div></td>";
 		            echo "<td><input type=\"number\" class=\"form-control-input\" name=\"input-minutes-{$s->getId()}\" value=\"{$test->getTotal()}\"></td>";
 		        }
 		        echo "</tr>\n";
