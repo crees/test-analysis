@@ -140,3 +140,8 @@ if ($db->dosql("SHOW TABLES LIKE 'TestComponent'")->num_rows < 1) {
     $db->dosql("ALTER TABLE `Test` DROP COLUMN total_a;");
     $db->dosql("ALTER TABLE `Test` DROP COLUMN total_b;");
 }
+
+/* Version 9 to 10 upgrade */
+if ($db->dosql("SHOW COLUMNS FROM `ScannedTest` LIKE 'Subject_id'")->num_rows < 1) {
+    $db->dosql("ALTER TABLE `ScannedTest` ADD Subject_id INT NOT NULL DEFAULT 22;");
+}

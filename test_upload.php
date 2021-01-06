@@ -78,26 +78,29 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
                     die("Sorry, only pdfs or zips are accepted");
                     break;
                 }
-            }
-            foreach ($students as $s) {
-                if (isset($_POST["set-for-{$s->getId()}"])) {
-                    $scannedTest = new ScannedTest([
-                        ScannedTest::TEST_ID => $test->getId(),
-                        ScannedTest::STUDENT_ID => $s->getId(),
-                        ScannedTest::MINUTES_ALLOWED => $_POST["input-minutes-{$s->getId()}"],
-                        ScannedTest::TS_UNLOCKED => strtotime($_POST['unlock_date']),
-                        ]);
-                    $scannedTest->commit();
-                    foreach ($pages as $num => $p) {
-                        $page = new ScannedTestPage([
-                            ScannedTestPage::SCANNEDTEST_ID => $scannedTest->getId(),
-                            ScannedTestPage::PAGE_NUM => $num,
-                            ScannedTestPage::IMAGEDATA => $p,
-                        ]);
-                        $page->commit();
-                    }   
+                foreach ($students as $s) {
+                    if (isset($_POST["set-for-{$s->getId()}"])) {
+                        $scannedTest = new ScannedTest([
+                            ScannedTest::TEST_ID => $test->getId(),
+                            ScannedTest::STUDENT_ID => $s->getId(),
+                            ScannedTest::SUBJECT_ID => $subject->getId(),
+                            ScannedTest::MINUTES_ALLOWED => $_POST["input-minutes-{$s->getId()}"],
+                            ScannedTest::TS_UNLOCKED => strtotime($_POST['unlock_date']),
+                            ]);
+                        $scannedTest->commit();
+                        foreach ($pages as $num => $p) {
+                            $page = new ScannedTestPage([
+                                ScannedTestPage::SCANNEDTEST_ID => $scannedTest->getId(),
+                                ScannedTestPage::PAGE_NUM => $num,
+                                ScannedTestPage::IMAGEDATA => $p,
+                            ]);
+                            $page->commit();
+                        }   
+                    }
                 }
             }
+            header("Location: ?subject={$_GET['subject']}&teaching_group={$_GET['teaching_group']}&test={$_GET['test']}");
+            die();
         }
     }
 }

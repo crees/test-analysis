@@ -5,6 +5,7 @@ class ScannedTest extends DatabaseCollection
 {
     const TEST_ID = 'Test_id';
     const STUDENT_ID = 'Student_id';
+    const SUBJECT_ID = 'Subject_id';
     const MINUTES_ALLOWED = 'minutes_allowed';
     /* Hopefully before 2038... */
     const TS_STARTED = 'ts_started';
@@ -20,15 +21,12 @@ class ScannedTest extends DatabaseCollection
         
         foreach ([  self::TEST_ID,
                     self::STUDENT_ID,
+                    self::SUBJECT_ID,
                     self::MINUTES_ALLOWED,
                     self::TS_STARTED,
                     self::TS_UNLOCKED,
                 ] as $d) {
-            if (false && isset($details[$d])) {
-                $this->details[$d] = null;
-            } else {
-                $this->details[$d] = $details[$d] ?? null;
-            }
+            $this->details[$d] = $details[$d] ?? null;
         }
     }
     
