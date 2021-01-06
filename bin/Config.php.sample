@@ -8,6 +8,7 @@ class Config {
     const site_url = "https://www.bayofrum.net/~crees/roombooking/test-analysis";
     const site_emaildomain = "droitwichspahigh.worcs.sch.uk";
     const site_supportemail = "reescm@droitwichspahigh.worcs.sch.uk";
+    const site_small_logo = "dshs.jpg"; // Path relative to site_url/img/
     
     const db = array(
         'host' => "localhost:3306",
