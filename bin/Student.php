@@ -12,10 +12,6 @@ class Student extends DatabaseCollection
         $this->setNames($details[self::FIRST_NAME], $details[self::LAST_NAME]);
     }
     
-    public function getTestResults() {
-        return TestResult::retrieveByDetail(TestResult::STUDENT_ID, $this->getId());
-    }
-    
     public function setNames(String $first, String $last) {
         $this->details[self::FIRST_NAME] = $first;
         $this->details[self::LAST_NAME] = $last;
