@@ -154,6 +154,7 @@ for ($i = 1; $i < $maxPages+1; $i++) {
     echo "<th>Page $i</th>";
 }
 echo "<th>Total</th>";
+echo "<th>Save score to database</th>";
 echo "</tr>";
 
 foreach ($students as $s) {
@@ -180,22 +181,77 @@ foreach ($students as $s) {
         }
         continue;
     }
-    echo "<tr><td>{$s->getName()}</td>";
+    echo "<tr><td><a href=\"student_individual_scores.php?student={$s->getId()}\">{$s->getName()}</a></td>";
     $pagesLeft = $maxPages;
+    $canCommit = true;
     $total = 0;
+    $sectionTotal = [];
     foreach ($scannedTest->getPages() as $page) {
         $pagesLeft--;
         $pTotal = $page->get(ScannedTestPage::PAGE_SCORE);
         $total += $pTotal;
         echo "<td>$pTotal</td>";
+        if ($canCommit) {
+            if (is_null($page->get(ScannedTestPage::TESTCOMPONENT_ID))) {
+                $canCommit = false;
+            } else {
+                $tcId = $page->get(ScannedTestPage::TESTCOMPONENT_ID);
+                if (count(TestComponentResult::retrieveByDetails(
+                    [TestComponentResult::STUDENT_ID, TestComponentResult::TESTCOMPONENT_ID],
+                    [$s->getId(), $tcId])) > 0
+                ) {
+                    // This was a slow test, but no biggie as we don't have many kids
+                    $canCommit = false;
+                } else {
+                    $sectionTotal[$tcId] = ($sectionTotal[$tcId] ?? 0) + $pTotal;
+                }
+            }
+        }
     }
     while ($pagesLeft-- > 0) {
         echo "<td>-</td>";
     }
     echo "<td>$total</td>";
+    if ($canCommit) {
+        $args = [];
+        foreach ($sectionTotal as $id => $total) {
+            array_push($args, "\\\"$id\\\": $total");
+        }
+        $args = '{' . implode(", ", $args) . '}';
+        echo "<td><input class=\"form-control\" type=\"button\" id=\"commit-{$s->getId()}\" onclick='commit({$s->getId()}, \"$args\")' value=\"Commit score\"></td>";
+    } else {
+        echo "<td><input class=\"form-control\" type=\"button\" disabled value=\"Commit score (score already present for this student, click name to check)\"></td>";
+    }
     echo "</tr>";
 }
 echo "</table>";
 ?>
+
+<script>
+function commit(studentId, values) {
+	values = JSON.parse(values);
+	for (testComponentId in values) {
+		var xhr = new XMLHttpRequest();
+	    xhr.open("POST", 'async/newscore.php', true);
+	    
+	    //Send the proper header information along with the request
+	    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	    xhr.onreadystatechange = function() {
+	        if (this.readyState == 4 && this.status == 200) {
+	          saved(studentId);
+	        }
+	        console.log(this.responseText);
+	    };
+	    xhr.send("studentId=" + studentId + "&testComponentId=" + testComponentId + "&result=" + values[testComponentId] + "&subjectId=<?= $subject->getId() ?>");
+	}
+}
+
+function saved(studentId) {
+	button = $('input#commit-' + studentId)[0];
+	button.disabled = true;
+}
+</script>
+
+
 </body>
 </html>

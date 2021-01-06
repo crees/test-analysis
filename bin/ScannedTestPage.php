@@ -4,6 +4,7 @@ namespace TestAnalysis;
 class ScannedTestPage extends DatabaseCollection
 {
     const SCANNEDTEST_ID = 'ScannedTest_id';
+    const TESTCOMPONENT_ID = 'TestComponent_id';
     const PAGE_NUM = 'page_num';
     const STUDENT_ID = 'Student_id';
     const IMAGEDATA = 'imagedata';
@@ -20,6 +21,7 @@ class ScannedTestPage extends DatabaseCollection
         }
         
         foreach ([  self::SCANNEDTEST_ID,
+                    self::TESTCOMPONENT_ID,
                     self::PAGE_NUM,
                     self::STUDENT_ID,
                     self::IMAGEDATA,

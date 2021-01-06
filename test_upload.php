@@ -78,6 +78,9 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
                     die("Sorry, only pdfs or zips are accepted");
                     break;
                 }
+
+                $components = $test->getTestComponents();
+                
                 foreach ($students as $s) {
                     if (isset($_POST["set-for-{$s->getId()}"])) {
                         $scannedTest = new ScannedTest([
@@ -88,9 +91,18 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
                             ScannedTest::TS_UNLOCKED => strtotime($_POST['unlock_date']),
                             ]);
                         $scannedTest->commit();
+                        $currentComponentIndex = 0;
                         foreach ($pages as $num => $p) {
+                            // XXX Yes, this next bit is horrible, I'm sorry
+                            //     Fun exercise for the reader?
+                            if (isset($components[$currentComponentIndex+1]) && 
+                                $_POST["page-for-component-{$components[$currentComponentIndex+1]->getId()}"] == $num
+                            ) {
+                                $currentComponentIndex++;
+                            }
                             $page = new ScannedTestPage([
                                 ScannedTestPage::SCANNEDTEST_ID => $scannedTest->getId(),
+                                ScannedTestPage::TESTCOMPONENT_ID => $components[$currentComponentIndex]->getId(),
                                 ScannedTestPage::PAGE_NUM => $num,
                                 ScannedTestPage::IMAGEDATA => $p,
                             ]);
@@ -195,10 +207,25 @@ EOF;
 		    echo <<< eof
         <form method="POST" enctype="multipart/form-data">
             <input type="submit" class="form-control btn btn-warning" value="Submit (click me or press Enter)!">
-            <input type="file" class="form-control-file" name="input-file">
-            <div class=\"form-group\"><input class="form-control" type="date" id="date-input" name="unlock_date">
-		        <label class=\"form-label\" for=\"date-input">Date to unlock test</label><div>
-
+            <div class="form-group">
+		        <label class="form-label" for="input-file">Test file to upload (jpgs in zip or pdf)</label>
+                <input type="file" class="form-control-file" name="input-file" id="input-file">
+            </div>
+            <div class="form-group">
+		        <label class="form-label" for="unlock_date">Date to unlock test</label>
+                <input class="form-control" type="date" id="unlock_date" name="unlock_date">
+            </div>
+eof;
+		    $components = $test->getTestComponents();
+		    $firstComponent = array_shift($components);
+		    echo "<input type=\"hidden\" name=\"page-for-component-{$firstComponent->getId()}\" value=\"0\" />";
+		    if (isset($components[0])) {
+		        // More than one component, so let's ask which page each one starts on
+    		    foreach ($components as $c) {
+    		        echo "<input class=\"form-control\" type=\"number\" name=\"page-for-component-{$c->getId()}\" placeholder=\"Section {$c->getName()} begins on page...\">";
+    		    }
+		    }
+		    echo <<< eof
             <div class="table-responsive table-95 table-stickyrow">
             <table class="table table-bordered table-sm table-hover">
                 <thead>
@@ -223,5 +250,5 @@ eof;
 		        }
 		        echo "</tr>\n";
 		    }
-		    echo "</table>\n</div><input type=\"hidden\" name=\"form_serial\" value=\"{$_SESSION['form_serial']}\">\n</form>\n</body>\n</html>";
+		    echo "</table>\n</div><input type=\"hidden\" name=\"form_serial\" value=\"{$_SESSION['form_serial']}\">\n</form>\n</div>\n</body>\n</html>";
 		}

@@ -145,3 +145,9 @@ if ($db->dosql("SHOW TABLES LIKE 'TestComponent'")->num_rows < 1) {
 if ($db->dosql("SHOW COLUMNS FROM `ScannedTest` LIKE 'Subject_id'")->num_rows < 1) {
     $db->dosql("ALTER TABLE `ScannedTest` ADD Subject_id INT NOT NULL DEFAULT 22;");
 }
+
+/* Version 10 to 11 upgrade */
+
+if ($db->dosql("SHOW COLUMNS FROM `ScannedTestPage` LIKE 'TestComponent_id'")->num_rows < 1) {
+    $db->dosql("ALTER TABLE `ScannedTestPage` ADD TestComponent_id INT NULL;");
+}
