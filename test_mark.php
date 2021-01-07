@@ -123,7 +123,7 @@ EOF;
 		    /* So, do we have any papers? */
 		    $page_num = $_GET['page'] ?? 0;
 		    $student_number = $_GET['student_number'] ?? 0;
-		    $seen_a_test = false;
+		    $firstLoop = true;
 		    for (;;) {
 		        if (isset($students[$student_number])) {
 		            $student = $students[$student_number];
@@ -147,9 +147,10 @@ EOF;
 		            }
 		            $student_number++;
 		        } else {
-		            if ($seen_a_test) {
+		            if ($firstLoop) {
     		            $student_number = 0;
     		            $page_num++;
+    		            $firstLoop = false;
 		            } else {
 		                $page_num++;
 		                die ("No tests have been set for this group.  This could be a bug-- if so, click <a href=\"?subject={$_GET['subject']}&teaching_group=$teaching_group&test={$_GET['test']}&page=$page_num&student_number=0\">here</a> for the next page.");
@@ -158,22 +159,22 @@ EOF;
 		    }
 		    $testPage = $testPages[$page_num];
 		    echo "<div class=\"row\">";
-            echo "<div class=\"col-3\"><span id=\"savebar\"></span>";
+		    echo '<div class="col-lg-9"><div id="testpage"></div></div>';
+		    echo "<div class=\"col-lg-3\">";
             echo "<div class=\"form-inline form-group\">";
-            echo "<label for=\"skipMarked\">Skip already marked tests: </label>";
             if (isset($_GET['skipMarked'])) {
                 $skipMarked = 'checked';
             } else {
                 $skipMarked = '';
             }
             echo "<input class=\"form-control\" type=\"checkbox\" id=\"skipMarked\" $skipMarked onchange=\"doButtons()\"><br>";
+            echo "<label for=\"skipMarked\"> Skip already marked tests</label>";
             echo "<label for=\"score\">Total page score: </label>";
             echo "<input class=\"form-control\" type=\"number\" id=\"score\" value=\"{$testPage->get(ScannedTestPage::PAGE_SCORE)}\">";
 		    echo '</div>';
-            echo "<div>Shortcut keys: Z for ticks, X for crosses.  Every tick placed increments the total by one.  Press Enter to save, or type a number (no clicks necessary) to jump to the score box.  Mark title page as zero!</div>";
-		    echo '</div>';
-		    echo '<div class="col-9"><br /><br />';
-		    echo '<div id="testpage"></div>';
+            echo "<div>Student name (press ?): <span id=\"kidname\" style=\"display: none\">{$student->getName()}</span><br /> Shortcut keys: Z for ticks, X for crosses.  Every tick placed increments the total by one.  Press Enter to save, or type a number (no clicks necessary) to jump to the score box.  Mark title page as zero!</div>";
+            echo "<div id=\"savebar\"></div>";
+            echo '</div>';
 		    echo "</div>";
 		    echo '</div>';
 		}
@@ -181,17 +182,17 @@ EOF;
 
 <script>
     options = {
-    		  width: $('.container')[0].clientWidth * 0.8,
-    		  height: $('.container')[0].clientWidth * 0.8 * 1.414,
-    		  color: "red",           // Color for shape and text
+    		  width: Math.trunc($('html')[0].clientHeight * 0.95 / 1.414),
+			  height: Math.trunc($('html')[0].clientHeight * 0.95),
+			  color: "red",           // Color for shape and text
     		  type : "tick",    // default shape: can be "rectangle", "arrow" or "text"
 			  tools: ['undo', 'tick', 'cross', 'text', 'circle', 'arrow', 'pen', 'redo'], // Tools
     		  images: ["data:image/jpg;base64,<?= base64_encode($testPage->get(ScannedTestPage::IMAGEDATA))?>"],          // Array of images path : ["images/image1.png", "images/image2.png"]
     		  linewidth: 2,           // Line width for rectangle and arrow shapes
-    		  fontsize: $('.container')[0].clientWidth * 1.414 * 0.022 + "px",       // font size for text
-			  lineheight: $('.container')[0].clientWidth * 1.414 * 0.022,
+    		  fontsize: Math.trunc($('html')[0].clientHeight * 0.022) + "px",       // font size for text
+			  lineheight: Math.trunc($('html')[0].clientHeight * 0.022),
     		  bootstrap: true,       // Bootstrap theme design
-    		  position: "top",       // Position of toolbar (available only with bootstrap)
+    		  position: "right",       // Position of toolbar (available only with bootstrap)
     		  selectEvent: "change", // listened event on .annotate-image-select selector to select active images
     		  unselectTool: false,   // Add a unselect tool button in toolbar (useful in mobile to enable zoom/scroll)
 			  imageExport: { type: "image/jpg", quality: 1 },
@@ -241,6 +242,9 @@ EOF;
 		  	case 'x':
 			  	tool = $("[name='tool_option_testpage'][data-tool='cross']");
 			  	break;
+		  	case '?':
+			  	$('span#kidname')[0].style.display = 'inline';
+			  	break;
 			default:
 				break;
 		  }
@@ -259,12 +263,12 @@ EOF;
 	    savebutton = '<a class="btn btn-success" onclick="save()">Save page</a>';
 	    dontsavebutton = '<a class="btn btn-danger" onclick="dontsave()">Do not save</a>';
 		currentPage = <?= $page_num ?>;
-	    prevbutton = '<a class="btn btn-secondary" onclick="visibleTop()">Change test/class</a><a class="btn btn-danger" href="?' + getvars + '&page=' + currentPage + '&student_number=<?= $student_number-1 ?>"><i class="fa fa-arrow-left"></i>Previous student</a>';
+	    prevbutton = '<a class="btn btn-danger" href="?' + getvars + '&page=' + currentPage + '&student_number=<?= $student_number-1 ?>"><i class="fa fa-arrow-left"></i>Previous student</a>';
 	    if (currentPage > 0) {
 	        prevbutton += '<a class="btn btn-warning" href="?' + getvars + '&page=' + (currentPage-1) + '&student_number=<?= $student_number ?>"><i class="fa fa-arrow-up"></i>Previous page</a>';
 	    }
 	    nextbutton = '<a class="btn btn-success" href="?' + getvars + '&page=<?= ($page_num + 1) ?>&student_number=<?= $student_number ?>">Next page<i class="fa fa-arrow-down"></i></a>';
-	    nextbutton += '<a class="btn btn-primary" href="?' + getvars + '&page=<?= $page_num ?>&student_number=<?= $student_number + 1 ?>">Next student<i class="fa fa-arrow-right"></i></a>';
+	    nextbutton += '<a class="btn btn-primary" href="?' + getvars + '&page=<?= $page_num ?>&student_number=<?= $student_number + 1 ?>">Next student<i class="fa fa-arrow-right"></i></a><a class="btn btn-secondary" onclick="visibleTop()">Change test/class</a>';
 	    document.getElementById('savebar').innerHTML = savebutton + prevbutton + nextbutton;
 	}
 
