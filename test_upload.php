@@ -96,7 +96,7 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
                             // XXX Yes, this next bit is horrible, I'm sorry
                             //     Fun exercise for the reader?
                             if (isset($components[$currentComponentIndex+1]) && 
-                                $_POST["page-for-component-{$components[$currentComponentIndex+1]->getId()}"] == $num
+                                $_POST["page-for-component-{$components[$currentComponentIndex+1]->getId()}"] == $num+1
                             ) {
                                 $currentComponentIndex++;
                             }
