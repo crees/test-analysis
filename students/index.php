@@ -99,7 +99,9 @@ if (!isset($_GET['test'])) {
         }
     }
     
-    echo "<div class=\"h4\">Hello {$student->getName()}.  You have these tests to complete:</div><ul class=\"list-group\">";
+    echo "<div class=\"h3\">Hello {$student->getName()}.</div>";
+    echo "<div><a href=\"https://youtu.be/Hm42t_5_ijs\" class=\"btn btn-danger\">Please click here for video instructions</a></div>";
+    echo "<div class=\"h4\">You have these tests to complete:</div><ul class=\"list-group\">";
     foreach ($tests_to_complete as $st) {
         $testId = $st->get(ScannedTest::TEST_ID);
         $test_name = Test::retrieveByDetail(Test::ID, $testId)[0]->getName();
