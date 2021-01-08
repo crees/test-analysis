@@ -151,7 +151,7 @@ echo "<table class=\"table table-bordered table-sm table-hover\">";
 echo "<tr>";
 echo "<th>Name</th>";
 for ($i = 1; $i < $maxPages+1; $i++) {
-    echo "<th>Page $i</th>";
+    echo "<th><a href=\"test_mark.php?subject={$subject->getId()}&teaching_group=$teaching_group&test={$test->getId()}&page=" . ($i-1) . "\">Page $i</a></th>";
 }
 echo "<th>Total</th>";
 echo "<th>Save score to database</th>";
