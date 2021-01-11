@@ -264,6 +264,9 @@ function redrawTiming(stId, newTime) {
 	} else {
 		timerId = '';
 	}
+	if (newTime === -1) {
+		return;
+	}
 	for (cell of $('td.bta-timer' + timerId)) {
 		scannedTestId = parseInt(cell.id);
 		var xhr = new XMLHttpRequest();
