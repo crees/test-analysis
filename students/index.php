@@ -118,7 +118,9 @@ if (!isset($_GET['test'])) {
         echo "<a href=\"?test={$st->get(ScannedTest::TEST_ID)}&getpdf=yes&masquerade={$auth_user}\">$test_name</a>";
         $test = Test::retrieveByDetail(Test::ID, $st->get(ScannedTest::TEST_ID))[0];
         $feedback_able = true;
-        foreach ($test->getTestComponents() as $c) {
+        if (empty($test->get(Test::TARGETS)[0])) {
+            $feedback_able = false;
+        } else foreach ($test->getTestComponents() as $c) {
             $r = TestComponentResult::retrieveByDetails(
                 [TestComponentResult::STUDENT_ID, TestComponentResult::TESTCOMPONENT_ID],
                 [$student->getId(), $c->getId()],
@@ -130,7 +132,7 @@ if (!isset($_GET['test'])) {
             }
         }
         if ($feedback_able) {
-            echo " (and <a href=\"feedback_sheet.php?test={$st->get(ScannedTest::TEST_ID)}&subject={$st->get(ScannedTest::SUBJECT_ID)}&student=$student_id\">feedback sheet</a>)";
+            echo " (and <a href=\"feedback_sheet.php?test={$st->get(ScannedTest::TEST_ID)}&subject={$st->get(ScannedTest::SUBJECT_ID)}&student=$student_id&masquerade=$auth_user\">feedback sheet</a>)";
         }
         echo "</li>";
     }
