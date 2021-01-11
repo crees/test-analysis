@@ -23,8 +23,8 @@ abstract class DatabaseCollection
     
     /**
      * 
-     * @param array $detailType
-     * @param array $detail
+     * @param array $detailTypes[]
+     * @param array $details[]
      * @param Database $db
      * @return \TestAnalysis\DatabaseCollection[]
      */
@@ -89,7 +89,13 @@ abstract class DatabaseCollection
         self::$db->dosql("DELETE FROM " . explode('\\', static::class)[1] . " WHERE id = $id;");
     }
     
-    public function commit() {
+    /**
+     * Commits changes-- any that need setting to null should be explicitly
+     * listed in the first argument as an array
+     * 
+     * @param array $setToNull
+     */
+    public function commit(array $setToNull = []) {
         if (is_null(self::$db)) {
             self::$db = new Database();
         }
@@ -109,6 +115,10 @@ abstract class DatabaseCollection
                 }
                 array_push($updatelist, "$key = \"$detail\"");
             }
+        }
+        
+        foreach ($setToNull as $nullKey) {
+            array_push($updatelist, "$nullKey = NULL");
         }
         
         $updatelist = implode(",", $updatelist);

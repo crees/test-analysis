@@ -35,7 +35,7 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
 <?php require "bin/head.php"; ?>
 </head>
 
-<body>
+<body onload="redrawTiming(null, null);">
 	<div class="container">
 	  <div id="top-part">
 		<?php require "bin/navbar.php"; ?>
@@ -151,6 +151,7 @@ echo "<div class=\"table-responsive table-95 table-stickyrow\">";
 echo "<table class=\"table table-bordered table-sm table-hover\">";
 echo "<tr>";
 echo "<th>Name</th>";
+echo "<th>Timer operations</th>";
 for ($i = 1; $i < $maxPages+1; $i++) {
     echo "<th scope=\"col\"><a href=\"test_mark.php?subject={$subject->getId()}&teaching_group=$teaching_group&test={$test->getId()}&page=" . ($i-1) . "\">Page $i</a></th>";
 }
@@ -170,19 +171,22 @@ foreach ($students as $s) {
         foreach ($scannedTests_unmarked as $stu) {
             if ($stu->get(ScannedTest::STUDENT_ID) == $s->getId()) {
                 echo "<tr><th scope=\"row\">{$s->getName()}</th>";
+                echo "<td class=\"bta-timer\" id=\"{$stu->getId()}\"></td>";
+                echo "<td>";
                 if (is_null($stu->get(ScannedTest::TS_STARTED))) {
-                    echo "<td>Not started</td>";
+                    echo "Not started";
                 } else if ($stu->secondsRemaining() > 0) {
-                    echo "<td>Started, but not finished</td>";
+                    echo "Started, but not finished";
                 } else {
-                    echo "<td>Not yet completely marked</td>";
+                    echo "Not yet completely marked";
                 }
+                echo "</td>";
                 echo "</tr>";
             }
         }
         continue;
     }
-    echo "<tr><th scope=\"row\"><a href=\"student_individual_scores.php?student={$s->getId()}\">{$s->getName()}</a></th>";
+    echo "<tr><th scope=\"row\"><a href=\"student_individual_scores.php?student={$s->getId()}\">{$s->getName()}</a></th><td>&nbsp;</td>";
     $pagesLeft = $maxPages;
     $canCommit = true;
     $total = 0;
@@ -253,6 +257,47 @@ function saved(studentId) {
 	button = $('input#commit-' + studentId)[0];
 	button.disabled = true;
 }
+
+function redrawTiming(stId, newTime) {
+	if (stId !== null) {
+		timerId = '#' + stId;
+	} else {
+		timerId = '';
+	}
+	for (cell of $('td.bta-timer' + timerId)) {
+		scannedTestId = parseInt(cell.id);
+		var xhr = new XMLHttpRequest();
+	    xhr.open("POST", 'async/scannedTestTimer.php', true);
+	    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	    xhr.onreadystatechange = function() {
+	        if (this.readyState == 4 && this.status == 200) {
+			  [id, remainingTime, ts_started] = this.responseText.split(':');
+			  remainingTime = parseInt(remainingTime);
+		      console.log(remainingTime);
+		      innerHTML  = '<span class="text-danger" onclick="redrawTiming(' + id + ', ' + (remainingTime-1) + ')">-</span>';
+		      innerHTML += remainingTime;
+		      innerHTML += '<span class="text-success" onclick="redrawTiming(' + id + ', ' + (remainingTime+1) + ')">+</span>';
+			  innerHTML += ' minutes';
+			  if (ts_started !== '') {
+				  innerHTML += '<span class="text-success" onclick="redrawTiming('  + id + ', -2)">(reset)</span>';
+			  }
+			  console.log('td.bta-timer#' + id);
+	          $('td.bta-timer#' + id)[0].innerHTML = innerHTML;
+	        }
+	        console.log(this.responseText);
+	    };
+	    if (newTime === null) {
+		    // Query only
+	    	xhr.send("scannedTestId=" + scannedTestId);
+	    } else if (newTime === -2) {
+		    // magic number to just reset
+			xhr.send("scannedTestId=" + scannedTestId + "&resetTimer=true");
+	    } else {
+	    	xhr.send("scannedTestId=" + scannedTestId + "&newTime=" + newTime);
+	    }
+	}
+}
+
 </script>
 
 

@@ -37,6 +37,15 @@ class ScannedTest extends DatabaseCollection
         }
     }
     
+    function setTime(int $newTime) {
+        $this->details[self::MINUTES_ALLOWED] = $newTime;
+        $this->resetTimer();
+    }
+    
+    function resetTimer() {
+        $this->commit([self::TS_STARTED]);
+    }
+    
     function secondsRemaining() {
         // Has this test been started?
         if ($this->details[self::TS_STARTED] == null) {
