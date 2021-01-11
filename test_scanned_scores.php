@@ -280,7 +280,7 @@ function redrawTiming(stId, newTime) {
 		      innerHTML  = '<span class="text-danger" onclick="redrawTiming(' + id + ', ' + (remainingTime-1) + ')">-</span>';
 		      innerHTML += remainingTime;
 		      innerHTML += '<span class="text-success" onclick="redrawTiming(' + id + ', ' + (remainingTime+1) + ')">+</span>';
-			  innerHTML += ' minutes';
+			  innerHTML += ' min';
 			  if (ts_started !== '') {
 				  innerHTML += '<span class="text-success" onclick="redrawTiming('  + id + ', -2)">(reset)</span>';
 			  }
