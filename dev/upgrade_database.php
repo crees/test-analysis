@@ -151,3 +151,7 @@ if ($db->dosql("SHOW COLUMNS FROM `ScannedTest` LIKE 'Subject_id'")->num_rows < 
 if ($db->dosql("SHOW COLUMNS FROM `ScannedTestPage` LIKE 'TestComponent_id'")->num_rows < 1) {
     $db->dosql("ALTER TABLE `ScannedTestPage` ADD TestComponent_id INT NULL;");
 }
+
+/* Version 11 to 12 upgrade */
+
+$db->dosql("ALTER TABLE `Baseline` MODIFY grade VARCHAR(30) NOT NULL;");

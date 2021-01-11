@@ -17,7 +17,7 @@ if (isset(Config::$maintenance) && Config::$maintenance) {
         name VARCHAR(300) NOT NULL,
         Mis_assessment_id INT UNSIGNED NOT NULL,
         Student_id INT UNSIGNED NOT NULL,
-        grade VARCHAR(10) NOT NULL,
+        grade VARCHAR(30) NOT NULL,
         CONSTRAINT PRIMARY KEY (id)
     );
     CREATE TABLE Department (
