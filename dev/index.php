@@ -40,7 +40,9 @@ require "../bin/classes.php";
     
     			<div class="card-text"><a href="manage_subjects.php" class="btn btn-primary" role="button">Manage subjects and groups</a></div>
     
+<!--
     			<div class="card-text"><a href="manage_topics.php" class="btn btn-primary" role="button">Manage topics</a></div>
+-->
     
     			<div class="card-text"><a href="manage_tests.php" class="btn btn-primary" role="button">Manage tests, targets and grade boundaries</a></div>
     			
