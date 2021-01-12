@@ -90,7 +90,7 @@ if (!isset($_GET['test'])) {
         } else {
             // Check the scores:
             array_push($tests_marked, $st);
-            foreach (ScannedTestPage::retrieveByDetail(ScannedTestPage::SCANNEDTEST_ID, $st->getId()) as $p) {
+            foreach (ScannedTestPage::retrieveByDetail(ScannedTestPage::SCANNEDTEST_ID, $st->getId(), "", '`' . ScannedTestPage::PAGE_SCORE . '`') as $p) {
                 if (is_null($p->get(ScannedTestPage::PAGE_SCORE))) {
                     array_push($tests_to_mark, array_pop($tests_marked));
                     break;
