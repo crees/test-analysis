@@ -152,6 +152,22 @@ if ($db->dosql("SHOW COLUMNS FROM `ScannedTestPage` LIKE 'TestComponent_id'")->n
     $db->dosql("ALTER TABLE `ScannedTestPage` ADD TestComponent_id INT NULL;");
 }
 
-/* Version 11 to 12 upgrade */
+/* Version 12 to 13 upgrade (enclosed v11 upgrade too) */
 
-$db->dosql("ALTER TABLE `Baseline` MODIFY grade VARCHAR(30) NOT NULL;");
+if ($db->dosql("SHOW TABLES LIKE 'Staff'")->num_rows < 1) {
+
+    $db->dosql("ALTER TABLE `Baseline` MODIFY grade VARCHAR(30) NOT NULL;"); // v12
+
+    $db->dosql("CREATE TABLE Staff (
+        id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        arbor_id INT UNSIGNED NOT NULL,
+        first_name VARCHAR(30) NOT NULL,
+        last_name VARCHAR(30) NOT NULL,
+        username VARCHAR(30) NOT NULL,
+        CONSTRAINT PRIMARY KEY (id)
+        );");
+    
+    $db->dosql("ALTER TABLE `TestComponentResult` ADD Staff_id INT NOT NULL;");
+    
+    $db->dosql("ALTER TABLE `ScannedTest` ADD Staff_id INT NOT NULL;");
+}

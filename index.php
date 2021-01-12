@@ -2,7 +2,6 @@
 namespace TestAnalysis;
 
 require "bin/classes.php";
-require "dev/upgrade_database.php";
 
 $departments = Department::retrieveAll(Department::NAME);
 $allSubjects = [];

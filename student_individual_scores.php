@@ -64,9 +64,12 @@ $student = $student[0];
 					<th>Score</th>
 				
 					<th>Date entered</th>
+					
+					<th>By whom</th>
 				</tr>
 			</thead>
 			<?php
+			$staffCache = [];
 			foreach (TestComponentResult::retrieveByDetail(TestComponentResult::STUDENT_ID, $student->getId(), TestComponentResult::RECORDED_TS . ' DESC') as $r) {
 			    $link = "<a href=\"?student=" . $student->getId() . "&resultToDelete=" . $r->getId() . "\" class=\"stretched-link\">";
 			    echo "<tr>";
@@ -75,6 +78,16 @@ $student = $student[0];
                 echo "<td>$link{$test->getName()}: {$component->getName()}</a></td>";
                 echo "<td>$link" . $r->get(TestComponentResult::SCORE) . "</a></td>";
                 echo "<td>$link" . date("Y-m-d H:i:s", $r->get(TestComponentResult::RECORDED_TS)) . "</a></td>";
+                $staffId = $r->get(TestComponentResult::STAFF_ID);
+                if ($staffId == 0) {
+                    $staffName = "Unknown";
+                } else {
+                    if (!isset($staffCache[$staffId])) {
+                        $staffCache[$staffId] = Staff::retrieveByDetail(Staff::ID, $staffId)[0];
+                    }
+                    $staffName = $staffCache[$staffId]->getName();
+                }
+                echo "<td>$link$staffName</td>";
                 echo "</tr>";
 			}
 			?>

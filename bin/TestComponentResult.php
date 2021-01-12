@@ -7,6 +7,7 @@ class TestComponentResult extends DatabaseCollection
     const TESTCOMPONENT_ID = 'TestComponent_id';
     const SCORE = 'score';
     const RECORDED_TS = 'recorded_ts';
+    const STAFF_ID = 'Staff_id';
     
     public function __construct(array $details)
     {
@@ -22,6 +23,7 @@ class TestComponentResult extends DatabaseCollection
         } else {
             $this->details[self::RECORDED_TS] = null;
         }
+        $this->details[self::STAFF_ID] = $details[self::STAFF_ID];
     }
     
     function __destruct()

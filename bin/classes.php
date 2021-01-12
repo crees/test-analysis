@@ -8,7 +8,6 @@ error_reporting(-1);
 /* Have we been called before? */
 if (!class_exists("Config")) {
     require "Config.php";
-    require "auth.php";
     require "Database.php";
     require "DatabaseCollection.php";
     require "Baseline.php";
@@ -18,6 +17,7 @@ if (!class_exists("Config")) {
     require "GraphQLClient.php";
     require "ScannedTest.php";
     require "ScannedTestPage.php";
+    require "Staff.php";
     require "Student.php";
     require "Subject.php";
     require "TeachingGroup.php";
@@ -29,6 +29,10 @@ if (!class_exists("Config")) {
     require "TestTestTopic.php";
     require "View.php";
     require Config::site_docroot . "/contrib/php-graphql-client/vendor/autoload.php";
+    
+    require Config::site_docroot . "/dev/upgrade_database.php";
+    
+    require "auth.php";
     
     /**
      * We start the session timer on creation, and destroy it after that time.

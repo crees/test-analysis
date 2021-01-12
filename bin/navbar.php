@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand">
             <!-- Brand -->
-    <a class="navbar-brand"><?= $auth_user ?></a>
+    <a class="navbar-brand"><?= $staff->getName(); ?></a>
     
     <!-- Toggler/collapsibe Button -->
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
