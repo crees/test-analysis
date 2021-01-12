@@ -43,6 +43,7 @@ class ScannedTest extends DatabaseCollection
     }
     
     function resetTimer() {
+        $this->details[self::TS_STARTED] = null;
         $this->commit([self::TS_STARTED]);
     }
     
