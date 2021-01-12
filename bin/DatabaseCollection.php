@@ -21,19 +21,21 @@ abstract class DatabaseCollection
         return 0;
     }
     
-    /**
-     * 
-     * @param array $detailTypes[]
-     * @param array $details[]
-     * @param string $orderBy
-     * @param string $selectOnly
-     * @return \TestAnalysis\DatabaseCollection[]
-     */
-    public static function retrieveByDetails(array $detailType, array $detail, string $orderBy = "", string $selectQuery = "*") {
+    protected static function _retrieveByDetails(array $detailType, array $detail, string $orderBy = "", array $selectQuery = []) {
         if (is_null(self::$db)) {
             self::$db = new Database();
         }
         $db = self::$db;
+        
+        if (empty($selectQuery)) {
+            $selections = '*';
+        } else {
+            $selections = [];
+            foreach ($selectQuery as $q) {
+                array_push($selections, '`' . $q . '`');
+            }
+            $selections = implode(',', $selections);
+        }
         
         if ($detail[0] == self::OPERATOR_MATCH_ALL) {
             $where = "";
@@ -53,7 +55,7 @@ abstract class DatabaseCollection
             $orderBy = "ORDER BY $orderBy";
         }
         
-        $result = $db->dosql("SELECT $selectQuery FROM " . explode('\\', static::class)[1] . "$where $orderBy;")->fetch_all(MYSQLI_ASSOC);
+        $result = $db->dosql("SELECT $selections FROM " . explode('\\', static::class)[1] . "$where $orderBy;")->fetch_all(MYSQLI_ASSOC);
         
         if (!isset($result[0])) {
             return [];
@@ -66,6 +68,17 @@ abstract class DatabaseCollection
         }
         
         return $ret;
+    }
+    
+    /**
+     *
+     * @param array $detailTypes[]
+     * @param array $details[]
+     * @param string $orderBy
+     * @return \TestAnalysis\DatabaseCollection[]
+     */
+    public static function retrieveByDetails(array $detailType, array $detail, string $orderBy = "") {
+        return static::_retrieveByDetails($detailType, $detail, $orderBy, []);
     }
     
     /**
