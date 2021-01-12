@@ -163,12 +163,14 @@ if ($st->get(ScannedTest::TS_UNLOCKED) > time()) {
     die("The test is not unlocked yet!");
 }
 
-$testPage = ScannedTestPage::retrieveByDetails([ScannedTestPage::SCANNEDTEST_ID, ScannedTestPage::PAGE_NUM], [$st->getId(), $page_num]);
-if (!isset($testPage[0])) {
+$testPageId = ScannedTestPage::retrieveByDetails([ScannedTestPage::SCANNEDTEST_ID, ScannedTestPage::PAGE_NUM], [$st->getId(), $page_num], "", "`id`");
+
+if (!isset($testPageId[0])) {
     die("<h3>Test complete!</h3>");
 }
 
-$testPage = $testPage[0];
+$testPageId = $testPageId[0]->getId();
+
 $st->startTimer();
 
 echo "<h3><i class=\"fa fa-clock\"></i>";
@@ -193,7 +195,7 @@ echo "<br /><br /><div id=\"testpage\"></div>";
     		  color: "blue",           // Color for shape and text
     		  type : "text",    // default shape: can be "rectangle", "arrow" or "text"
 			  tools: ['undo', 'unselect', 'tick', 'rectangle-filled', 'circle', 'text', 'arrow', 'pen', 'redo'], // Tools
-    		  images: ["../async/getScannedImage.php?stpid=<?= $testPage->getId() ?>"],          // Array of images path : ["images/image1.png", "images/image2.png"]
+    		  images: ["../async/getScannedImage.php?stpid=<?= $testPageId ?>"],          // Array of images path : ["images/image1.png", "images/image2.png"]
     		  linewidth: 2,           // Line width for rectangle and arrow shapes
     		  fontsize: $('.container')[0].clientWidth * 1.414 * 0.033 / 2 + "px",       // font size for text
 			  lineheight: $('.container')[0].clientWidth * 1.414 * 0.033 / 2,
@@ -237,7 +239,7 @@ echo "<br /><br /><div id=\"testpage\"></div>";
 				      saved();
 				    }
 				};
-			  xhr.send("img=" + image + "&stpid=<?= $testPage->getId() ?>");
+			  xhr.send("img=" + image + "&stpid=<?= $testPageId ?>");
 		  });
 	}
 

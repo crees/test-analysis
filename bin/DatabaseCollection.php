@@ -25,10 +25,11 @@ abstract class DatabaseCollection
      * 
      * @param array $detailTypes[]
      * @param array $details[]
-     * @param Database $db
+     * @param string $orderBy
+     * @param string $selectOnly
      * @return \TestAnalysis\DatabaseCollection[]
      */
-    public static function retrieveByDetails(array $detailType, array $detail, string $orderBy = "") {
+    public static function retrieveByDetails(array $detailType, array $detail, string $orderBy = "", string $selectQuery = "*") {
         if (is_null(self::$db)) {
             self::$db = new Database();
         }
@@ -52,7 +53,7 @@ abstract class DatabaseCollection
             $orderBy = "ORDER BY $orderBy";
         }
         
-        $result = $db->dosql("SELECT * FROM " . explode('\\', static::class)[1] . "$where $orderBy;")->fetch_all(MYSQLI_ASSOC);
+        $result = $db->dosql("SELECT $selectQuery FROM " . explode('\\', static::class)[1] . "$where $orderBy;")->fetch_all(MYSQLI_ASSOC);
         
         if (!isset($result[0])) {
             return [];
