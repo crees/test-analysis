@@ -4,7 +4,7 @@ namespace TestAnalysis;
 /* User authenticated? */
 
 if(!isset($_SERVER['PHP_AUTH_USER'])) {
-    header('WWW-Authenticate: Basic realm="CSE2K"');
+    header('WWW-Authenticate: Basic realm="Username in lower case-- no capitals"');
     header('HTTP/1.0 401 Unauthorized');
 }
 
