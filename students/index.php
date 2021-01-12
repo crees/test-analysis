@@ -193,7 +193,7 @@ echo "<br /><br /><div id=\"testpage\"></div>";
     		  color: "blue",           // Color for shape and text
     		  type : "text",    // default shape: can be "rectangle", "arrow" or "text"
 			  tools: ['undo', 'unselect', 'tick', 'rectangle-filled', 'circle', 'text', 'arrow', 'pen', 'redo'], // Tools
-    		  images: ["data:image/jpg;base64,<?= base64_encode($testPage->get(ScannedTestPage::IMAGEDATA))?>"],          // Array of images path : ["images/image1.png", "images/image2.png"]
+    		  images: ["../async/getScannedImage.php?stpid=<?= $testPage->getId() ?>"],          // Array of images path : ["images/image1.png", "images/image2.png"]
     		  linewidth: 2,           // Line width for rectangle and arrow shapes
     		  fontsize: $('.container')[0].clientWidth * 1.414 * 0.033 / 2 + "px",       // font size for text
 			  lineheight: $('.container')[0].clientWidth * 1.414 * 0.033 / 2,
