@@ -1,6 +1,8 @@
 <?php
 namespace TestAnalysis;
 
+$students_allowed = true;
+
 require "../bin/classes.php";
 
 if (!isset($_POST['img']) || !isset($_POST['stpid'])) {

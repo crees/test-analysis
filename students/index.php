@@ -228,7 +228,7 @@ echo "<br /><br /><div id=\"testpage\"></div>";
 	function save() {
 		$('#testpage').annotate('export', options, function(image) {
 			  var xhr = new XMLHttpRequest();
-			  xhr.open("POST", 'submitimg.php', true);
+			  xhr.open("POST", '../async/submitimg.php', true);
 
 			  //Send the proper header information along with the request
 			  xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");

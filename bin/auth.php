@@ -14,7 +14,15 @@ $auth_user = preg_replace('/@' . Config::site_emaildomain . '/', "", $_SERVER['P
 
 /* Redirect students if necessary */
 if (Config::is_student($auth_user)) {
-    if (basename(dirname($_SERVER['PHP_SELF'])) !== 'students') {
+    switch (basename(dirname($_SERVER['PHP_SELF']))) {
+    case 'students':
+        break;
+    case 'async':
+        if (isset($students_allowed) && $students_allowed === true) {
+            break;
+        }
+        /* FALLTHROUGH - students_allowed not set so they can't use it */
+    default:
         header("location: " . Config::site_url . "/students/index.php");
         die();
     }
