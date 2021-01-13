@@ -89,7 +89,7 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
                             ScannedTest::SUBJECT_ID => $subject->getId(),
                             ScannedTest::MINUTES_ALLOWED => $_POST["input-minutes-{$s->getId()}"],
                             ScannedTest::TS_UNLOCKED => strtotime($_POST['unlock_date']),
-                            ScannedTest::STAFF_ID => $staff->getId();
+                            ScannedTest::STAFF_ID => $staff->getId(),
                             ]);
                         $scannedTest->commit();
                         $currentComponentIndex = 0;
