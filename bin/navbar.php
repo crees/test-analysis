@@ -30,6 +30,7 @@
                     <a class="dropdown-item" href="<?= TestAnalysis\Config::site_url; ?>/test_upload.php">Upload tests</a>
                     <a class="dropdown-item" href="<?= TestAnalysis\Config::site_url; ?>/test_mark.php">Mark tests</a>
                     <a class="dropdown-item" href="<?= TestAnalysis\Config::site_url; ?>/test_scanned_scores.php">Review test scores</a>
+                    <a class="dropdown-item" href="<?= TestAnalysis\Config::site_url; ?>/test_worklist.php">My worklist</a>
                 </div>
               </li>
     	</ul>

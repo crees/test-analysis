@@ -29,6 +29,19 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
     if (isset($_POST['form_serial']) && $_POST['form_serial'] == $_SESSION['form_serial'] - 1) {
         /* Deal with submitted data */
     }
+} else if (isset($_GET['my_tests_only']) && $_GET['my_tests_only'] && isset($_GET['test'])) {
+    $test = Test::retrieveByDetail(Test::ID, $_GET['test']);
+    if (count($test) < 1) {
+        echo "<div>This must be a bug of some sort, sorry.</div>";
+        return;
+    }
+    $test = $test[0];
+    $students = [];
+    foreach (ScannedTest::retrieveByDetails([ScannedTest::TEST_ID, ScannedTest::STAFF_ID],
+        [$_GET['test'],        $staff->getId()      ],
+        ) as $st) {
+            array_push($students, Student::retrieveByDetail(Student::ID, $st->get(ScannedTest::STUDENT_ID))[0]);
+        }
 }
 
 ?>
@@ -43,6 +56,7 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
 	<div class="container">
 	  <div id="top-part">
 		<?php require "bin/navbar.php"; ?>
+<?php if (!(isset($_GET['my_tests_only']) && $_GET['my_tests_only'])) { ?>
 		<form method="GET">
     		<div class="form-group row">
     			<label for="subject" class="col-2 col-form-label">Subject</label>
@@ -116,6 +130,7 @@ EOF;
         		} /* isset($_GET['subject']) */ ?>
     		</div>
 		</form>
+<?php } /* my_tests_only */ ?>
 	  </div> <!-- #top-part -->
 
 		<?php
@@ -133,7 +148,12 @@ EOF;
 		            if (count($scannedTest) != 0) {
 		                $testPages = $scannedTest[0]->getPages();
 		                if (!isset($testPages[$page_num])) {
-		                    die ("<div>No more tests remaining.  <a class=\"btn btn-success\" href=\"test_scanned_scores.php?subject={$subject->getId()}&teaching_group={$teaching_group}&test={$test->getId()}\">Get results</div>");
+		                    if (isset($teaching_group)) {
+		                        $link = "<a class=\"btn btn-success\" href=\"test_scanned_scores.php?subject={$subject->getId()}&teaching_group={$teaching_group}&test={$test->getId()}\">Get results</a>";
+		                    } else {
+		                        $link = "<a class=\"btn btn-success\" href=\"test_worklist.php\">Back to the worklist</a>";
+		                    }
+		                    die ("<div>No more tests remaining.$link</div>");
 		                }
 		                $testPage = $testPages[$page_num];
 		                // Do not put up a test for marking until the timer is up.
@@ -172,8 +192,8 @@ EOF;
             echo "<label for=\"score\">Total page score: </label>";
             echo "<input class=\"form-control\" type=\"number\" id=\"score\" value=\"{$testPage->get(ScannedTestPage::PAGE_SCORE)}\">";
 		    echo '</div>';
-            echo "<div>Student name (press ?): <span id=\"kidname\" style=\"display: none\">{$student->getName()}</span><br /> Shortcut keys: Z for ticks, X for crosses.  Every tick placed increments the total by one.  Press Enter to save, or type a number (no clicks necessary) to jump to the score box.  Mark title page as zero!</div>";
-            echo "<div id=\"savebar\"></div>";
+		    echo "<div id=\"savebar\"></div>";
+		    echo "<div>Student name (press ?): <span id=\"kidname\" style=\"display: none\">{$student->getName()}</span><br /> Shortcut keys: Z for ticks, X for crosses.  Every tick placed increments the total by one.  Press Enter to save, or type a number (no clicks necessary) to jump to the score box.  Mark title page as zero!</div>";
             echo '</div>';
 		    echo "</div>";
 		    echo '</div>';
@@ -186,7 +206,7 @@ EOF;
 			  height: Math.trunc($('html')[0].clientHeight * 0.95),
 			  color: "red",           // Color for shape and text
     		  type : "tick",    // default shape: can be "rectangle", "arrow" or "text"
-			  tools: ['undo', 'tick', 'cross', 'text', 'circle', 'arrow', 'pen', 'redo'], // Tools
+			  tools: ['undo', 'tick', 'cross', 'text', 'rectangle-filled', 'circle', 'arrow', 'pen', 'redo'], // Tools
     		  images: ["async/getScannedImage.php?stpid=<?= $testPage->getId() ?>"],          // Array of images path : ["images/image1.png", "images/image2.png"]
     		  linewidth: 2,           // Line width for rectangle and arrow shapes
     		  fontsize: Math.trunc($('html')[0].clientHeight * 0.022) + "px",       // font size for text
@@ -256,15 +276,23 @@ EOF;
 	});
 
 	function doButtons() {
+		<?php if (isset($_GET['my_tests_only']) && $_GET['my_tests_only']) { ?>
+		getvars = 'my_tests_only=1&test=<?= $_GET['test'] ?>';
+		<?php } else { ?>
 		getvars = 'subject=<?= $_GET['subject'] ?>&teaching_group=<?= $_GET['teaching_group'] ?>&test=<?= $_GET['test'] ?>';
+		<?php } ?>
 		if (document.getElementById('skipMarked').checked) {
 			getvars += '&skipMarked=yes';
 		}
 	    savebutton = '<a class="btn btn-success" onclick="save()">Save page</a>';
 	    dontsavebutton = '<a class="btn btn-danger" onclick="dontsave()">Do not save</a>';
 		currentPage = <?= $page_num ?>;
-	    prevbutton = '<a class="btn btn-danger" href="?' + getvars + '&page=' + currentPage + '&student_number=<?= $student_number-1 ?>"><i class="fa fa-arrow-left"></i>Previous student</a>';
-	    if (currentPage > 0) {
+		if (<?= $student_number ?> > 0) {
+			prevbutton = '<a class="btn btn-danger" href="?' + getvars + '&page=' + currentPage + '&student_number=<?= $student_number-1 ?>"><i class="fa fa-arrow-left"></i>Previous student</a>';
+		} else {
+			prevbutton = '<a class="btn btn-secondary"><i class="fa fa-arrow-left"></i>Previous student</a>';
+		}
+		if (currentPage > 0) {
 	        prevbutton += '<a class="btn btn-warning" href="?' + getvars + '&page=' + (currentPage-1) + '&student_number=<?= $student_number ?>"><i class="fa fa-arrow-up"></i>Previous page</a>';
 	    }
 	    nextbutton = '<a class="btn btn-success" href="?' + getvars + '&page=<?= ($page_num + 1) ?>&student_number=<?= $student_number ?>">Next page<i class="fa fa-arrow-down"></i></a>';
