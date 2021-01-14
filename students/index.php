@@ -6,6 +6,7 @@ require "../bin/classes.php";
 if (Config::is_staff($auth_user)) {
     if (isset($_GET['masquerade'])) {
         $auth_user = $_GET['masquerade'];
+        $_SESSION['is_staff'] = TRUE;
     } else {
         session_destroy();
         echo "<html><head></head><body><h3>Need to masquerade as a student?  Please put in their username:</h3>";
@@ -173,16 +174,21 @@ if (!isset($testPage[0])) {
 
 $testPage = $testPage[0];
 
-$st->startTimer();
-
-echo "<h3><i class=\"fa fa-clock\"></i>";
-
-if (($minutes = round($st->secondsRemaining() / 60, 0)) <= 0) {
-    die(" Sorry, out of time!");
+echo "<h3>";
+if (isset($_SESSION['is_staff']) && $_SESSION['is_staff']) {
+    echo "Not starting the timer as you are staff masquerading as $auth_user.";
 } else {
-    $end = date('H:i', $st->get(ScannedTest::TS_STARTED) + $st->get(ScannedTest::MINUTES_ALLOWED) * 60);
-    echo " $minutes minutes remaining on {$test->getName()}- finishing at $end.</h3>";
+    // Not starting the timer for staff!
+    $st->startTimer();
+    echo "<i class=\"fa fa-clock\"></i>";
+    if (($minutes = round($st->secondsRemaining() / 60, 0)) <= 0) {
+        die(" Sorry, out of time!");
+    } else {
+        $end = date('H:i', $st->get(ScannedTest::TS_STARTED) + $st->get(ScannedTest::MINUTES_ALLOWED) * 60);
+        echo " $minutes minutes remaining on {$test->getName()}- finishing at $end.";
+    }
 }
+echo "</h3>";
 
 echo "<div id=\"savebar\"></div>";
 
