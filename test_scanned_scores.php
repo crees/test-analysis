@@ -247,7 +247,6 @@ function commit(studentId, values) {
 	        if (this.readyState == 4 && this.status == 200) {
 	          saved(studentId);
 	        }
-	        console.log(this.responseText);
 	    };
 	    xhr.send("studentId=" + studentId + "&testComponentId=" + testComponentId + "&result=" + values[testComponentId] + "&subjectId=<?= $subject->getId() ?>");
 	}
@@ -276,7 +275,6 @@ function redrawTiming(stId, newTime) {
 	        if (this.readyState == 4 && this.status == 200) {
 			  [id, remainingTime, ts_started] = this.responseText.split(':');
 			  remainingTime = parseInt(remainingTime);
-		      console.log(remainingTime);
 		      innerHTML  = '<span class="text-danger" onclick="redrawTiming(' + id + ', ' + (remainingTime-1) + ')">-</span>';
 		      innerHTML += remainingTime;
 		      innerHTML += '<span class="text-success" onclick="redrawTiming(' + id + ', ' + (remainingTime+1) + ')">+</span>';
@@ -284,10 +282,8 @@ function redrawTiming(stId, newTime) {
 			  if (ts_started !== '') {
 				  innerHTML += '<span class="text-success" onclick="redrawTiming('  + id + ', -2)">(reset)</span>';
 			  }
-			  console.log('td.bta-timer#' + id);
 	          $('td.bta-timer#' + id)[0].innerHTML = innerHTML;
 	        }
-	        console.log(this.responseText);
 	    };
 	    if (newTime === null) {
 		    // Query only
