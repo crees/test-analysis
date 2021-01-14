@@ -39,6 +39,8 @@ if (!class_exists("Config")) {
      */
     $timeout_duration = 6400;
     
+    ini_set('session.cookie_samesite', 'Strict');
+    
     session_name("TestAnalysis");
     
     session_start(['gc_maxlifetime' => $timeout_duration, 'cookie_lifetime' => $timeout_duration]);
