@@ -13,32 +13,26 @@ $subject = Subject::retrieveByDetail(Subject::ID, $_GET['subject'])[0];
 $test = Test::retrieveByDetail(Test::ID, $_GET['test'])[0];
 $student = Student::retrieveByDetail(Student::ID, $_GET['student'])[0];
 
-header("Content-Type: application/vnd.ms-word");
+// First retrieve the template Subject file
+$template = new TempFile("feedback-template-");
+$myfile = new TempFile("feedback-{$student->getId()}-");
+
+$fbsheettemplate = $subject->getFeedbackSheetTemplate();
+
+if (is_null($fbsheettemplate)) {
+    die("No feedback sheet template for your subject.");
+}
+
+file_put_contents($template->getPath(), $fbsheettemplate->get(FeedbackSheet::TEMPLATEDATA));
+
+$dm = new \DocxMerge\DocxMerge();
+
+$dm->setValues($template->getPath(), $myfile->getPath(), FeedbackSheet::getSubst($subject, $test, $student));
+
+header("Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document");
 header("Expires: 0");
 header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
-header("content-disposition: attachment;filename=\"feedback-{$test->getName()}-{$student->getName()}.doc\"");
+header("content-disposition: attachment;filename=\"feedback-{$test->getName()}-{$student->getName()}.docx\"");
 
-?>
-<!doctype html>
-<html>
-    <head>
-    	<?php require "../bin/head.php"; ?>
-    	
-    	<style type="text/css" media="print">
-            @page 
-            {
-                size: auto;   /* auto is the initial value */
-                margin: 0mm;  /* this affects the margin in the printer settings */
-            }
-        </style>
-    </head>
-    
-    <body>
-    	<div class="container">
-<?php
-$sheet = new FeedbackSheet($subject, $test, $student);
-$sheet->draw(true);
-?>
-		</div>
-	</body>
-</html>
+die(file_get_contents($myfile->getPath()));
+

@@ -6,6 +6,7 @@ class Subject extends DatabaseCollection
     const CODE = 'code';
     const BASELINE_ID = 'Baseline_id';
     const DEPARTMENT_ID = 'Department_id';
+    const FEEDBACKSHEET_ID = 'FeedbackSheet_id';
     
     public function __construct(array $details)
     {
@@ -16,6 +17,7 @@ class Subject extends DatabaseCollection
             $this->details[self::ID] = $details[self::ID];
         }
         $this->details[self::BASELINE_ID] = $details[self::BASELINE_ID] ?? null;
+        $this->details[self::FEEDBACKSHEET_ID] = $details[self::FEEDBACKSHEET_ID] ?? null;
     }
 
     public function getTeachingGroups() {
@@ -55,6 +57,14 @@ class Subject extends DatabaseCollection
         return $tests;
     }
     
+    public function getFeedbackSheetTemplate() {
+        $templateId = $this->get(self::FEEDBACKSHEET_ID);
+        if (is_null($templateId)) {
+            return null;
+        }
+        return FeedbackSheet::retrieveByDetail(FeedbackSheet::ID, $templateId)[0];
+    }
+    
     public function setBaseline(int $bId) {
         $this->details[self::BASELINE_ID] = $bId;
     }
@@ -65,6 +75,10 @@ class Subject extends DatabaseCollection
     
     public function setDepartmentId(int $dId) {
         $this->details[self::DEPARTMENT_ID] = $dId;
+    }
+    
+    public function setFeedbackSheetId(int $fId) {
+        $this->details[self::FEEDBACKSHEET_ID] = $fId;
     }
     
     public function addTest(Test $test) {

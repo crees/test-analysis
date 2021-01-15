@@ -9,6 +9,8 @@ error_reporting(-1);
 if (!class_exists("Config")) {
     require "Config.php";
     require "Database.php";
+    require "TempFile.php";
+    
     require "DatabaseCollection.php";
     require "Baseline.php";
     require "Department.php";
@@ -28,6 +30,7 @@ if (!class_exists("Config")) {
     require "TestTopic.php";
     require "TestTestTopic.php";
     require "View.php";
+    require Config::site_docroot . "/contrib/docxmerge/vendor/autoload.php";
     require Config::site_docroot . "/contrib/php-graphql-client/vendor/autoload.php";
     
     require Config::site_docroot . "/dev/upgrade_database.php";

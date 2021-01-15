@@ -47,36 +47,43 @@ $subject = Subject::retrieveByDetail(Subject::ID, $_GET['subject'])[0];
 $group = TeachingGroup::retrieveByDetail(TeachingGroup::ID, $_GET['teaching_group'])[0];
 $test = Test::retrieveByDetail(Test::ID, $_GET['test'])[0];
 
-header("Content-Type: application/vnd.ms-word");
+// First retrieve the template Subject file
+$template = new TempFile("feedback-template-");
+
+$sheetTemplate = $subject->getFeedbackSheetTemplate();
+
+if (is_null($sheetTemplate)) {
+    die("No feedback sheet template for your subject.  Please <a href=\"dev/manage_subjects.php\">add one</a> (suggest you use one of the others as a template).");
+}
+file_put_contents($template->getPath(), $sheetTemplate->get(FeedbackSheet::TEMPLATEDATA));
+
+$files = [];
+
+$dm = new \DocxMerge\DocxMerge();
+
+foreach ($group->getStudents() as $student) {
+    $subst = FeedbackSheet::getSubst($subject, $test, $student, $_GET['teacher_name']);
+    if (is_null($subst)) {
+        continue;
+    }
+    $file = new TempFile("feedback-{$student->getId()}-");
+    array_push($files, $file);
+    $dm->setValues($template->getPath(), $file->getPath(), $subst);
+}
+
+unset($template);
+
+$combined = new TempFile("class-{$group->getName()}");
+
+$dm->merge(array_map(function (TempFile $f) { return $f->getPath(); }, $files), $combined->getPath(), TRUE, TRUE);
+
+unset($files);
+
+header("Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document");
 header("Expires: 0");
 header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
-header("content-disposition: attachment;filename=\"feedback-{$test->getName()}-{$group->getName()}.doc\"");
+header("content-disposition: attachment;filename=\"feedback-{$test->getName()}-{$group->getName()}.docx\"");
 
-?>
-<!doctype html>
-<html>
-    <head>
-    	<?php require "bin/head.php"; ?>
-    	
-    	<style type="text/css" media="print">
-            @page 
-            {
-                size: auto;   /* auto is the initial value */
-                margin: 0mm;  /* this affects the margin in the printer settings */
-            }
-        </style>
-    </head>
-    
-    <body>
-    	<div class="container">
-<?php
-$firstPage = true;
-foreach ($group->getStudents() as $student) {
-    $sheet = new FeedbackSheet($subject, $test, $student, $_GET['teacher_name']);
-    $sheet->draw($firstPage);
-    $firstPage = false;
-}
-?>
-		</div>
-	</body>
-</html>
+echo file_get_contents($combined->getPath());
+
+unset($combined);

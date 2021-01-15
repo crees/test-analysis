@@ -1,28 +1,24 @@
 <?php
 namespace TestAnalysis;
 
-class FeedbackSheet
+class FeedbackSheet extends DatabaseCollection
 {
-    protected static $smallLogo = null;
+    const TEMPLATEDATA = 'templatedata';
     
-    protected Subject $subject;
-    protected Test $test;
-    protected Student $student;
-    protected $teacher_name;
-
-    public function __construct(Subject $subject, Test $test, Student $student, $teacher_name = '') {
-        $this->subject = $subject;
-        $this->test = $test;
-        $this->student = $student;
-        $this->teacher_name = $teacher_name;
+    public function __construct(array $details) {
+        if (isset($details[self::ID])) {
+            $this->details[self::ID] = $details[self::ID];
+        }
+        $this->details[self::NAME] = $details[self::NAME];
+        $this->details[self::TEMPLATEDATA] = $details[self::TEMPLATEDATA] ?? null;
     }
 
-    public function draw(bool $firstPage = false) {
+    public static function getSubst(Subject $subject, Test $test, Student $student, $teacher_name = '') {
         
         /* Count targets */
         $number_of_targets = 0;
         
-        foreach ($this->test->get(Test::TARGETS) as $target) {
+        foreach ($test->get(Test::TARGETS) as $target) {
             if (!empty($target)) {
                 $number_of_targets++;
             }
@@ -38,7 +34,7 @@ class FeedbackSheet
         
         $marks_to_shift = 0;
         
-        foreach ($this->test->getTestComponents() as $c) {
+        foreach ($test->getTestComponents() as $c) {
             if ($c->get(TestComponent::INCLUDED_FOR_TARGETS)) {
                 $marks_to_shift += $c->get(TestComponent::TOTAL);
             }
@@ -49,15 +45,14 @@ class FeedbackSheet
         $results = [];
         $shiftmarks = 0;
         $marksText = [];
-        foreach ($this->test->getTestComponents() as $c) {
+        foreach ($test->getTestComponents() as $c) {
             $r = TestComponentResult::retrieveByDetails(
                 [TestComponentResult::STUDENT_ID, TestComponentResult::TESTCOMPONENT_ID],
-                [$this->student->getId(), $c->getId()],
+                [$student->getId(), $c->getId()],
                 TestComponentResult::RECORDED_TS . ' DESC'
                 );
             if (empty($r)) {
-                $results = null;
-                break;
+                return null;
             }
             $r = $r[0];
             array_push($results, $r);
@@ -72,7 +67,7 @@ class FeedbackSheet
         
         $marksText = implode(', ', $marksText);
         
-        $targets = $this->test->get(Test::TARGETS);
+        $targets = $test->get(Test::TARGETS);
         $numtargets = 3;
         
         while (($shiftmarks = $shiftmarks - $marks_to_shift) >= 0) {
@@ -83,89 +78,28 @@ class FeedbackSheet
             array_shift($targets);
         }
         
-        $pagebreak = $firstPage ? '' : 'style="page-break-before: always"';
         $date = date('d/m/Y');
-        $img = self::getSmallLogo();
-        $test_total = $this->test->getTotal();
+        $test_total = $test->getTotal();
         
-        echo <<< EOF
-<div $pagebreak><img src="$img" style="width:30%;" />&nbsp;</div>
-
-<br />
-
-<div><h1>Science Assessment Record & Feedback</h1></div>
-
-<table style="page-break-after: always">
-    <colgroup>
-        <col style="width:33%;">
-        
-        <col style="width:33%;">
-        
-        <col style="width:34%;">
-    </colgroup>
-    
-    <tr>
-        <td colspan="2">Name: {$this->student->getName()}</th>
-        
-        <td>Teacher: {$this->teacher_name}</th>
-    </tr>
-    
-    <tr>
-        <td>Indicative grade range: <strong>{$this->student->getIgr($this->subject)}</strong></td>
-        
-        <td>Currently working at grade: <strong>{$this->student->getAverageGrade($this->subject)}</strong></td>
-        
-        <td>Personal target grade:</td>
-    </tr>
-    
-    <tr>
-        <td colspan="3">&nbsp;</td>
-    <tr>
-    
-    <tr>
-        <td colspan="2">Assessment title: <strong>{$this->test->getName()}</strong></td>
-        
-        <td>Date: $date</td>
-    </tr>
-    
-    <tr>
-        <td>Grade achieved: {$this->test->calculateGrade($this->student, $this->subject)}</td>
-        
-        <td>Marks achieved: $marksText</td>
-        
-        <td>Marks available: $test_total</td>
-    </tr>
-    
-    <tr>
-        <td colspan=3>
-            <div>Targets for improvement are:</div>
-            
-            <ol>
-                <li>$targets[0]</li>
-                
-                <li>$targets[1]</li>
-                
-                <li>$targets[2]</li>
-            </ol>
-        </td>
-    </tr>
-    
-    <tr>
-        <td colspan="3">Evidence to show that targets have been met (teacher will sign below):</td>
-    </tr>
-</table>
-EOF;
+        return [
+            'NAME'      => $student->getName(),
+            'TEACHER'   => $teacher_name,
+            'IGR'       => $student->getIgr($subject),
+            'CWAG'      => '',
+            'PTG'       => '',
+            'ASSESSMENT_TITLE' => $test->getName(),
+            'GRADE'     => $test->calculateGrade($student, $subject),
+            'MARKS'     => $marksText,
+            'MARKS_TOTAL' => $test_total,
+            'TARGET_1'  => $targets[0],
+            'TARGET_2'  => $targets[1],
+            'TARGET_3'  => $targets[2],
+            'DATE'      => $date,
+        ];
     }
     
     function __destruct()
     {}
-
-    public static function getSmallLogo() {
-        if (is_null(self::$smallLogo)) {
-            self::$smallLogo = 'data:image/jpeg;base64,' . base64_encode(file_get_contents(Config::site_docroot . "/img/" . Config::site_small_logo));
-        }
-        return self::$smallLogo;
-    }
 
 }
 

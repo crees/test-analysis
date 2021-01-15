@@ -43,6 +43,10 @@ if (isset($_GET['removeGroup'])) {
                 $subject = Subject::retrieveByDetail(Subject::ID, str_replace("subject-dept-", "", $k))[0];
                 $subject->setDepartmentId($value);
                 $subject->commit();
+            } elseif (str_contains($k, "subject-feedbackid-")) {
+                $subject = Subject::retrieveByDetail(Subject::ID, str_replace("subject-feedbackid-", "", $k))[0];
+                $subject->setFeedbackSheetId($value);
+                $subject->commit();
             }
         }
     }
@@ -75,7 +79,7 @@ if (isset($_GET['removeGroup'])) {
     </nav>
 <form method="post">
 <table class="table table-sm table-hover">
-<thead><tr><th>Code</th><th>Name</th><th>Department</th><th>Baseline source</th><th>Groups (click to remove)</th><th>Add group</th><th>Save</th></tr></thead>
+<thead><tr><th>Code</th><th>Name</th><th>Department</th><th>Baseline source</th><th>Feedback sheet template</th><th>Groups (click to remove)</th><th>Add group</th><th>Save</th></tr></thead>
 <?php
 
 // Let's get the List of baseline subject IDs
@@ -88,6 +92,11 @@ foreach (Baseline::retrieveAll(Baseline::MIS_ASSESSMENT_ID) as $b) {
     $newId = $b->get(Baseline::MIS_ASSESSMENT_ID);
     $newName = $b->get(Baseline::NAME);
     $baselines[$newId] = $newName;
+}
+
+$feedbackSheetTemplates = [];
+foreach (FeedbackSheet::retrieveAll(FeedbackSheet::NAME) as $f) {
+    $feedbackSheetTemplates[$f->getId()] = $f->getName();
 }
 
 $orphanedGroups = TeachingGroup::retrieveAll(TeachingGroup::NAME);
@@ -110,14 +119,6 @@ foreach ($departments as $department) {
         }
         echo "</select>";
         echo "</td>";
-        $names = [];
-        foreach ($s->getTeachingGroups() as $g) {
-            array_push($names, "<a href=\"?removeGroup=" . $g->getId() . "&removeFromSubject=" . $s->getId() . "\">" . $g->getName() . "</a>");
-            unset($allGroups[array_search($g, $allGroups)]);
-            if (($o = array_search($g, $orphanedGroups)) !== FALSE) {
-                unset($orphanedGroups[$o]);
-            }
-        }
         echo "<td><select name=\"subject-baseline-" . $s->getId() . "\" onchange=\"this.form.submit()\">";
         if (empty($s->get(Subject::BASELINE_ID))) {
             echo "<option value=\"\" selected>No baseline selected</option>";
@@ -131,7 +132,29 @@ foreach ($departments as $department) {
             echo "<option value=\"$bId\" $selected>$bName</option>";
         }
         echo "</select></td>";
+ 
+        echo "<td><select name=\"subject-feedbackid-" . $s->getId() . "\" onchange=\"this.form.submit()\">";
+        if (is_null($s->get(Subject::FEEDBACKSHEET_ID))) {
+            echo "<option value=\"\" selected>No template selected</option>";
+        }
+        foreach ($feedbackSheetTemplates as $fId => $fName) {
+            if ($s->get(Subject::FEEDBACKSHEET_ID) == $fId) {
+                $selected = "selected";
+            } else {
+                $selected = "";
+            }
+            echo "<option value=\"$fId\" $selected>$fName</option>";
+        }
+        echo "</select></td>";
         
+        $names = [];
+        foreach ($s->getTeachingGroups() as $g) {
+            array_push($names, "<a href=\"?removeGroup=" . $g->getId() . "&removeFromSubject=" . $s->getId() . "\">" . $g->getName() . "</a>");
+            unset($allGroups[array_search($g, $allGroups)]);
+            if (($o = array_search($g, $orphanedGroups)) !== FALSE) {
+                unset($orphanedGroups[$o]);
+            }
+        }
         echo "<td>" . implode(", ", $names) . "</td>";
 
         echo "<td><select name=\"subject-add-group-" . $s->getId() . "[]\" multiple>";

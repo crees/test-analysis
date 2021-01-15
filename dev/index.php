@@ -38,6 +38,8 @@ require "../bin/classes.php";
     
     			<div class="card-text"><a href="manage_departments.php" class="btn btn-primary" role="button">Manage departments</a></div>
     
+    			<div class="card-text"><a href="manage_feedback_sheets.php" class="btn btn-primary" role="button">Manage feedback sheet templates</a></div>
+    
     			<div class="card-text"><a href="manage_subjects.php" class="btn btn-primary" role="button">Manage subjects and groups</a></div>
     
 <!--

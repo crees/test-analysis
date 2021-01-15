@@ -171,3 +171,15 @@ if ($db->dosql("SHOW TABLES LIKE 'Staff'")->num_rows < 1) {
     
     $db->dosql("ALTER TABLE `ScannedTest` ADD Staff_id INT NOT NULL;");
 }
+
+if ($db->dosql("SHOW TABLES LIKE 'FeedbackSheet'")->num_rows < 1) {
+    
+    $db->dosql("ALTER TABLE `Subject` ADD FeedbackSheet_id INT UNSIGNED NULL;"); // v12
+    
+    $db->dosql("CREATE TABLE FeedbackSheet (
+        id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        name VARCHAR(30) NOT NULL,
+        templatedata MEDIUMBLOB NOT NULL,
+        CONSTRAINT PRIMARY KEY (id)
+        );");
+}
