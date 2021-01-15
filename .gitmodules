@@ -4,3 +4,6 @@
 [submodule "contrib/djaodjin-annotate"]
 	path = contrib/djaodjin-annotate
 	url = https://github.com/crees/djaodjin-annotate
+[submodule "contrib/docxmerge"]
+	path = contrib/docxmerge
+	url = https://github.com/crees/DocxMerge
