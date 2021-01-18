@@ -1,0 +1,6 @@
+:root {
+	--background: #222;
+  	--grade-on: var(--warning);
+	--grade-above: var(--success);
+	--grade-below: var(--danger);
+}

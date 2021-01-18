@@ -187,3 +187,7 @@ if ($db->dosql("SHOW TABLES LIKE 'FeedbackSheet'")->num_rows < 1) {
 if ($db->dosql("SHOW COLUMNS FROM `ScannedTest` LIKE 'student_upload_allowed'")->num_rows < 1) {
     $db->dosql("ALTER TABLE `ScannedTest` ADD student_upload_allowed INT NOT NULL DEFAULT 0;");
 }
+
+if ($db->dosql("SHOW COLUMNS FROM `Staff` LIKE 'theme'")->num_rows < 1) {
+    $db->dosql("ALTER TABLE `Staff` ADD theme VARCHAR(30) NULL;");
+}

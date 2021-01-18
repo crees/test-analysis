@@ -235,6 +235,7 @@ function inputify() {
 
 function excel_export() {
 	var table = $('table#data-table')[0];
+	colouriseAll(literalColours = true);
 	// Grab the title rows and add filter element.
 	for (th of $('tr.excel-filtered')[0].children) {
 		th.setAttribute('filter', 'ALL');
@@ -251,13 +252,13 @@ function excel_export() {
     location.reload();
 }
 
-function colouriseAll() {
+function colouriseAll(literalColours = false) {
 	for (s of students) {
 		for (t of tests) {
-			colourise([['percent', t, s].join('-')]);
-			colourise([['grade', t, s].join('-')]);
+			colourise([['percent', t, s].join('-')], literalColours);
+			colourise([['grade', t, s].join('-')], literalColours);
 		}
-		colourise([['cwag', 0, s].join('-')]);
+		colourise([['cwag', 0, s].join('-')], literalColours);
 	}
 }
 
@@ -310,7 +311,7 @@ function saved(element, responseText) {
 	}
 }
 
-function colourise(arr) {
+function colourise(arr, literalColours = false) {
 	element = $('#' + arr[0])[0];
 	components = arr[0].split('-');
 	switch (components[0]) {
@@ -349,11 +350,11 @@ function colourise(arr) {
 			return;
 		}
 		if (gradeb == baselineb) {
-			element.style.backgroundColor = '#ffeeba';
+			element.style.backgroundColor = literalColours ? '#ffeeba' : 'var(--grade-on)';
 		} else if (gradeb > baselineb) {
-			element.style.backgroundColor = '#c3e6cb';
+			element.style.backgroundColor = literalColours ? '#c3e6cb' : 'var(--grade-above)';
 		} else {
-			element.style.backgroundColor = '#f5c6cb';
+			element.style.backgroundColor = literalColours ? '#f5c6cb' : 'var(--grade-below)';
 		}
 	}
 }

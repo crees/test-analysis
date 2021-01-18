@@ -32,13 +32,26 @@
                     <a class="dropdown-item" href="<?= TestAnalysis\Config::site_url; ?>/test_scanned_scores.php">Review test scores</a>
                     <a class="dropdown-item" href="<?= TestAnalysis\Config::site_url; ?>/test_worklist.php">My worklist</a>
                 </div>
-              </li>
+            </li>
+
+        	<li class="nav-item dropdown">
+        		<a class="nav-link dropdown-toggle" href="#" id="prefsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          			Preferences
+        		</a>
+        		<div class="dropdown-menu">
+                	<a class="dropdown-item" href="?theme=default">Default theme</a>
+                	<a class="dropdown-item" href="?theme=darkly">Dark theme</a>
+                </div>
+        	</li>
+	
+            
     	</ul>
 	</div>
+	
 	<span class="navbar-text">
 		<a class="nav-link" href="dev">Manage database</a>
 	</span>
 </nav>
 
-<div class="h3 text-center"><img src="img/dshs.jpg" style="width: 30%;" /></div>
+<div class="h3 text-center"><img src="img/<?= \TestAnalysis\Config::site_small_logo ?>" style="width: 30%;" /></div>
 <div class="h3 text-center"><?= \TestAnalysis\Config::site ?></div>
