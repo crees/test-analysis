@@ -87,7 +87,7 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
                             ScannedTest::TEST_ID => $test->getId(),
                             ScannedTest::STUDENT_ID => $s->getId(),
                             ScannedTest::SUBJECT_ID => $subject->getId(),
-                            ScannedTest::MINUTES_ALLOWED => $_POST["input-minutes-{$s->getId()}"],
+                            ScannedTest::MINUTES_ALLOWED => $_POST['test_time'] + $_POST["input-minutes-{$s->getId()}"],
                             ScannedTest::TS_UNLOCKED => strtotime($_POST['unlock_date']),
                             ScannedTest::STAFF_ID => $staff->getId(),
                             ]);
@@ -213,7 +213,11 @@ EOF;
                 <input type="file" class="form-control-file" name="input-file" id="input-file">
             </div>
             <div class="form-group">
-		        <label class="form-label" for="unlock_date">Date to unlock test</label>
+		        <label class="form-label" for="test_time">Time for test (minutes)</label>
+                <input class="form-control" type="number" id="test_time" name="test_time">
+            </div>
+            <div class="form-group">
+		        <label class="form-label" for="unlock_date">Date to unlock test (optional)</label>
                 <input class="form-control" type="date" id="unlock_date" name="unlock_date">
             </div>
 eof;
@@ -234,7 +238,7 @@ eof;
                         <th rowspan="2" scope="col">Name</th>
                         <th rowspan="2" scope="col">Group</th>
                         <th rowspan="2" scope="col">Assign to this student</th>
-                        <th rowspan="2" scope="col">Time allowed for test in minutes (default total marks for test)</th>
+                        <th rowspan="2" scope="col">Extra time for test (+/- minutes allowed)</th>
                     </tr>
                 </thead>
 eof;
@@ -243,11 +247,11 @@ eof;
 		        echo "<td>" . $s->getName() . "</td>";
 		        echo "<td>" . $s->getTeachingGroup($subject) . "</td>";
 		        if (!empty(ScannedTest::retrieveByDetails([ScannedTest::TEST_ID, ScannedTest::STUDENT_ID], [$test->getId(), $s->getId()]))) {
-		            echo "<td>&nbsp;</td><td><div class=\"form-check text-danger\"><input class=\"form-check-input\" type=\"checkbox\" name=\"delete-for-" . $s->getId() . "\" id=\"delete-for-" . $s->getId() . "\">";
+		            echo "<td class=\"text-success\">Assigned successfully</td><td><div class=\"form-check text-danger\"><input class=\"form-check-input\" type=\"checkbox\" name=\"delete-for-" . $s->getId() . "\" id=\"delete-for-" . $s->getId() . "\">";
 		            echo "<label class=\"form-check-label\" for=\"delete-for-" . $s->getId() . "\">Delete uploaded {$test->getName()}</label><div></td>";
 		        } else {
 		            echo "<td><div class=\"form-check\"><input type=\"checkbox\" class=\"form-check-input\" name=\"set-for-" . $s->getId() . "\" checked></div></td>";
-		            echo "<td><input type=\"number\" class=\"form-control-input\" name=\"input-minutes-{$s->getId()}\" value=\"{$test->getTotal()}\"></td>";
+		            echo "<td><input type=\"number\" class=\"form-control-input\" name=\"input-minutes-{$s->getId()}\" value=\"0\"></td>";
 		        }
 		        echo "</tr>\n";
 		    }
