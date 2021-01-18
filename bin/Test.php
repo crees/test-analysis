@@ -125,7 +125,11 @@ class Test extends DatabaseCollection
                 $percentTotal += $c->get(TestComponent::TOTAL);
             }
         }
-        return round($score * 100.0 / $percentTotal, 0);
+        if ($percentTotal == 0) {
+            return NAN;
+        } else {
+            return round($score * 100.0 / $percentTotal, 0);
+        }
     }
     
     public function getGradeBoundaries(Subject $subject, bool $forceForSubject = false) {
