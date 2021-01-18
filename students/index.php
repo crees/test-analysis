@@ -63,6 +63,72 @@ if (isset($_GET['getpdf']) && !empty($_GET['test'])) {
     die();
 }
 
+if (!empty($_FILES)) {
+    foreach ($scannedTest = ScannedTest::retrieveByDetail(ScannedTest::STUDENT_ID, $student_id) as $st) {
+        if (isset($_FILES["input-file-{$st->getId()}"])) {
+            $f = $_FILES["input-file-{$st->getId()}"];
+            if ($f['size'] > 0) {
+                $pages = [];
+                switch (substr($f['name'], -4, 4)) {
+                    case ".pdf":
+                        try {
+                            $im = new \Imagick();
+                            $im->setresolution(150, 150);
+                            $im->readimage($f['tmp_name']);
+                            for ($i = 0; $i < $im->getnumberimages(); $i++) {
+                                $im->setiteratorindex($i);
+                                $im->setimageformat('jpg');
+                                $im->setImageAlphaChannel(\Imagick::ALPHACHANNEL_REMOVE);
+                                array_push($pages, addslashes($im->getimageblob()));
+                            }
+                            $im->destroy();
+                        } catch (\ImagickException $e) {
+                            die('Well, that\'s a shame.  For some reason, we can\'t extract pdf files, so please use <a href="https://www.ilovepdf.com/pdf_to_jpg">a pdf converter</a> to turn your pdf into a zipfile of images and try uploading that.');
+                        }
+                        break;
+                    case ".zip":
+                        /* Deal with zipped images in alphabetical order.  Very primitive :( */
+                        $zip = new \ZipArchive();
+                        $zip->open($f['tmp_name']);
+                        $zipcontents = [];
+                        for ($i = 0; $i < $zip->numFiles; $i++) {
+                            $n = $zip->getNameIndex($i);
+                            if (preg_match('/[.]jpe?g$/', $n) == 1) {
+                                array_push($zipcontents, $n);
+                            }
+                        }
+                        sort($zipcontents);
+                        foreach ($zipcontents as $name) {
+                            array_push($pages, addslashes($zip->getFromName($name)));
+                        }
+                        break;
+                    default:
+                        die("Sorry, only pdfs or zips are accepted");
+                        break;
+                }
+                if (count($pages) > 0) {
+                    // Delete all the old ones first!
+                    foreach (ScannedTestPage::retrieveByDetail(ScannedTestPage::SCANNEDTEST_ID, $st->getId()) as $p) {
+                        ScannedTestPage::delete($p->getId());
+                    }
+                    $num = 0;
+                    foreach ($pages as $p) {
+                        $page = new ScannedTestPage([
+                            ScannedTestPage::SCANNEDTEST_ID => $st->getId(),
+                            ScannedTestPage::TESTCOMPONENT_ID => null,
+                            ScannedTestPage::PAGE_NUM => $num,
+                            ScannedTestPage::IMAGEDATA => $p,
+                        ]);
+                        $page->commit();
+                        $num++;
+                    }
+                    $st->setTime(0);
+                }
+            }
+        }
+    }
+}
+
 ?>
 <!doctype html>
 <html>
@@ -74,7 +140,7 @@ if (isset($_GET['getpdf']) && !empty($_GET['test'])) {
 <body>
 	<div class="container">
 		<br />
-		<div class="h3"><a href="index.php"><img src="<?= Config::site_url ?>/img/dshs.jpg" style="width: 30%;" /></a></div>
+		<div class="h3"><a href="index.php"><img src="<?= Config::site_url ?>/img/<?= Config::site_small_logo ?>" style="width: 30%;" /></a></div>
 <?php
 if (!isset($_GET['test'])) {
     $tests_to_complete = [];
@@ -103,14 +169,21 @@ if (!isset($_GET['test'])) {
     echo "<div class=\"h3\">Hello {$student->getName()}.</div>";
     echo "<div><a href=\"https://youtu.be/Hm42t_5_ijs\" class=\"btn btn-danger\">Please click here for video instructions</a></div>";
     echo "<div class=\"h4\">You have these tests to complete:</div><ul class=\"list-group\">";
+    echo '<form method="POST" enctype="multipart/form-data">';
     foreach ($tests_to_complete as $st) {
         $testId = $st->get(ScannedTest::TEST_ID);
         $test_name = Test::retrieveByDetail(Test::ID, $testId)[0]->getName();
         echo "<li class=\"list-group-item\">";
         echo "<a href=\"?test={$st->get(ScannedTest::TEST_ID)}&masquerade={$auth_user}\">$test_name, {$time_left} minutes allowed</a>";
+        if ($st->get(ScannedTest::STUDENT_UPLOAD_ALLOWED) == true) {
+            echo " <a href=\"?test={$st->get(ScannedTest::TEST_ID)}&masquerade={$auth_user}&getpdf=yes\">(download to complete on paper)</a>";
+            echo "<br><label class=\"form-label\" for=\"input-file-{$st->getId()}\">Scanned test to upload (jpgs in zip or pdf)</label>";
+            echo "<input type=\"file\" class=\"form-control-file\" name=\"input-file-{$st->getId()}\" id=\"input-file-{$st->getId()}\">";
+            echo " <button type=\"submit\" class=\"btn btn-primary\">Submit</button>";
+        }
         echo "</li>";
     }
-    echo '</ul>';
+    echo '</form></ul>';
     echo '<div class="h4">Marked tests to review:</div><ul class="list-group">';
     foreach ($tests_marked as $st) {
         $testId = $st->get(ScannedTest::TEST_ID);
@@ -147,7 +220,7 @@ if (!isset($_GET['test'])) {
         echo "</li>";
     }
     echo '</ul>';
-    die();
+    die('</div></body></html>');
 }
 
 $page_num = $_GET['page'] ?? 0;

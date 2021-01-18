@@ -81,6 +81,8 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
 
                 $components = $test->getTestComponents();
                 
+                $selfUpload = isset($_POST['student_upload_allowed']) ? true : false;
+                
                 foreach ($students as $s) {
                     if (isset($_POST["set-for-{$s->getId()}"])) {
                         $scannedTest = new ScannedTest([
@@ -90,6 +92,7 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
                             ScannedTest::MINUTES_ALLOWED => $_POST['test_time'] + $_POST["input-minutes-{$s->getId()}"],
                             ScannedTest::TS_UNLOCKED => strtotime($_POST['unlock_date']),
                             ScannedTest::STAFF_ID => $staff->getId(),
+                            ScannedTest::STUDENT_UPLOAD_ALLOWED => $selfUpload,
                             ]);
                         $scannedTest->commit();
                         $currentComponentIndex = 0;
@@ -212,14 +215,6 @@ EOF;
 		        <label class="form-label" for="input-file">Test file to upload (jpgs in zip or pdf)</label>
                 <input type="file" class="form-control-file" name="input-file" id="input-file">
             </div>
-            <div class="form-group">
-		        <label class="form-label" for="test_time">Time for test (minutes)</label>
-                <input class="form-control" type="number" id="test_time" name="test_time">
-            </div>
-            <div class="form-group">
-		        <label class="form-label" for="unlock_date">Date to unlock test (optional)</label>
-                <input class="form-control" type="date" id="unlock_date" name="unlock_date">
-            </div>
 eof;
 		    $components = $test->getTestComponents();
 		    $firstComponent = array_shift($components);
@@ -230,6 +225,20 @@ eof;
     		        echo "<input class=\"form-control\" type=\"number\" name=\"page-for-component-{$c->getId()}\" placeholder=\"Section {$c->getName()} begins on page...\">";
     		    }
 		    }
+            echo <<< eof
+            <div class="form-group">
+		        <label class="form-label" for="test_time">Time for test (minutes)</label>
+                <input class="form-control" type="number" id="test_time" name="test_time">
+            </div>
+            <div class="form-group">
+		        <label class="form-label" for="unlock_date">Date to unlock test (optional)</label>
+                <input class="form-control" type="date" id="unlock_date" name="unlock_date">
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="student_upload_allowed" name="student_upload_allowed">
+		        <label class="form-label" for="student_upload_allowed">Allow students to upload their own version (advanced, suggest only for sixth form as they can defeat the timer)</label>
+            </div>
+eof;
 		    echo <<< eof
             <div class="table-responsive table-95 table-stickyrow">
             <table class="table table-bordered table-sm table-hover">

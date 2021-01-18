@@ -11,6 +11,7 @@ class ScannedTest extends DatabaseCollection
     const TS_STARTED = 'ts_started';
     const TS_UNLOCKED = 'ts_unlocked';
     const STAFF_ID = 'Staff_id';
+    const STUDENT_UPLOAD_ALLOWED = 'student_upload_allowed';
     
     public function __construct(array $details)
     {
@@ -30,6 +31,8 @@ class ScannedTest extends DatabaseCollection
                 ] as $d) {
             $this->details[$d] = $details[$d] ?? null;
         }
+        
+        $this->details[self::STUDENT_UPLOAD_ALLOWED] = self::parseBoolean($details, self::STUDENT_UPLOAD_ALLOWED);
     }
     
     function startTimer() {
@@ -41,7 +44,7 @@ class ScannedTest extends DatabaseCollection
     
     function setTime(int $newTime) {
         $this->details[self::MINUTES_ALLOWED] = $newTime;
-        $this->resetTimer();
+        $this->startTimer();
     }
     
     function resetTimer() {

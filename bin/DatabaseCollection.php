@@ -121,6 +121,11 @@ abstract class DatabaseCollection
         $columnvalues = [];
         
         foreach ($this->details as $key => $detail) {
+            if ($detail === false) {
+                $detail = 0;
+            } else if ($detail === true) {
+                $detail = 1;
+            }
             if (!is_null($detail) && strcmp($detail, "") != 0) {
                 array_push($columnkeys, $key);
                 array_push($columnvalues, $detail);
@@ -132,6 +137,7 @@ abstract class DatabaseCollection
         }
         
         foreach ($setToNull as $nullKey) {
+            $this->details[$nullKey] = null;
             array_push($updatelist, "$nullKey = NULL");
         }
         

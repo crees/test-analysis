@@ -183,3 +183,7 @@ if ($db->dosql("SHOW TABLES LIKE 'FeedbackSheet'")->num_rows < 1) {
         CONSTRAINT PRIMARY KEY (id)
         );");
 }
+
+if ($db->dosql("SHOW COLUMNS FROM `ScannedTest` LIKE 'student_upload_allowed'")->num_rows < 1) {
+    $db->dosql("ALTER TABLE `ScannedTest` ADD student_upload_allowed INT NOT NULL DEFAULT 0;");
+}
