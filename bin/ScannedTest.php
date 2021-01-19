@@ -52,6 +52,11 @@ class ScannedTest extends DatabaseCollection
         $this->commit([self::TS_STARTED]);
     }
     
+    function expireTimer() {
+        $this->details[self::TS_STARTED] = 0;
+        $this->commit();
+    }
+    
     function setUploadAllowed($uploadAllowed) {
         $this->details[self::STUDENT_UPLOAD_ALLOWED] = $uploadAllowed ? 1 : 0;
         $this->commit();
@@ -62,7 +67,7 @@ class ScannedTest extends DatabaseCollection
         if ($this->details[self::TS_STARTED] == null) {
             return $this->get(self::MINUTES_ALLOWED) * 60;
         }
-        $remainingseconds = ($this->get(self::TS_STARTED) +
+        $remainingseconds = ($this->details[self::TS_STARTED] +
             60 * $this->get(self::MINUTES_ALLOWED) - time());
         if ($remainingseconds < 0) {
             $remainingseconds = 0;

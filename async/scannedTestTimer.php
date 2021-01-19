@@ -33,6 +33,13 @@ if (isset($_POST['student_upload_allowed'])) {
     $scannedTest->setUploadAllowed($_POST['student_upload_allowed']);
 }
 
+if (isset($_POST['forceEndTest'])) {
+    $scannedTest->expireTimer();
+}
+
+// Refetch after changes
+$scannedTest = ScannedTest::retrieveByDetail(ScannedTest::ID, $scannedTestId)[0];
+
 $ts_started = $scannedTest->get(ScannedTest::TS_STARTED);
 
 $student_upload_allowed = $scannedTest->get(ScannedTest::STUDENT_UPLOAD_ALLOWED) ? 1 : 0;

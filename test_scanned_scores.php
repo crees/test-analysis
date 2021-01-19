@@ -284,6 +284,8 @@ function redrawTiming(stId, newTime) {
 			  innerHTML += ' min';
 			  if (ts_started !== '') {
 				  innerHTML += '<span class="text-success" onclick="redrawTiming('  + id + ', -2)">(reset)</span>';
+			  } else {
+				  innerHTML += '<span class="text-warning" onclick="redrawTiming('  + id + ', 0)">(end test)</span>';
 			  }
 			  $('td.bta-timer#' + id)[0].innerHTML = innerHTML;
 			  if (upload_allowed == 1) {
@@ -296,6 +298,8 @@ function redrawTiming(stId, newTime) {
 	    if (newTime === null) {
 		    // Query only
 	    	xhr.send("scannedTestId=" + scannedTestId);
+	    } else if (newTime === 0) {
+		    xhr.send("scannedTestId=" + scannedTestId + "&forceEndTest=1");
 	    } else if (newTime === -2) {
 		    // magic number to just reset
 			xhr.send("scannedTestId=" + scannedTestId + "&resetTimer=true");
