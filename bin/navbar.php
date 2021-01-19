@@ -2,6 +2,18 @@
 
 namespace TestAnalysis;
 
+// Deal with persistent settings such as subject, group and test
+$getVars = [];
+foreach (['subject', 'teaching_group', 'test'] as $persistentVar) {
+    if (isset($_GET[$persistentVar])) {
+        array_push($getVars, "$persistentVar={$_GET[$persistentVar]}");
+    }
+}
+if (!empty($getVars)) {
+    $getVars = '?' . implode('&', $getVars);
+} else {
+    $getVars = '';
+}
 ?>
 
 <nav class="navbar navbar-expand">
@@ -17,7 +29,7 @@ namespace TestAnalysis;
     <div class="collapse navbar-collapse" id="collapsibleNavbar">
     	<ul class="navbar-nav">
     		<li class="nav-item">
-        		<a class="nav-link" href="<?= Config::site_url; ?>/index.php?session_destroy=<?= $_SESSION['SESSION_CREATIONTIME']; ?>">Home</a>
+        		<a class="nav-link" href="<?= Config::site_url; ?>/index.php?session_destroy=<?= $_SESSION['SESSION_CREATIONTIME'] ?>">Home</a>
         	</li>
 <!--
     		<li class="nav-item">
@@ -33,10 +45,10 @@ namespace TestAnalysis;
           			Online papers
         		</a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <a class="dropdown-item" href="<?= Config::site_url; ?>/test_upload.php">Upload tests</a>
-                    <a class="dropdown-item" href="<?= Config::site_url; ?>/test_mark.php">Mark tests</a>
-                    <a class="dropdown-item" href="<?= Config::site_url; ?>/test_scanned_scores.php">Review test scores</a>
-                    <a class="dropdown-item" href="<?= Config::site_url; ?>/test_worklist.php">My worklist</a>
+                    <a class="dropdown-item" href="<?= Config::site_url ?>/test_upload.php<?= $getVars ?>">Upload tests</a>
+                    <a class="dropdown-item" href="<?= Config::site_url ?>/test_mark.php<?= $getVars ?>">Mark tests</a>
+                    <a class="dropdown-item" href="<?= Config::site_url ?>/test_scanned_scores.php<?= $getVars ?>">Review test scores</a>
+                    <a class="dropdown-item" href="<?= Config::site_url ?>/test_worklist.php">My worklist</a>
                 </div>
             </li>
 
