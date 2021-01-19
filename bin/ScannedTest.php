@@ -52,6 +52,11 @@ class ScannedTest extends DatabaseCollection
         $this->commit([self::TS_STARTED]);
     }
     
+    function setUploadAllowed($uploadAllowed) {
+        $this->details[self::STUDENT_UPLOAD_ALLOWED] = $uploadAllowed ? 1 : 0;
+        $this->commit();
+    }
+    
     function secondsRemaining() {
         // Has this test been started?
         if ($this->details[self::TS_STARTED] == null) {

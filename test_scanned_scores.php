@@ -152,6 +152,7 @@ echo "<table class=\"table table-bordered table-sm table-hover\">";
 echo "<tr>";
 echo "<th>Name</th>";
 echo "<th>Timer operations</th>";
+echo "<th>Student can upload own pdf</th>";
 for ($i = 1; $i < $maxPages+1; $i++) {
     echo "<th scope=\"col\"><a href=\"test_mark.php?subject={$subject->getId()}&teaching_group=$teaching_group&test={$test->getId()}&page=" . ($i-1) . "\">Page $i</a></th>";
 }
@@ -172,6 +173,7 @@ foreach ($students as $s) {
             if ($stu->get(ScannedTest::STUDENT_ID) == $s->getId()) {
                 echo "<tr><th scope=\"row\">{$s->getName()}</th>";
                 echo "<td class=\"bta-timer\" id=\"{$stu->getId()}\"></td>";
+                echo "<td class=\"bta-upload_allowed\" id=\"{$stu->getId()}\"></td>";
                 echo "<td>";
                 if (is_null($stu->get(ScannedTest::TS_STARTED))) {
                     echo "Not started";
@@ -272,8 +274,9 @@ function redrawTiming(stId, newTime) {
 	    xhr.open("POST", 'async/scannedTestTimer.php', true);
 	    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 	    xhr.onreadystatechange = function() {
+		    console.log(this.responseText);
 	        if (this.readyState == 4 && this.status == 200) {
-			  [id, remainingTime, ts_started] = this.responseText.split(':');
+			  [id, remainingTime, ts_started, upload_allowed] = this.responseText.split(':');
 			  remainingTime = parseInt(remainingTime);
 		      innerHTML  = '<span class="text-danger" onclick="redrawTiming(' + id + ', ' + (remainingTime-1) + ')">-</span>';
 		      innerHTML += remainingTime;
@@ -282,7 +285,12 @@ function redrawTiming(stId, newTime) {
 			  if (ts_started !== '') {
 				  innerHTML += '<span class="text-success" onclick="redrawTiming('  + id + ', -2)">(reset)</span>';
 			  }
-	          $('td.bta-timer#' + id)[0].innerHTML = innerHTML;
+			  $('td.bta-timer#' + id)[0].innerHTML = innerHTML;
+			  if (upload_allowed == 1) {
+				  $('td#' + id + '.bta-upload_allowed')[0].innerHTML = '<span class="text-success" onclick="redrawTiming(' + id + ', -3)">allowed</span>';
+			  } else {
+				  $('td#' + id + '.bta-upload_allowed')[0].innerHTML = '<span class="text-danger" onclick="redrawTiming(' + id + ', -4)">not allowed</span>';				  
+			  }
 	        }
 	    };
 	    if (newTime === null) {
@@ -291,6 +299,10 @@ function redrawTiming(stId, newTime) {
 	    } else if (newTime === -2) {
 		    // magic number to just reset
 			xhr.send("scannedTestId=" + scannedTestId + "&resetTimer=true");
+	    } else if (newTime === -3) {
+		    xhr.send("scannedTestId=" + scannedTestId + "&student_upload_allowed=0");
+	    } else if (newTime === -4) {
+	    	xhr.send("scannedTestId=" + scannedTestId + "&student_upload_allowed=1");
 	    } else {
 	    	xhr.send("scannedTestId=" + scannedTestId + "&newTime=" + newTime);
 	    }

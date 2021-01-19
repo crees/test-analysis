@@ -29,6 +29,12 @@ if (isset($_POST['resetTimer'])) {
     $scannedTest->resetTimer();
 }
 
+if (isset($_POST['student_upload_allowed'])) {
+    $scannedTest->setUploadAllowed($_POST['student_upload_allowed']);
+}
+
 $ts_started = $scannedTest->get(ScannedTest::TS_STARTED);
 
-echo "$scannedTestId:" . intdiv($scannedTest->secondsRemaining(), 60) . ":$ts_started";
+$student_upload_allowed = $scannedTest->get(ScannedTest::STUDENT_UPLOAD_ALLOWED) ? 1 : 0;
+
+echo "$scannedTestId:" . intdiv($scannedTest->secondsRemaining(), 60) . ":$ts_started:$student_upload_allowed";
