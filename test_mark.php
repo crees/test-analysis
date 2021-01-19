@@ -181,7 +181,8 @@ EOF;
 		    echo "<div class=\"row\">";
 		    echo '<div class="col-lg-9"><div id="testpage"></div></div>';
 		    echo "<div class=\"col-lg-3\">";
-            echo "<div class=\"form-inline form-group\">";
+		    echo "<div id=\"savebar\"></div><br>";
+		    echo "<div class=\"form-inline form-group\">";
             if (isset($_GET['skipMarked'])) {
                 $skipMarked = 'checked';
             } else {
@@ -192,8 +193,7 @@ EOF;
             echo "<label for=\"score\">Total page score: </label>";
             echo "<input class=\"form-control\" type=\"number\" id=\"score\" value=\"{$testPage->get(ScannedTestPage::PAGE_SCORE)}\">";
 		    echo '</div>';
-		    echo "<div id=\"savebar\"></div>";
-		    echo "<div>Student name (press ?): <span id=\"kidname\" style=\"display: none\">{$student->getName()}</span><br /> Shortcut keys: Z for ticks, X for crosses.  Every tick placed increments the total by one.  Press Enter to save, or type a number (no clicks necessary) to jump to the score box.  Mark title page as zero!</div>";
+		    echo "<div onclick=\"$('span#kidname')[0].style.display = 'inline';\">Student name (press ?): <span id=\"kidname\" style=\"display: none\">{$student->getName()}</span><br /> Shortcut keys: Z for ticks, X for crosses.  Every tick placed increments the total by one.  Press Enter to save, or type a number (no clicks necessary) to jump to the score box.  Mark title page as zero!</div>";
             echo '</div>';
 		    echo "</div>";
 		    echo '</div>';
