@@ -44,7 +44,7 @@ class ScannedTest extends DatabaseCollection
     
     function setTime(int $newTime) {
         $this->details[self::MINUTES_ALLOWED] = $newTime;
-        $this->startTimer();
+        $this->resetTimer();
     }
     
     function resetTimer() {

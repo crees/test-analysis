@@ -123,6 +123,7 @@ if (!empty($_FILES)) {
                         $num++;
                     }
                     $st->setTime(0);
+                    $st->startTimer();
                 }
             }
         }
