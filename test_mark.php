@@ -206,7 +206,8 @@ EOF;
 			  height: Math.trunc($('html')[0].clientHeight * 0.95),
 			  color: "red",           // Color for shape and text
     		  type : "tick",    // default shape: can be "rectangle", "arrow" or "text"
-			  tools: ['undo', 'tick', 'cross', 'text', 'rectangle-filled', 'circle', 'arrow', 'pen', 'redo'], // Tools
+			  // for the stamps, stamp_\u2227 is logical AND symbol, basically a huge caret for "missing"
+			  tools: ['undo', 'tick', 'cross', 'stamp_CE', 'stamp_TV', 'stamp_BOD', 'stamp_NAQ', 'stamp_\u2227', 'stamp_REP', 'text', 'rectangle-filled', 'circle', 'arrow', 'pen', 'redo'], // Tools
     		  images: ["async/getScannedImage.php?stpid=<?= $testPage->getId() ?>"],          // Array of images path : ["images/image1.png", "images/image2.png"]
     		  linewidth: 2,           // Line width for rectangle and arrow shapes
     		  fontsize: Math.trunc($('html')[0].clientHeight * 0.022) + "px",       // font size for text
@@ -261,6 +262,24 @@ EOF;
 		    	break;
 		  	case 'x':
 			  	tool = $("[name='tool_option_testpage'][data-tool='cross']");
+			  	break;
+		  	case 'c':
+			  	tool = $("[name='tool_option_testpage'][data-tool='stamp_CE']");
+			  	break;
+		  	case 'v':
+		    	tool = $("[name='tool_option_testpage'][data-tool='stamp_TV']");
+		    	break;
+		  	case 'b':
+		    	tool = $("[name='tool_option_testpage'][data-tool='stamp_BOD']");
+		    	break;
+		  	case 'n':
+			  	tool = $("[name='tool_option_testpage'][data-tool='stamp_NAQ']");
+			  	break;
+		  	case 'm':
+			  	tool = $("[name='tool_option_testpage'][data-tool='stamp_\u2227']");
+			  	break;
+		  	case ',':
+		  		tool = $("[name='tool_option_testpage'][data-tool='stamp_REP']");
 			  	break;
 		  	case '?':
 			  	$('span#kidname')[0].style.display = 'inline';
