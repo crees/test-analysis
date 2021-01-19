@@ -188,7 +188,7 @@ foreach ($students as $s) {
         }
         continue;
     }
-    echo "<tr><th scope=\"row\"><a href=\"student_individual_scores.php?student={$s->getId()}\">{$s->getName()}</a></th><td>&nbsp;</td>";
+    echo "<tr><th scope=\"row\"><a href=\"student_individual_scores.php?student={$s->getId()}\">{$s->getName()}</a></th><td>&nbsp;</td><td>&nbsp;</td>";
     $pagesLeft = $maxPages;
     $canCommit = true;
     $total = 0;
