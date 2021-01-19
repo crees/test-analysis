@@ -1,3 +1,9 @@
+<?php 
+
+namespace TestAnalysis;
+
+?>
+
 <nav class="navbar navbar-expand">
             <!-- Brand -->
     <a class="navbar-brand"><?= $staff->getName(); ?></a>
@@ -11,15 +17,15 @@
     <div class="collapse navbar-collapse" id="collapsibleNavbar">
     	<ul class="navbar-nav">
     		<li class="nav-item">
-        		<a class="nav-link" href="<?= TestAnalysis\Config::site_url; ?>/index.php?session_destroy=<?= $_SESSION['SESSION_CREATIONTIME']; ?>">Home</a>
+        		<a class="nav-link" href="<?= Config::site_url; ?>/index.php?session_destroy=<?= $_SESSION['SESSION_CREATIONTIME']; ?>">Home</a>
         	</li>
 <!--
     		<li class="nav-item">
-        		<a class="nav-link" href="<?= TestAnalysis\Config::site_url; ?>/topic_overview.php">Topic overview</a>
+        		<a class="nav-link" href="<?= Config::site_url; ?>/topic_overview.php">Topic overview</a>
         	</li>
 
     		<li class="nav-item">
-        		<a class="nav-link" href="<?= TestAnalysis\Config::site_url; ?>/skillset_overview.php">Skillset overview</a>
+        		<a class="nav-link" href="<?= Config::site_url; ?>/skillset_overview.php">Skillset overview</a>
         	</li>
 -->        	
         	<li class="nav-item dropdown">
@@ -27,10 +33,10 @@
           			Online papers
         		</a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <a class="dropdown-item" href="<?= TestAnalysis\Config::site_url; ?>/test_upload.php">Upload tests</a>
-                    <a class="dropdown-item" href="<?= TestAnalysis\Config::site_url; ?>/test_mark.php">Mark tests</a>
-                    <a class="dropdown-item" href="<?= TestAnalysis\Config::site_url; ?>/test_scanned_scores.php">Review test scores</a>
-                    <a class="dropdown-item" href="<?= TestAnalysis\Config::site_url; ?>/test_worklist.php">My worklist</a>
+                    <a class="dropdown-item" href="<?= Config::site_url; ?>/test_upload.php">Upload tests</a>
+                    <a class="dropdown-item" href="<?= Config::site_url; ?>/test_mark.php">Mark tests</a>
+                    <a class="dropdown-item" href="<?= Config::site_url; ?>/test_scanned_scores.php">Review test scores</a>
+                    <a class="dropdown-item" href="<?= Config::site_url; ?>/test_worklist.php">My worklist</a>
                 </div>
             </li>
 
@@ -53,5 +59,5 @@
 	</span>
 </nav>
 
-<div class="h3 text-center"><img src="img/<?= \TestAnalysis\Config::site_small_logo ?>" style="width: 30%;" /></div>
-<div class="h3 text-center"><?= \TestAnalysis\Config::site ?></div>
+<div class="h3 text-center"><img src="img/<?= Config::site_small_logo ?>" style="width: 30%;" /></div>
+<div class="h3 text-center"><?= Config::site ?></div>
