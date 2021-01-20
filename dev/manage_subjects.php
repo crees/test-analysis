@@ -106,7 +106,7 @@ foreach ($departments as $department) {
         $allGroups = TeachingGroup::retrieveAll(TeachingGroup::NAME);
         echo "<tr>";
         echo View::makeTextBoxCell("subject-code-{$s->getId()}", $s->get(Subject::CODE));
-        echo View::makeTextBoxCell("subject-name-{$s->getId()}", $s->get(Subject::NAME));
+        echo View::makeTextBoxCell("subject-name-{$s->getId()}", $s->get(Subject::NAME), 0, 'text', 'style="width: min-content;"');
         echo "<td>";
         echo "<select name=\"subject-dept-{$s->getid()}\" onchange=\"this.form.submit()\">";
         foreach ($departments as $dept) {
