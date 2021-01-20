@@ -242,10 +242,12 @@ function excel_export() {
 	}
 	for (s of students) {
 		for (t of tests) {
-			cell = $('td#' + ['grade', t, s].join('-'))[0]
+			cell = $('td#' + ['grade', t, s].join('-'))[0];
 			cell.innerHTML = '="' + cell.innerHTML + '"';
 		}
-		cell = $('td#' + ['cwag', 0, s].join('-'))[0]
+		cell = $('td#' + ['cwag', 0, s].join('-'))[0];
+		cell.innerHTML = '="' + cell.innerHTML + '"';
+		cell = $('td#baseline-' + s)[0];
 		cell.innerHTML = '="' + cell.innerHTML + '"';
 	}
     window.open('data:application/vnd.ms-excel,' + encodeURIComponent(table.outerHTML));
