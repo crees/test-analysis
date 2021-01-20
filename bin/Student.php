@@ -72,7 +72,7 @@ class Student extends DatabaseCollection
         foreach ($subject->getTests() as $t) {
             $result = $t->getResult($this);
             if (!is_null($result)) {
-                array_push($percentages_b, $result->get(TestResult::SCORE_B) * 100 / $t->get(Test::TOTAL_B));
+                //array_push($percentages_b, $result->get(TestResult::SCORE_B) * 100 / $t->get(Test::TOTAL_B));
             }
         }
         if (count($percentages_b) > 0) {
