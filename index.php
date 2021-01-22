@@ -3,7 +3,7 @@ namespace TestAnalysis;
 
 require "bin/classes.php";
 
-$departments = Department::retrieveAll(Department::NAME);
+$departments = $_SESSION['staff']->getDepartments(true);
 $allSubjects = [];
 foreach ($departments as $d) {
     foreach (Subject::retrieveByDetail(Subject::DEPARTMENT_ID, $d->getId(), Subject::NAME) as $s) {

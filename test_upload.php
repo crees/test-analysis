@@ -1,10 +1,19 @@
 <?php
 namespace TestAnalysis;
 
+$pageTitle = "Upload tests";
+
 require "bin/classes.php";
 require "dev/upgrade_database.php";
 
-$allSubjects = Subject::retrieveAll(Subject::NAME);
+$departments = $_SESSION['staff']->getDepartments(true);
+$allSubjects = [];
+foreach ($departments as $d) {
+    foreach (Subject::retrieveByDetail(Subject::DEPARTMENT_ID, $d->getId(), Subject::NAME) as $s) {
+        $s->setName("{$d->getName()}: {$s->getName()}");
+        array_push($allSubjects, $s);
+    }
+}
 
 if (isset($_GET['subject']) && !empty($_GET['subject'])) {
     $subject = Subject::retrieveByDetail(Subject::ID, $_GET['subject'])[0];
@@ -91,7 +100,7 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
                             ScannedTest::SUBJECT_ID => $subject->getId(),
                             ScannedTest::MINUTES_ALLOWED => $_POST['test_time'] + $_POST["input-minutes-{$s->getId()}"],
                             ScannedTest::TS_UNLOCKED => strtotime($_POST['unlock_date']),
-                            ScannedTest::STAFF_ID => $staff->getId(),
+                            ScannedTest::STAFF_ID => $_SESSION['staff']->getId(),
                             ScannedTest::STUDENT_UPLOAD_ALLOWED => $selfUpload,
                             ]);
                         $scannedTest->commit();

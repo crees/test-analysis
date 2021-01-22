@@ -1,29 +1,31 @@
 <?php namespace TestAnalysis; ?>
 
-<title><?= Config::site ?></title>
+<title><?= (isset($pageTitle) ? "$pageTitle - " : "") . Config::site ?></title>
 
 <link rel="icon" href="<?= Config::site_url; ?>/img/badge_blue.png">
 
 <?php
 // Sort themes
 
-if (isset($staff)) {
+if (isset($_SESSION['staff'])) {
     if (isset($_GET['theme'])) {
+        $staff = $_SESSION['staff'];
         switch ($_GET['theme']) {
         case 'darkly':
-            $staff->setTheme('darkly');
-            $staff->commit();
+            $_SESSION['staff']->setTheme('darkly');
+            $_SESSION['staff']->commit();
             break;
         default:
-            $staff->commit([Staff::THEME]);
+            $_SESSION['staff']->commit([Staff::THEME]);
             break;
         }
+        $_SESSION['staff'] = $staff;
     }
 }
 
-if (isset($staff) && !is_null($staff->get(Staff::THEME))) {
-    echo '<link rel="stylesheet" href="' . Config::site_url . '/css/themes/' . $staff->get(Staff::THEME) . '-custom.css">';
-    echo '<link rel="stylesheet" href="' . Config::site_url . '/css/themes/' . $staff->get(Staff::THEME) . '.css">';
+if (isset($_SESSION['staff']) && !is_null($_SESSION['staff']->get(Staff::THEME))) {
+    echo '<link rel="stylesheet" href="' . Config::site_url . '/css/themes/' . $_SESSION['staff']->get(Staff::THEME) . '-custom.css">';
+    echo '<link rel="stylesheet" href="' . Config::site_url . '/css/themes/' . $_SESSION['staff']->get(Staff::THEME) . '.css">';
 } else {
     echo '<link rel="stylesheet" href="' . Config::site_url . '/css/bootstrap-custom.css">';
     echo '<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">';

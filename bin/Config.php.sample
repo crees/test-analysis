@@ -27,6 +27,8 @@ class Config {
     
     const max_targets = 12;
     
+    const forced_admin_users = array('reescm');
+    
     public static $maintenance = true;
     
     const debug = true;
@@ -63,5 +65,9 @@ class Config {
     
     static function is_staff($name) {
         return self::check_regex($name, 'staff');
+    }
+    
+    static function is_forced_admin($name) {
+        return in_array($name, self::forced_admin_users);
     }
 }

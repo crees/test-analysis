@@ -1,10 +1,19 @@
 <?php
 namespace TestAnalysis;
 
+$pageTitle = "Mark tests";
+
 require "bin/classes.php";
 require "dev/upgrade_database.php";
 
-$allSubjects = Subject::retrieveAll(Subject::NAME);
+$departments = $_SESSION['staff']->getDepartments(true);
+$allSubjects = [];
+foreach ($departments as $d) {
+    foreach (Subject::retrieveByDetail(Subject::DEPARTMENT_ID, $d->getId(), Subject::NAME) as $s) {
+        $s->setName("{$d->getName()}: {$s->getName()}");
+        array_push($allSubjects, $s);
+    }
+}
 
 if (isset($_GET['subject']) && !empty($_GET['subject'])) {
     $subject = Subject::retrieveByDetail(Subject::ID, $_GET['subject'])[0];
@@ -38,7 +47,7 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
     $test = $test[0];
     $students = [];
     foreach (ScannedTest::retrieveByDetails([ScannedTest::TEST_ID, ScannedTest::STAFF_ID],
-        [$_GET['test'],        $staff->getId()      ],
+        [$_GET['test'],        $_SESSION['staff']->getId()      ],
         ) as $st) {
             array_push($students, Student::retrieveByDetail(Student::ID, $st->get(ScannedTest::STUDENT_ID))[0]);
         }

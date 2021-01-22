@@ -15,6 +15,8 @@ if (isset($_GET['removeTopic'])) {
 } else 
 */
 
+$departments = $_SESSION['staff']->getAdminDepartments(true);
+
 if (isset($_POST['newtest-name']) && isset($_POST['form_serial']) && $_POST['form_serial'] == $_SESSION['form_serial']-1) {
     foreach (Test::retrieveAll() as $t) {
         $tId = $t->getId();
@@ -48,6 +50,14 @@ if (isset($_POST['newtest-name']) && isset($_POST['form_serial']) && $_POST['for
         }
         $t = new Test($newTestDetails);
         $t->commit();
+        (new TestComponent([
+            TestComponent::NAME => '',
+            TestComponent::TEST_ID => $t->getId(),
+            TestComponent::TOTAL => 0,
+            TestComponent::INCLUDED_IN_PERCENT => 1,
+            TestComponent::INCLUDED_IN_GRADE => 1,
+            TestComponent::INCLUDED_FOR_TARGETS => 1,
+        ]))->commit();
     }
     
     // Let's now examine the grade boundaries.  First handle any that have changed
@@ -66,18 +76,20 @@ if (isset($_POST['newtest-name']) && isset($_POST['form_serial']) && $_POST['for
     }
     
     // Now we add any new ones we find for each subject.
-    foreach (Subject::retrieveAll() as $s) {
-        $sId = $s->getId();
-        for ($i = 1; $i < 20; $i++) {
-            $newGrade = $_POST["GradeBoundary-grade-new-for-subject-$sId-$i"];
-            $newBoundary = $_POST["GradeBoundary-boundary-new-for-subject-$sId-$i"];
-            if (($newGrade !== "") && ($newBoundary !== "")) {
-                $b = new GradeBoundary([
-                    GradeBoundary::NAME => $newGrade,
-                    GradeBoundary::BOUNDARY => $newBoundary,
-                    GradeBoundary::TEST_ID => -$sId,
-                ]);
-                $b->commit();
+    foreach ($departments as $dept) {
+        foreach (Subject::retrieveByDetail(Subject::DEPARTMENT_ID, $dept->getId()) as $s) {
+            $sId = $s->getId();
+            for ($i = 1; $i < 20; $i++) {
+                $newGrade = $_POST["GradeBoundary-grade-new-for-subject-$sId-$i"];
+                $newBoundary = $_POST["GradeBoundary-boundary-new-for-subject-$sId-$i"];
+                if (($newGrade !== "") && ($newBoundary !== "")) {
+                    $b = new GradeBoundary([
+                        GradeBoundary::NAME => $newGrade,
+                        GradeBoundary::BOUNDARY => $newBoundary,
+                        GradeBoundary::TEST_ID => -$sId,
+                    ]);
+                    $b->commit();
+                }
             }
         }
     }
@@ -123,7 +135,6 @@ if (isset($_POST['newtest-name']) && isset($_POST['form_serial']) && $_POST['for
 
 <?php
 // $orphanedTopics = TestTopic::retrieveAll(TestTopic::NAME);
-$departments = Department::retrieveAll(Department::NAME);
 foreach ($departments as $department) {
     foreach (Test::retrieveByDetail(Test::DEPARTMENT_ID, $department->getId(), Test::NAME) as $t) {
         $tId = $t->getId();

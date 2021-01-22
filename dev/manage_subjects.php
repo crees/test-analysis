@@ -3,6 +3,8 @@ namespace TestAnalysis;
 
 include "../bin/classes.php";
 
+$departments = $_SESSION['staff']->getAdminDepartments(true);
+
 if (isset($_GET['removeGroup'])) {
     Subject::retrieveByDetail(Subject::ID, $_GET['removeFromSubject'])[0]->removeMember(TeachingGroup::retrieveByDetail(TeachingGroup::ID, $_GET['removeGroup'])[0]);
     header('Location: manage_subjects.php');
@@ -100,7 +102,6 @@ foreach (FeedbackSheet::retrieveAll(FeedbackSheet::NAME) as $f) {
 }
 
 $orphanedGroups = TeachingGroup::retrieveAll(TeachingGroup::NAME);
-$departments = Department::retrieveAll(Department::NAME);
 foreach ($departments as $department) {
     foreach (Subject::retrieveByDetail(Subject::DEPARTMENT_ID, $department->getId(), Subject::NAME) as $s) {
         $allGroups = TeachingGroup::retrieveAll(TeachingGroup::NAME);

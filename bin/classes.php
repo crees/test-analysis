@@ -20,6 +20,7 @@ if (!class_exists("Config")) {
     require "ScannedTest.php";
     require "ScannedTestPage.php";
     require "Staff.php";
+    require "StaffDepartmentMembership.php";
     require "Student.php";
     require "Subject.php";
     require "TeachingGroup.php";
@@ -34,8 +35,6 @@ if (!class_exists("Config")) {
     require Config::site_docroot . "/contrib/php-graphql-client/vendor/autoload.php";
     
     require Config::site_docroot . "/dev/upgrade_database.php";
-    
-    require "auth.php";
     
     /**
      * We start the session timer on creation, and destroy it after that time.
@@ -68,4 +67,6 @@ if (!class_exists("Config")) {
         $_SESSION['form_serial'] = 0;
     }
     $_SESSION['form_serial']++;
+    
+    require "auth.php";
 }

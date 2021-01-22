@@ -18,7 +18,14 @@ if (!empty($getVars)) {
 
 <nav class="navbar navbar-expand">
             <!-- Brand -->
-    <a class="navbar-brand"><?= $staff->getName(); ?></a>
+    <a class="navbar-brand"><?php 
+    echo $_SESSION['staff']->getName();
+    if ($_SESSION['staff']->adminType() == Staff::ADMIN_TYPE_GLOBAL) {
+        echo "<span class=\"text-danger\"> (admin)</span>";
+    } elseif ($_SESSION['staff']->adminType() == Staff::ADMIN_TYPE_DEPARTMENT) {
+        echo "<span class=\"text-warning\"> (department admin)</span>";
+    }
+    ?></a>
     
     <!-- Toggler/collapsibe Button -->
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
@@ -66,10 +73,12 @@ if (!empty($getVars)) {
     	</ul>
 	</div>
 	
+	<?php if ($_SESSION['staff']->isDepartmentAdmin()) { ?>
 	<span class="navbar-text">
 		<a class="nav-link" href="dev">Manage database</a>
 	</span>
+	<?php } ?>
 </nav>
 
 <div class="h3 text-center"><img src="img/<?= Config::site_small_logo ?>" style="width: 30%;" /></div>
-<div class="h3 text-center"><?= Config::site ?></div>
+<div class="h3 text-center"><?php echo Config::site; if (isset($pageTitle)) echo ": $pageTitle"; ?></div>

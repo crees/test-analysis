@@ -1,10 +1,19 @@
 <?php
 namespace TestAnalysis;
 
+$pageTitle = "Manage and score tests";
+
 require "bin/classes.php";
 require "dev/upgrade_database.php";
 
-$allSubjects = Subject::retrieveAll(Subject::NAME);
+$departments = $_SESSION['staff']->getDepartments(true);
+$allSubjects = [];
+foreach ($departments as $d) {
+    foreach (Subject::retrieveByDetail(Subject::DEPARTMENT_ID, $d->getId(), Subject::NAME) as $s) {
+        $s->setName("{$d->getName()}: {$s->getName()}");
+        array_push($allSubjects, $s);
+    }
+}
 
 if (isset($_GET['subject']) && !empty($_GET['subject'])) {
     $subject = Subject::retrieveByDetail(Subject::ID, $_GET['subject'])[0];

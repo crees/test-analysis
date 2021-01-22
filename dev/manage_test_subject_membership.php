@@ -3,6 +3,8 @@ namespace TestAnalysis;
 
 include "../bin/classes.php";
 
+$departments = $_SESSION['staff']->getAdminDepartments(true);
+
 if (isset($_GET['removeTest'])) {
     Subject::retrieveByDetail(Subject::ID, $_GET['removeFromSubject'])[0]->removeTest(Test::retrieveByDetail(Test::ID, $_GET['removeTest'])[0]);
     $url = explode("?", "https://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]")[0];
@@ -48,7 +50,8 @@ if (isset($_GET['removeTest'])) {
 <table class="table table-sm table-hover">
 <thead><tr><th>Test</th><th>Subjects (click to remove)</th><th>Add subject</th></tr></thead>
 <?php
-foreach (Department::retrieveAll(Department::NAME) as $dept) {
+foreach ($departments as $dept) {
+    echo "<tr><th colspan=\"3\">{$dept->getName()}</th></tr>";
     foreach (Test::retrieveByDetail(Test::DEPARTMENT_ID, $dept->getId(), Test::NAME) as $t) {
         $allSubjects = Subject::retrieveByDetail(Subject::DEPARTMENT_ID, $dept->getId(), Subject::NAME);
         echo "<tr>";

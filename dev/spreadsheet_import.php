@@ -54,7 +54,7 @@ while (($line = fgetcsv($f)) !== false) {
             TestComponentResult::TESTCOMPONENT_ID => $testComponentId,
             TestComponentResult::STUDENT_ID => $studentId,
             TestComponentResult::SCORE => $result,
-            TestComponentResult::STAFF_ID => $staff->getId(),
+            TestComponentResult::STAFF_ID => $_SESSION['staff']->getId(),
         ]);
         print_r($result);
         //$result->commit();

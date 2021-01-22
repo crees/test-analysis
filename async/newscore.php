@@ -41,7 +41,7 @@ $result = new TestComponentResult([
     TestComponentResult::SCORE => $_POST['result'],
     TestComponentResult::STUDENT_ID => $_POST['studentId'],
     TestComponentResult::TESTCOMPONENT_ID => $_POST['testComponentId'],
-    TestComponentResult::STAFF_ID => $staff->getId(),
+    TestComponentResult::STAFF_ID => $_SESSION['staff']->getId(),
 ]);
 
 $result->commit();

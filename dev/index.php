@@ -34,9 +34,15 @@ require "../bin/classes.php";
     			<div class="card-body">
     			<h3 class="card-title">Database tools:</h3>
     
+    			<?php if ($_SESSION['staff']->isGlobalAdmin()) { ?>
     			<div class="card-text"><a href="arbor_import.php" class="btn btn-success" role="button">Refresh from Arbor (might take ten minutes or so, be patient!)</a></div>
     
-    			<div class="card-text"><a href="manage_departments.php" class="btn btn-primary" role="button">Manage departments</a></div>
+    			<div class="card-text"><a href="manage_departments.php" class="btn btn-warning" role="button">Manage departments</a></div>
+    			<?php } ?>
+
+    			<?php if ($_SESSION['staff']->isDepartmentAdmin()) { ?>
+    			<div class="card-text"><a href="manage_staff.php" class="btn btn-warning" role="button">Manage staff</a></div>
+    			<?php } ?>
     
     			<div class="card-text"><a href="manage_feedback_sheets.php" class="btn btn-primary" role="button">Manage feedback sheet templates</a></div>
     
@@ -50,10 +56,12 @@ require "../bin/classes.php";
     			
     			<div class="card-text"><a href="manage_test_subject_membership.php" class="btn btn-primary" role="button">Assign tests to subjects</a></div>
     
+    			<?php if ($_SESSION['staff']->isGlobalAdmin()) { ?>
     			<?php if (isset($_GET['showmethegoodstuff']) && $_GET['showmethegoodstuff'] === "yes") { ?>
     				<div class="card-text"><a href="database_setup.php" class="btn btn-danger" role="button">Initial database setup- DELETES ALL DATA!</a></div>
     			<?php } else { ?>
     				<div class="card-text"><a href="?showmethegoodstuff=yes" class="btn btn-warning" role="button">Show me the really dangerous stuff.</a></div>
+    			<?php } ?>
     			<?php } ?>
     			</div>
     		</div>

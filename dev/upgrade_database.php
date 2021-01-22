@@ -9,6 +9,7 @@ if ($db->dosql("SHOW TABLES LIKE 'db_version'")->num_rows == 1) {
     $dbVersion = 0;
 }
 
+// Fallthrough in all cases
 switch ($dbVersion) {
 case 0:
 case 1:
@@ -205,5 +206,25 @@ case 16:
     $db->dosql("INSERT INTO `db_version` (version) VALUES (17);");
 
 case 17:
+    $db->dosql("CREATE TABLE StaffDepartmentMembership (
+            id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+            Staff_id INT NOT NULL,
+            Department_id INT NOT NULL,
+            department_admin INT NOT NULL DEFAULT 0,
+            CONSTRAINT PRIMARY KEY (id)
+        );");
+    $db->dosql("ALTER TABLE `Staff` ADD global_admin INT NOT NULL DEFAULT 0;");
+    $db->dosql("UPDATE `Staff` SET global_admin = 1 WHERE Staff.id = 1");
+    foreach ($db->dosql("SELECT Staff.id FROM Staff;")->fetch_all() as $staffId) {
+        foreach ($db->dosql("SELECT Department.id FROM Department;")->fetch_all() as $deptId) {
+            $db->dosql("INSERT INTO StaffDepartmentMembership (Staff_id, Department_id) VALUES ({$staffId[0]}, {$deptId[0]});");
+        }
+    }
+case 18:
+    $db->dosql("ALTER TABLE `Test` MODIFY name VARCHAR(100) NOT NULL;");
+    
+    $db->dosql("UPDATE `db_version` SET version = 19;");
+    
 default:
+
 }
