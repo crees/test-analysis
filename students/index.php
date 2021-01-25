@@ -14,8 +14,10 @@ if (Config::is_staff($auth_user)) {
     }
 }
 
+$student = Student::retrieveByDetail(Student::USERNAME, $auth_user);
+
 /* Look up kid's ID from email address */
-if (!isset($_SESSION['student_id'])) {
+if (!isset($student[0])) {
     $emailAddress = $auth_user . "@" . Config::site_emaildomain;
     $emailQuery = "{ EmailAddress (emailAddress: \"$emailAddress\") { emailAddressOwner { id }}}";
     $client = new GraphQLClient();
@@ -34,14 +36,15 @@ if (!isset($_SESSION['student_id'])) {
     if ($qEmailAddress[0]['emailAddressOwner']['entityType'] != 'Student') {
         die("Your email address $emailAddress appears not to belong to a student.");
     }
-    $_SESSION['student_id'] = $qEmailAddress[0]['emailAddressOwner']['id'];
-}
-
-$student_id = $_SESSION['student_id'];
-$student = Student::retrieveByDetail(Student::ID, $student_id);
-
-if (!isset($student[0])) {
-    die("Your email address $emailAddress does not appear to match any student in this database.");
+    $student_id = $qEmailAddress[0]['emailAddressOwner']['id'];;
+    $student = Student::retrieveByDetail(Student::ID, $student_id);
+    
+    if (!isset($student[0])) {
+        die("Your email address $emailAddress does not appear to match any student in this database.");
+    }
+    
+    $student[0]->setUsername($auth_user);
+    $student[0]->commit();
 }
 
 $student = $student[0];
@@ -50,7 +53,7 @@ if (isset($_GET['getpdf']) && !empty($_GET['test'])) {
     $pdf = new \Imagick();
     $pdf->setresolution(150, 150);
     $test = Test::retrieveByDetail(Test::ID, $_GET['test'])[0];
-    $scannedTest = ScannedTest::retrieveByDetails([ScannedTest::TEST_ID, ScannedTest::STUDENT_ID], [$test->getId(), $student_id])[0];
+    $scannedTest = ScannedTest::retrieveByDetails([ScannedTest::TEST_ID, ScannedTest::STUDENT_ID], [$test->getId(), $student->getId()])[0];
     foreach (ScannedTestPage::retrieveByDetail(ScannedTestPage::SCANNEDTEST_ID, $scannedTest->getId(), ScannedTestPage::PAGE_NUM) as $page) {
         $pdf->readimageblob($page->get(ScannedTestPage::IMAGEDATA));
         $pdf->scaleimage(0, 1700);
@@ -64,7 +67,7 @@ if (isset($_GET['getpdf']) && !empty($_GET['test'])) {
 }
 
 if (!empty($_FILES)) {
-    foreach ($scannedTest = ScannedTest::retrieveByDetail(ScannedTest::STUDENT_ID, $student_id) as $st) {
+    foreach ($scannedTest = ScannedTest::retrieveByDetail(ScannedTest::STUDENT_ID, $student->getId()) as $st) {
         if (isset($_FILES["input-file-{$st->getId()}"])) {
             $f = $_FILES["input-file-{$st->getId()}"];
             if ($f['size'] > 0) {
@@ -148,7 +151,7 @@ if (!isset($_GET['test'])) {
     $tests_to_mark = [];
     $tests_marked = [];
     
-    $scannedTests = ScannedTest::retrieveByDetail(ScannedTest::STUDENT_ID, $student_id);
+    $scannedTests = ScannedTest::retrieveByDetail(ScannedTest::STUDENT_ID, $student->getId());
     foreach ($scannedTests as $st) {
         $time_left = round($st->secondsRemaining() / 60, 0);
         if ($time_left > 0) {
@@ -207,7 +210,7 @@ if (!isset($_GET['test'])) {
             }
         }
         if ($feedback_able) {
-            echo " (and <a href=\"feedback_sheet.php?test={$st->get(ScannedTest::TEST_ID)}&subject={$st->get(ScannedTest::SUBJECT_ID)}&student=$student_id&masquerade=$auth_user\">feedback sheet</a>)";
+            echo " (and <a href=\"feedback_sheet.php?test={$st->get(ScannedTest::TEST_ID)}&subject={$st->get(ScannedTest::SUBJECT_ID)}&student={$student->getId()}&masquerade=$auth_user\">feedback sheet</a>)";
         }
         echo "</li>";
     }
@@ -229,7 +232,7 @@ $testId = $_GET['test'];
 
 try {
     $test = Test::retrieveByDetail(Test::ID, $testId)[0];
-    $st = ScannedTest::retrieveByDetails([ScannedTest::STUDENT_ID, ScannedTest::TEST_ID], [$student_id, $test->getId()])[0];
+    $st = ScannedTest::retrieveByDetails([ScannedTest::STUDENT_ID, ScannedTest::TEST_ID], [$student->getId(), $test->getId()])[0];
     $st->getId();
 } catch (\Error $e) {
     die("You appear to be trying to retrieve a nonexistent test.");

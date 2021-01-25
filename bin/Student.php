@@ -5,16 +5,22 @@ class Student extends DatabaseCollection
 {
     const FIRST_NAME = 'first_name';
     const LAST_NAME = 'last_name';
+    const USERNAME = 'username';
     
     public function __construct(array $details)
     {
         $this->details[self::ID] = $details[self::ID];
         $this->setNames($details[self::FIRST_NAME], $details[self::LAST_NAME]);
+        $this->details[self::USERNAME] = $details[self::USERNAME] ?? null;
     }
     
     public function setNames(String $first, String $last) {
         $this->details[self::FIRST_NAME] = $first;
         $this->details[self::LAST_NAME] = $last;
+    }
+    
+    public function setUsername(String $username) {
+        $this->details[self::USERNAME] = $username;
     }
     
     public function getName() {

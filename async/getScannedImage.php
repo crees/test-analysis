@@ -19,9 +19,10 @@ $stp = $stp[0];
 
 if (Config::is_student($auth_user)) {
     $scannedTest = ScannedTest::retrieveByDetail(ScannedTest::ID, $stp->get(ScannedTestPage::SCANNEDTEST_ID));
-    if (!isset($scannedTest[0]) || 
-        !isset($_SESSION['student_id']) ||
-        $scannedTest[0]->get(ScannedTest::STUDENT_ID) !== $_SESSION['student_id']) {
+    // Check that it really is that student
+    $student = Student::retrieveByDetail(Student::USERNAME, $auth_user);
+    if (!isset($scannedTest[0]) || !isset($student[0]) ||
+        $scannedTest[0]->get(ScannedTest::STUDENT_ID) !== $student[0]->getId()) {
         die ("Are you trying to get another kid's image?");
     }    
 }

@@ -223,7 +223,10 @@ case 17:
 case 18:
     $db->dosql("ALTER TABLE `Test` MODIFY name VARCHAR(100) NOT NULL;");
     
-    $db->dosql("UPDATE `db_version` SET version = 19;");
+case 19:
+    $db->dosql("ALTER TABLE `Student` ADD username VARCHAR(30) NULL;");
+    
+    $db->dosql("UPDATE `db_version` SET version = 20;");
     
 default:
 
