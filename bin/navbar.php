@@ -19,10 +19,11 @@ if (!empty($getVars)) {
 <nav class="navbar navbar-expand">
             <!-- Brand -->
     <a class="navbar-brand"><?php 
-    echo $_SESSION['staff']->getName();
-    if ($_SESSION['staff']->adminType() == Staff::ADMIN_TYPE_GLOBAL) {
+    $staff = Staff::me($auth_user);
+    echo $staff->getName();
+    if ($staff->adminType() == Staff::ADMIN_TYPE_GLOBAL) {
         echo "<span class=\"text-danger\"> (admin)</span>";
-    } elseif ($_SESSION['staff']->adminType() == Staff::ADMIN_TYPE_DEPARTMENT) {
+    } elseif ($staff->adminType() == Staff::ADMIN_TYPE_DEPARTMENT) {
         echo "<span class=\"text-warning\"> (department admin)</span>";
     }
     ?></a>

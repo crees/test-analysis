@@ -29,8 +29,13 @@ if (Config::is_student($auth_user)) {
 } elseif (Config::is_staff($auth_user)) {
     if (!isset($_SESSION['staff']) || $_SESSION['staff']->get(Staff::USERNAME) != $auth_user) {
         // Look up staff, and if they don't exist then use Arbor
-        $staff = Staff::retrieveByDetail(Staff::USERNAME, $auth_user);
-        if (!isset($staff[0]) || $staff[0]->get(Staff::ARBOR_ID) == 0) {
+        try {
+            $staff = Staff::me($auth_user);
+            $arborId = $staff->get(Staff::ARBOR_ID);
+        } catch (\Exception $e) {
+            $arborId = 0;
+        }
+        if ($staff->get(Staff::ARBOR_ID) == 0) {
             $details = [];
             $emailAddress = $auth_user . "@" . Config::site_emaildomain;
             $emailQuery = "{ EmailAddress (emailAddress: \"$emailAddress\") { emailAddressOwner { ... on Staff { id firstName lastName entityType } } } }";
@@ -62,15 +67,13 @@ if (Config::is_student($auth_user)) {
                 $staff = new Staff($details);
             }
             $staff->commit();
-        } else {
-            $staff = $staff[0];
         }
         $_SESSION['staff'] = $staff;
     }
     switch (basename(dirname($_SERVER['PHP_SELF']))) {
     case 'dev':
         // Lock non-admins out of management area
-        if (!$_SESSION['staff']->isDepartmentAdmin()) {
+        if (!$staff->isDepartmentAdmin()) {
             header("location: " . Config::site_url . "/index.php");
             die();
         }

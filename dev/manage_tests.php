@@ -15,9 +15,11 @@ if (isset($_GET['removeTopic'])) {
 } else 
 */
 
-$departments = $_SESSION['staff']->getAdminDepartments(true);
+$staff = Staff::me($auth_user);
 
-if (isset($_POST['newtest-name']) && isset($_POST['form_serial']) && $_POST['form_serial'] == $_SESSION['form_serial']-1) {
+$departments = $staff->getAdminDepartments(true);
+
+if (isset($_POST['newtest-name']) && isset($_POST['form_serial']) && (session_status() != PHP_SESSION_ACTIVE || $_POST['form_serial'] != $_SESSION['form_serial'] - 1)) {
     foreach (Test::retrieveAll() as $t) {
         $tId = $t->getId();
         // Test modifications

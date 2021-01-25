@@ -3,8 +3,10 @@ namespace TestAnalysis;
 
 include "../bin/classes.php";
 
+$staff = Staff::me($auth_user);
+
 // OK, so here we need to check the right people are in.
-$departments = Department::staffAdminDepartments($_SESSION['staff']);
+$departments = Department::staffAdminDepartments($staff);
 
 if (empty($departments)) {
     die("Hm, you should not be here!"); 
@@ -24,7 +26,7 @@ if (isset($_GET['removeStaff'])) {
     if (!isset($departments[$deptId])) {
         die("You should not be working on someone else's department!");
     }
-    if ($_GET['toggleAdmin'] == $_SESSION['staff']->getId() && !$_SESSION['staff']->isGlobalAdmin()) {
+    if ($_GET['toggleAdmin'] == $staff->getId() && !$staff->isGlobalAdmin()) {
         echo "You can't demote yourself-- get someone else to do it if you need to!";
     } else {
         $m = StaffDepartmentMembership::retrieveByDetails([StaffDepartmentMembership::DEPARTMENT_ID, StaffDepartmentMembership::STAFF_ID], [$_GET['applyToDepartment'], $_GET['toggleAdmin']])[0];
@@ -49,7 +51,7 @@ if (isset($_GET['removeStaff'])) {
             $staffId = str_replace("global-admin-for-", "", $k);
             if ($value == "checked") {
                 if (!isset($_POST["global-admin-$staffId"])) {
-                    if ($staffId == $_SESSION['staff']->getId()) {
+                    if ($staffId == $staff->getId()) {
                         echo "You can't demote yourself-- get someone else to do it if you need to!";
                     } else {
                         $s = Staff::retrieveByDetail(Staff::ID, $staffId)[0];
@@ -127,7 +129,7 @@ foreach ($departments as $dept) {
 
 <?php
 
-if ($_SESSION['staff']->isGlobalAdmin()) {
+if ($staff->isGlobalAdmin()) {
     echo "<h4>Global admins</h4>";
     $staff = [];
     $globalAdmins = [];

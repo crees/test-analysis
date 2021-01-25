@@ -3,7 +3,9 @@ namespace TestAnalysis;
 
 include "../bin/classes.php";
 
-$departments = $_SESSION['staff']->getAdminDepartments(true);
+$staff = Staff::me($auth_user);
+
+$departments = $staff->getAdminDepartments(true);
 
 if (isset($_GET['removeTest'])) {
     Subject::retrieveByDetail(Subject::ID, $_GET['removeFromSubject'])[0]->removeTest(Test::retrieveByDetail(Test::ID, $_GET['removeTest'])[0]);

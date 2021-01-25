@@ -4,6 +4,8 @@ namespace TestAnalysis;
 require "bin/classes.php";
 require "dev/upgrade_database.php";
 
+$staff = Staff::me($auth_user);
+
 if (!isset($_GET['testId'])) {
     $tests = [];
     foreach (Test::retrieveAll() as $test) {
@@ -14,7 +16,7 @@ if (!isset($_GET['testId'])) {
     $markedTests = [];
     $unmarkedTests = [];
     
-    foreach (ScannedTest::retrieveByDetail(ScannedTest::STAFF_ID, $_SESSION['staff']->getId()) as $st) {
+    foreach (ScannedTest::retrieveByDetail(ScannedTest::STAFF_ID, $staff->getId()) as $st) {
         if ($st->secondsRemaining() > 0) {
             $student_id = $st->get(ScannedTest::STUDENT_ID);
             if (!isset($unfinishedScannedTests[$student_id])) {

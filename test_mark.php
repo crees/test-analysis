@@ -6,7 +6,9 @@ $pageTitle = "Mark tests";
 require "bin/classes.php";
 require "dev/upgrade_database.php";
 
-$departments = $_SESSION['staff']->getDepartments(true);
+$staff = Staff::me($auth_user);
+
+$departments = $staff->getDepartments(true);
 $allSubjects = [];
 foreach ($departments as $d) {
     foreach (Subject::retrieveByDetail(Subject::DEPARTMENT_ID, $d->getId(), Subject::NAME) as $s) {
@@ -35,7 +37,7 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
         $students = $subject->getStudents();
     }
     
-    if (isset($_POST['form_serial']) && $_POST['form_serial'] == $_SESSION['form_serial'] - 1) {
+    if (isset($_POST['form_serial']) && (session_status() != PHP_SESSION_ACTIVE || $_POST['form_serial'] != $_SESSION['form_serial'] - 1)) {
         /* Deal with submitted data */
     }
 } else if (isset($_GET['my_tests_only']) && $_GET['my_tests_only'] && isset($_GET['test'])) {
@@ -47,7 +49,7 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
     $test = $test[0];
     $students = [];
     foreach (ScannedTest::retrieveByDetails([ScannedTest::TEST_ID, ScannedTest::STAFF_ID],
-        [$_GET['test'],        $_SESSION['staff']->getId()      ],
+        [$_GET['test'],        $staff->getId()      ],
         ) as $st) {
             array_push($students, Student::retrieveByDetail(Student::ID, $st->get(ScannedTest::STUDENT_ID))[0]);
         }

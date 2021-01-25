@@ -6,9 +6,8 @@ require "../bin/classes.php";
 if (Config::is_staff($auth_user)) {
     if (isset($_GET['masquerade'])) {
         $auth_user = $_GET['masquerade'];
-        $_SESSION['is_staff'] = TRUE;
+        $is_staff = TRUE;
     } else {
-        session_destroy();
         echo "<html><head></head><body><h3>Need to masquerade as a student?  Please put in their username:</h3>";
         die ("<p><form method=\"get\"><input type=\"text\" name=\"masquerade\"><input type=\"submit\"></form></body></html>");
     }
@@ -252,7 +251,7 @@ if (!isset($testPage[0])) {
 $testPage = $testPage[0];
 
 echo "<h3>";
-if (isset($_SESSION['is_staff']) && $_SESSION['is_staff']) {
+if (isset($is_staff) && $is_staff) {
     echo "Not starting the timer as you are staff masquerading as $auth_user.";
 } else {
     // Not starting the timer for staff!

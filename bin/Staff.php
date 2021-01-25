@@ -12,6 +12,7 @@ class Staff extends DatabaseCollection
     
     const ADMIN_TYPE_GLOBAL = 'global_admin';
     const ADMIN_TYPE_DEPARTMENT = 'department_admin';
+    protected static $me = null;
     protected $admin_type = null;
     
     public function __construct(array $details)
@@ -22,6 +23,23 @@ class Staff extends DatabaseCollection
         $this->details[self::ARBOR_ID] = $details[self::ARBOR_ID];
         $this->details[self::THEME] = $details[self::THEME] ?? null;
         $this->details[self::GLOBAL_ADMIN] = $details[self::GLOBAL_ADMIN] ?? 0;
+    }
+    
+    public static function me(String $username) {
+        if (!is_null(self::$me)) {
+            return self::$me;
+        }
+        if (!Config::is_staff($username)) {
+            return null;
+        }
+        $me = self::retrieveByDetail(self::USERNAME, $username);
+        if (isset($me[0]) && !isset($me[1])) {
+            // No duplicates, excellent
+            self::$me = $me[0];
+            return self::$me;
+        } else {
+            throw new \Exception('No staff found or ambiguous');
+        }
     }
     
     public function setNames(String $first, String $last) {
@@ -116,9 +134,6 @@ class Staff extends DatabaseCollection
     
     public function commit($setToNull = []) {
         parent::commit($setToNull);
-        if ($this->getId() == $_SESSION['staff']->getId()) {
-            unset($_SESSION['staff']);
-        }
     }
     
     function __destruct()

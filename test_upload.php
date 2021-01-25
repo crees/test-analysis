@@ -6,7 +6,9 @@ $pageTitle = "Upload tests";
 require "bin/classes.php";
 require "dev/upgrade_database.php";
 
-$departments = $_SESSION['staff']->getDepartments(true);
+$staff = Staff::me($auth_user);
+
+$departments = $staff->getDepartments(true);
 $allSubjects = [];
 foreach ($departments as $d) {
     foreach (Subject::retrieveByDetail(Subject::DEPARTMENT_ID, $d->getId(), Subject::NAME) as $s) {
@@ -35,7 +37,7 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
         $students = $subject->getStudents();
     }
     
-    if (isset($_POST['form_serial']) && $_POST['form_serial'] == $_SESSION['form_serial'] - 1) {
+    if (isset($_POST['form_serial']) && (session_status() != PHP_SESSION_ACTIVE || $_POST['form_serial'] != $_SESSION['form_serial'] - 1)) {
         foreach ($students as $s) {
             if (isset($_POST["delete-for-{$s->getId()}"]) && $_POST["delete-for-{$s->getId()}"] == 'on') {
                 foreach (ScannedTest::retrieveByDetails([ScannedTest::STUDENT_ID, ScannedTest::TEST_ID], [$s->getId(), $test->getId()]) as $st) {
@@ -100,7 +102,7 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
                             ScannedTest::SUBJECT_ID => $subject->getId(),
                             ScannedTest::MINUTES_ALLOWED => $_POST['test_time'] + $_POST["input-minutes-{$s->getId()}"],
                             ScannedTest::TS_UNLOCKED => strtotime($_POST['unlock_date']),
-                            ScannedTest::STAFF_ID => $_SESSION['staff']->getId(),
+                            ScannedTest::STAFF_ID => $staff->getId(),
                             ScannedTest::STUDENT_UPLOAD_ALLOWED => $selfUpload,
                             ]);
                         $scannedTest->commit();

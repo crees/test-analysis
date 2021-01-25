@@ -4,6 +4,8 @@ namespace TestAnalysis;
 
 require "../bin/classes.php";
 
+$staff = Staff::me($auth_user);
+
 ?>
 <!doctype html>
 <html>
@@ -34,13 +36,13 @@ require "../bin/classes.php";
     			<div class="card-body">
     			<h3 class="card-title">Database tools:</h3>
     
-    			<?php if ($_SESSION['staff']->isGlobalAdmin()) { ?>
+    			<?php if ($staff->isGlobalAdmin()) { ?>
     			<div class="card-text"><a href="arbor_import.php" class="btn btn-success" role="button">Refresh from Arbor (might take ten minutes or so, be patient!)</a></div>
     
     			<div class="card-text"><a href="manage_departments.php" class="btn btn-warning" role="button">Manage departments</a></div>
     			<?php } ?>
 
-    			<?php if ($_SESSION['staff']->isDepartmentAdmin()) { ?>
+    			<?php if ($staff->isDepartmentAdmin()) { ?>
     			<div class="card-text"><a href="manage_staff.php" class="btn btn-warning" role="button">Manage staff</a></div>
     			<?php } ?>
     
@@ -56,7 +58,7 @@ require "../bin/classes.php";
     			
     			<div class="card-text"><a href="manage_test_subject_membership.php" class="btn btn-primary" role="button">Assign tests to subjects</a></div>
     
-    			<?php if ($_SESSION['staff']->isGlobalAdmin()) { ?>
+    			<?php if ($staff->isGlobalAdmin()) { ?>
     			<?php if (isset($_GET['showmethegoodstuff']) && $_GET['showmethegoodstuff'] === "yes") { ?>
     				<div class="card-text"><a href="database_setup.php" class="btn btn-danger" role="button">Initial database setup- DELETES ALL DATA!</a></div>
     			<?php } else { ?>

@@ -3,11 +3,15 @@ namespace TestAnalysis;
 
 require "../bin/classes.php";
 
-if (!isset($_GET['subject']) || !isset($_GET['test']) || !isset($_SESSION['student_id']) || $_GET['student'] != $_SESSION['student_id']) {
+$student = Student::retrieveByDetail(Student::USERNAME, $auth_user);
+
+if (!isset($_GET['subject']) || !isset($_GET['test']) || !isset($student[0]) || $_GET['student'] != $student[0]->getId()) {
     // Nice try, trying to hack another kid's results!
     header('Location: index.php');
     die();
 }
+
+$student = $student[0];
 
 $subject = Subject::retrieveByDetail(Subject::ID, $_GET['subject'])[0];
 $test = Test::retrieveByDetail(Test::ID, $_GET['test'])[0];

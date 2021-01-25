@@ -6,7 +6,9 @@ $pageTitle = "Manage and score tests";
 require "bin/classes.php";
 require "dev/upgrade_database.php";
 
-$departments = $_SESSION['staff']->getDepartments(true);
+$staff = Staff::me($auth_user);
+
+$departments = $staff->getDepartments(true);
 $allSubjects = [];
 foreach ($departments as $d) {
     foreach (Subject::retrieveByDetail(Subject::DEPARTMENT_ID, $d->getId(), Subject::NAME) as $s) {
