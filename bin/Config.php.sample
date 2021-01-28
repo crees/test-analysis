@@ -10,6 +10,8 @@ class Config {
     const site_supportemail = "reescm@droitwichspahigh.worcs.sch.uk";
     const site_small_logo = "dshs.jpg"; // Path relative to site_url/img/
     
+    const student_instruction_video = 'https://youtu.be/Hm42t_5_ijs';
+    
     const use_sessions = false;
     
     const db = array(
