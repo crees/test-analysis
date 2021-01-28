@@ -68,6 +68,12 @@ if (!empty($getVars)) {
                 	<a class="dropdown-item" href="?theme=default">Default theme</a>
                 	<a class="dropdown-item" href="?theme=darkly">Dark theme</a>
                 	<div class="dropdown-divider"></div>
+                	<?php if ($staff->get(Staff::LARGE_MARKING) == 0) { ?>
+                		<a class="dropdown-item" href="?large_marking=1">Make the tests fill screen width</a>
+                	<?php } else { ?>
+                		<a class="dropdown-item" href="?large_marking=0">Make the tests fill screen height</a>
+                	<?php } ?>
+                	<div class="dropdown-divider"></div>
                 	<a class="dropdown-item" href="change_name.php">Change my display name</a>
                 </div>
         	</li>
@@ -76,7 +82,7 @@ if (!empty($getVars)) {
     	</ul>
 	</div>
 	
-	<?php if ($_SESSION['staff']->isDepartmentAdmin()) { ?>
+	<?php if ($staff->isDepartmentAdmin()) { ?>
 	<span class="navbar-text">
 		<a class="nav-link" href="dev">Manage database</a>
 	</span>

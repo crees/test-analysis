@@ -9,6 +9,7 @@ class Staff extends DatabaseCollection
     const THEME = 'theme';
     const USERNAME = 'username';
     const GLOBAL_ADMIN = 'global_admin';
+    const LARGE_MARKING = 'large_marking';
     
     const ADMIN_TYPE_GLOBAL = 'global_admin';
     const ADMIN_TYPE_DEPARTMENT = 'department_admin';
@@ -23,6 +24,7 @@ class Staff extends DatabaseCollection
         $this->details[self::ARBOR_ID] = $details[self::ARBOR_ID];
         $this->details[self::THEME] = $details[self::THEME] ?? null;
         $this->details[self::GLOBAL_ADMIN] = $details[self::GLOBAL_ADMIN] ?? 0;
+        $this->details[self::LARGE_MARKING] = $details[self::LARGE_MARKING] ?? 0;
     }
     
     public static function me(String $username) {
@@ -49,6 +51,10 @@ class Staff extends DatabaseCollection
     
     public function setTheme(String $theme) {
         $this->details[self::THEME] = $theme;
+    }
+    
+    public function setLargeMarking(int $val) {
+        $this->details[self::LARGE_MARKING] = (($val == 0) ? 0 : 1);
     }
     
     public function getName() {

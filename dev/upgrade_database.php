@@ -226,7 +226,10 @@ case 18:
 case 19:
     $db->dosql("ALTER TABLE `Student` ADD username VARCHAR(30) NULL;");
     
-    $db->dosql("UPDATE `db_version` SET version = 20;");
+case 20:
+    $db->dosql("ALTER TABLE `Staff` ADD large_marking TINYINT NOT NULL DEFAULT 0;");
+    
+    $db->dosql("UPDATE `db_version` SET version = 21;");
     
 default:
 

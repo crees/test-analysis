@@ -184,13 +184,22 @@ EOF;
     		            $firstLoop = false;
 		            } else {
 		                $page_num++;
-		                die ("No tests have been set for this group.  This could be a bug-- if so, click <a href=\"?subject={$_GET['subject']}&teaching_group=$teaching_group&test={$_GET['test']}&page=$page_num&student_number=0\">here</a> for the next page.");
+		                if (isset($_GET['my_tests_only']) && $_GET['my_tests_only'] == 1) {
+		                    $link = "?my_tests_only=1&test={$_GET['test']}&page=$page_num&student_number=0";
+		                } else {
+                            $link = "?subject={$_GET['subject']}&teaching_group=$teaching_group&test={$_GET['test']}&page=$page_num&student_number=0";
+		                }
+		                die ("No tests have been set for this group.  This could be a bug-- if so, click <a href=\"$link\">here</a> for the next page.");
 		            }
 		        }
 		    }
 		    $testPage = $testPages[$page_num];
 		    echo "<div class=\"row\">";
-		    echo '<div class="col-lg-9"><div id="testpage"></div></div>';
+		    if ($staff->get(Staff::LARGE_MARKING) == 1) {
+		        echo '<div class="col-lg-12"><div id="testpage"></div></div>';
+		    } else {
+		        echo '<div class="col-lg-9"><div id="testpage"></div></div>';
+		    }
 		    echo "<div class=\"col-lg-3\">";
 		    echo "<div id=\"savebar\"></div><br>";
 		    echo "<div class=\"form-inline form-group\">";
@@ -204,8 +213,17 @@ EOF;
             echo "<label for=\"score\">Total page score: </label>";
             echo "<input class=\"form-control\" type=\"number\" id=\"score\" value=\"{$testPage->get(ScannedTestPage::PAGE_SCORE)}\">";
 		    echo '</div>';
-		    echo "<div onclick=\"$('span#kidname')[0].style.display = 'inline';\">Student name (press ?): <span id=\"kidname\" style=\"display: none\">{$student->getName()}</span><br /> Shortcut keys: Z for ticks, X for crosses.  Every tick placed increments the total by one.  Press Enter to save, or type a number (no clicks necessary) to jump to the score box.  Mark title page as zero!</div>";
-            echo '</div>';
+		    echo "<div onclick=\"$('span#kidname')[0].style.display = 'inline';\">Student name (press ?): <span id=\"kidname\" style=\"display: none\">{$student->getName()}</span><br /> Shortcut keys: Z for ticks, X for crosses.  Every tick placed increments the total by one.  Press Enter to save, or type a number (no clicks necessary) to jump to the score box.  Spacebar also saves.  Mark title page as zero!</div>";
+            echo "<div><ul>";
+            echo "<li>ECF - error carried forward</li>";
+            echo "<li>TV - too vague</li>";
+            echo "<li>BOD - benefit of doubt</li>";
+            echo "<li>NAQ - not answered question</li>";
+            echo "<li>ECF - error carried forward</li>";
+            echo "<li>^ - something missing here</li>";
+            echo "<li>REP - student has repeated a marking point</li>";
+            echo "</div></ul>";
+		    echo '</div>';
 		    echo "</div>";
 		    echo '</div>';
 		}
@@ -213,16 +231,30 @@ EOF;
 
 <script>
     options = {
+<?php // Deal with staff who want the test to take the width of the browser window
+if ($staff->get(Staff::LARGE_MARKING) == 1) {
+?>
+              width: Math.trunc($('html')[0].clientWidth * 0.8),
+              height: Math.trunc($('html')[0].clientWidth * 0.8 * 1.414),
+<?php } else { ?>
     		  width: Math.trunc($('html')[0].clientHeight * 0.95 / 1.414),
 			  height: Math.trunc($('html')[0].clientHeight * 0.95),
+<?php } ?>
 			  color: "red",           // Color for shape and text
     		  type : "tick",    // default shape: can be "rectangle", "arrow" or "text"
 			  // for the stamps, stamp_\u2227 is logical AND symbol, basically a huge caret for "missing"
-			  tools: ['undo', 'tick', 'cross', 'stamp_CE', 'stamp_TV', 'stamp_BOD', 'stamp_NAQ', 'stamp_\u2227', 'stamp_REP', 'text', 'rectangle-filled', 'circle', 'arrow', 'pen', 'redo'], // Tools
+			  tools: ['undo', 'tick', 'cross', 'stamp_ECF', 'stamp_TV', 'stamp_BOD', 'stamp_NAQ', 'stamp_\u2227', 'stamp_REP', 'text', 'rectangle-filled', 'circle', 'arrow', 'pen', 'redo'], // Tools
     		  images: ["async/getScannedImage.php?stpid=<?= $testPage->getId() ?>"],          // Array of images path : ["images/image1.png", "images/image2.png"]
     		  linewidth: 2,           // Line width for rectangle and arrow shapes
-    		  fontsize: Math.trunc($('html')[0].clientHeight * 0.022) + "px",       // font size for text
-			  lineheight: Math.trunc($('html')[0].clientHeight * 0.022),
+<?php // Deal with staff who want the test to take the width of the browser window
+if ($staff->get(Staff::LARGE_MARKING) == 1) {
+?>
+    		  fontsize: Math.trunc($('html')[0].clientWidth * 0.022) + "px",       // font size for text
+			  lineheight: Math.trunc($('html')[0].clientWidth * 0.022),
+<?php } else { ?>
+              fontsize: Math.trunc($('html')[0].clientHeight * 0.022) + "px",       // font size for text
+              lineheight: Math.trunc($('html')[0].clientHeight * 0.022),
+<?php } ?>
     		  bootstrap: true,       // Bootstrap theme design
     		  position: "right",       // Position of toolbar (available only with bootstrap)
     		  selectEvent: "change", // listened event on .annotate-image-select selector to select active images
@@ -258,8 +290,9 @@ EOF;
 			return 0;
 		  }
 		  tool = null;
-		  if (event.which === 13) {
+		  if (event.key === 'Enter' || event.key === ' ') {
 		    // "Submit"
+		    event.preventDefault();
 			save();
 		  } else /* if (event.keyCode >= 48 && event.keyCode <= 57) */
 			  if (event.key >= 0 && event.key <= 9) {
@@ -275,7 +308,7 @@ EOF;
 			  	tool = $("[name='tool_option_testpage'][data-tool='cross']");
 			  	break;
 		  	case 'c':
-			  	tool = $("[name='tool_option_testpage'][data-tool='stamp_CE']");
+			  	tool = $("[name='tool_option_testpage'][data-tool='stamp_ECF']");
 			  	break;
 		  	case 'v':
 		    	tool = $("[name='tool_option_testpage'][data-tool='stamp_TV']");

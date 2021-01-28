@@ -21,6 +21,10 @@ if (!is_null($staff)) {
             break;
         }
     }
+    if (isset($_GET['large_marking'])) {
+        $staff->setLargeMarking($_GET['large_marking'] == 0 ? 0 : 1);
+        $staff->commit();
+    }
 }
 
 if (!is_null($staff) && !is_null($staff->get(Staff::THEME))) {
