@@ -8,7 +8,7 @@ if(!isset($_SERVER['PHP_AUTH_USER'])) {
     header('HTTP/1.0 401 Unauthorized');
 }
 
-$auth_user = preg_replace('/@' . Config::site_emaildomain . '/', "", $_SERVER['PHP_AUTH_USER']);
+$auth_user = strtolower(preg_replace('/@' . Config::site_emaildomain . '/', "", $_SERVER['PHP_AUTH_USER']));
 
 /* So, let's check this user should actually be here! */
 
@@ -35,7 +35,7 @@ if (Config::is_student($auth_user)) {
         } catch (\Exception $e) {
             $arborId = 0;
         }
-        if ($staff->get(Staff::ARBOR_ID) == 0) {
+        if ($arborId == 0) {
             $details = [];
             $emailAddress = $auth_user . "@" . Config::site_emaildomain;
             $emailQuery = "{ EmailAddress (emailAddress: \"$emailAddress\") { emailAddressOwner { ... on Staff { id firstName lastName entityType } } } }";
@@ -60,9 +60,8 @@ if (Config::is_student($auth_user)) {
             $details[Staff::FIRST_NAME] = $qEmailAddress[0]['emailAddressOwner']['firstName'];
             $details[Staff::LAST_NAME] = $qEmailAddress[0]['emailAddressOwner']['lastName'];
             $details[Staff::USERNAME] = $auth_user;
-            if (isset($staff[0])) {
-                $staff[0]->updateDetails($details);
-                $staff = $staff[0];
+            if (isset($staff)) {
+                $staff->updateDetails($details);
             } else {
                 $staff = new Staff($details);
             }
