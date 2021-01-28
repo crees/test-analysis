@@ -13,6 +13,8 @@ if (Config::is_staff($auth_user)) {
     }
 }
 
+$msq = isset($_GET['masquerade']) ? "?masquerade={$_GET['masquerade']}" : "";
+
 $student = Student::retrieveByDetail(Student::USERNAME, $auth_user);
 
 /* Look up kid's ID from email address */
@@ -150,7 +152,7 @@ if (!isset($_GET['test'])) {
     $tests_to_mark = [];
     $tests_marked = [];
     
-    $scannedTests = ScannedTest::retrieveByDetail(ScannedTest::STUDENT_ID, $student->getId());
+    $scannedTests = ScannedTest::retrieveByDetail(ScannedTest::STUDENT_ID, $student->getId(), ScannedTest::TEST_ID);
     foreach ($scannedTests as $st) {
         $time_left = round($st->secondsRemaining() / 60, 0);
         if ($time_left > 0) {
@@ -162,6 +164,15 @@ if (!isset($_GET['test'])) {
             array_push($tests_marked, $st);
             foreach (ScannedTestPage::retrieveByDetail(ScannedTestPage::SCANNEDTEST_ID, $st->getId(), "", '`' . ScannedTestPage::PAGE_SCORE . '`') as $p) {
                 if (is_null($p->get(ScannedTestPage::PAGE_SCORE))) {
+                    // Delete completed practice test
+                    if ($st->get(ScannedTest::TEST_ID) == 0) {
+                        foreach (ScannedTestPage::retrieveByDetail(ScannedTestPage::SCANNEDTEST_ID, $st->getId()) as $page) {
+                            ScannedTestPage::delete($page->getId());
+                        }
+                        ScannedTest::delete($st->getId());
+                        array_pop($tests_marked);
+                        break;
+                    }
                     array_push($tests_to_mark, array_pop($tests_marked));
                     break;
                 }
@@ -170,12 +181,23 @@ if (!isset($_GET['test'])) {
     }
     
     echo "<div class=\"h3\">Hello {$student->getName()}.</div>";
-    echo "<div><a href=\"" . Config::student_instruction_video . "\" class=\"btn btn-danger\">Please click here for video instructions</a></div>";
+    echo "<div>";
+    echo "<a href=\"" . Config::student_instruction_video . "\" class=\"btn btn-danger\">Please click here for video instructions</a>";
+    if (count(ScannedTest::retrieveByDetails([ScannedTest::STUDENT_ID, ScannedTest::TEST_ID], [$student->getId(), 0])) > 0) {
+        echo "<a href=\"make_test_test.php$msq\" class=\"btn btn-danger\">Please click here to delete your practice test</a>";
+    } else {
+        echo "<a href=\"make_test_test.php$msq\" class=\"btn btn-success\">Please click here to generate a practice test</a>";
+    }
+    echo "</div>";
     echo "<div class=\"h4\">You have these tests to complete:</div><ul class=\"list-group\">";
     echo '<form method="POST" enctype="multipart/form-data">';
     foreach ($tests_to_complete as $st) {
         $testId = $st->get(ScannedTest::TEST_ID);
-        $test_name = Test::retrieveByDetail(Test::ID, $testId)[0]->getName();
+        if ($testId == 0) {
+            $test_name = "Practice test";
+        } else {
+            $test_name = Test::retrieveByDetail(Test::ID, $testId)[0]->getName();
+        }
         $time_left = round($st->secondsRemaining() / 60, 0);
         echo "<li class=\"list-group-item\">";
         echo "<a href=\"?test={$st->get(ScannedTest::TEST_ID)}&masquerade={$auth_user}\">$test_name, {$time_left} minutes allowed</a>";
@@ -231,9 +253,12 @@ $page_num = $_GET['page'] ?? 0;
 $testId = $_GET['test'];
 
 try {
-    $test = Test::retrieveByDetail(Test::ID, $testId)[0];
-    $st = ScannedTest::retrieveByDetails([ScannedTest::STUDENT_ID, ScannedTest::TEST_ID], [$student->getId(), $test->getId()])[0];
-    $st->getId();
+    if ($testId == 0) {
+        $st = ScannedTest::retrieveByDetails([ScannedTest::STUDENT_ID, ScannedTest::TEST_ID], [$student->getId(), 0])[0];
+    } else {
+        $test = Test::retrieveByDetail(Test::ID, $testId)[0];
+        $st = ScannedTest::retrieveByDetails([ScannedTest::STUDENT_ID, ScannedTest::TEST_ID], [$student->getId(), $test->getId()])[0];
+    }
 } catch (\Error $e) {
     die("You appear to be trying to retrieve a nonexistent test.");
 }
@@ -262,7 +287,12 @@ if (isset($is_staff) && $is_staff) {
         die(" Sorry, out of time!");
     } else {
         $end = date('H:i', $st->get(ScannedTest::TS_STARTED) + $st->get(ScannedTest::MINUTES_ALLOWED) * 60);
-        echo " $minutes minutes remaining on {$test->getName()}- finishing at $end.";
+        if ($testId == 0) {
+            $testName = "Practice test";
+        } else {
+            $testName = $test->getName();
+        }
+        echo " $minutes minutes remaining on {$testName}- finishing at $end.";
     }
 }
 echo "</h3>";
