@@ -37,7 +37,7 @@ if (!empty($getVars)) {
     <div class="collapse navbar-collapse" id="collapsibleNavbar">
     	<ul class="navbar-nav">
     		<li class="nav-item">
-        		<a class="nav-link" href="<?= Config::site_url; ?>/index.php?session_destroy=<?= $_SESSION['SESSION_CREATIONTIME'] ?>">Home</a>
+        		<a class="nav-link" href="<?= Config::site_url; ?>/index.php?session_destroy=<?= $_SESSION['SESSION_CREATIONTIME'] ?? '' ?>">Home</a>
         	</li>
 <!--
     		<li class="nav-item">
@@ -67,6 +67,8 @@ if (!empty($getVars)) {
         		<div class="dropdown-menu">
                 	<a class="dropdown-item" href="?theme=default">Default theme</a>
                 	<a class="dropdown-item" href="?theme=darkly">Dark theme</a>
+                	<div class="dropdown-divider"></div>
+                	<a class="dropdown-item" href="change_name.php">Change my display name</a>
                 </div>
         	</li>
 	
