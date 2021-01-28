@@ -5,7 +5,7 @@ require "../bin/classes.php";
 
 if (Config::is_staff($auth_user)) {
     if (isset($_GET['masquerade'])) {
-        $auth_user = $_GET['masquerade'];
+        $auth_user = strtolower($_GET['masquerade']);
         $is_staff = TRUE;
     } else {
         echo "<html><head></head><body><h3>Need to masquerade as a student?  Please put in their username:</h3>";
@@ -170,12 +170,13 @@ if (!isset($_GET['test'])) {
     }
     
     echo "<div class=\"h3\">Hello {$student->getName()}.</div>";
-    echo "<div><a href=\"https://youtu.be/Hm42t_5_ijs\" class=\"btn btn-danger\">Please click here for video instructions</a></div>";
+    echo "<div><a href=\"" . Config::student_instruction_video . "\" class=\"btn btn-danger\">Please click here for video instructions</a></div>";
     echo "<div class=\"h4\">You have these tests to complete:</div><ul class=\"list-group\">";
     echo '<form method="POST" enctype="multipart/form-data">';
     foreach ($tests_to_complete as $st) {
         $testId = $st->get(ScannedTest::TEST_ID);
         $test_name = Test::retrieveByDetail(Test::ID, $testId)[0]->getName();
+        $time_left = round($st->secondsRemaining() / 60, 0);
         echo "<li class=\"list-group-item\">";
         echo "<a href=\"?test={$st->get(ScannedTest::TEST_ID)}&masquerade={$auth_user}\">$test_name, {$time_left} minutes allowed</a>";
         if ($st->get(ScannedTest::STUDENT_UPLOAD_ALLOWED) == true) {
@@ -268,7 +269,7 @@ echo "</h3>";
 
 echo "<div id=\"savebar\"></div>";
 
-echo "<br /><br /><div id=\"testpage\"></div>";
+echo "<br /><br /><div id=\"testpage\"></div><div id=\"errors\"></div>";
 
 ?>
 

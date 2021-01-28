@@ -3,6 +3,10 @@ namespace TestAnalysis;
 
 require "../bin/classes.php";
 
+if (Config::is_staff($auth_user) && isset($_GET['masquerade'])) {
+    $auth_user = $_GET['masquerade'];
+}
+
 $student = Student::retrieveByDetail(Student::USERNAME, $auth_user);
 
 if (!isset($_GET['subject']) || !isset($_GET['test']) || !isset($student[0]) || $_GET['student'] != $student[0]->getId()) {
