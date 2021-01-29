@@ -76,16 +76,25 @@ if (!empty($_FILES)) {
                 switch (substr($f['name'], -4, 4)) {
                     case ".pdf":
                         try {
-                            $im = new \Imagick();
-                            $im->setresolution(150, 150);
-                            $im->readimage($f['tmp_name']);
-                            for ($i = 0; $i < $im->getnumberimages(); $i++) {
-                                $im->setiteratorindex($i);
-                                $im->setimageformat('jpg');
-                                $im->setImageAlphaChannel(\Imagick::ALPHACHANNEL_REMOVE);
-                                array_push($pages, addslashes($im->getimageblob()));
+                            if (defined('TestAnalysis\Config::windows_path_to_gs_exe')) {
+                                shell_exec(Config::windows_path_to_gs_exe . " -sDEVICE=jpeg -sOutputFile={$f['tmp_name']}-page-%03d.jpg -r150x150 -f -dBATCH -dNOPAUSE -q {$f['tmp_name']}");
+                                $pages = [];
+                                foreach (glob("{$f['tmp_name']}-page-[0-9][0-9][0-9].jpg") as $page) {
+                                    array_push($pages, addslashes(file_get_contents($page)));
+                                    unlink($page);
+                                }
+                            } else {
+                                $im = new \Imagick();
+                                $im->setresolution(150, 150);
+                                $im->readimage($f['tmp_name']);
+                                for ($i = 0; $i < $im->getnumberimages(); $i++) {
+                                    $im->setiteratorindex($i);
+                                    $im->setimageformat('jpg');
+                                    $im->setImageAlphaChannel(\Imagick::ALPHACHANNEL_REMOVE);
+                                    array_push($pages, addslashes($im->getimageblob()));
+                                }
+                                $im->destroy();
                             }
-                            $im->destroy();
                         } catch (\ImagickException $e) {
                             die('Well, that\'s a shame.  For some reason, we can\'t extract pdf files, so please use <a href="https://www.ilovepdf.com/pdf_to_jpg">a pdf converter</a> to turn your pdf into a zipfile of images and try uploading that.');
                         }
