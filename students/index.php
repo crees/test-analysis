@@ -63,6 +63,11 @@ if (isset($_GET['getpdf']) && !empty($_GET['test'])) {
     
     header("Content-type:application/pdf");
     header("Content-Disposition:attachment;filename={$test->getName()}.pdf");
+    if ($scannedTest->get(ScannedTest::DOWNLOADED) == 0) {
+        $scannedTest->markAsDownloaded();
+        $scannedTest->setTime(intdiv($scannedTest->secondsRemaining(), 60) + 10);
+    }
+    $scannedTest->startTimer();
     echo $pdf->getimagesblob();
     die();
 }
@@ -70,6 +75,9 @@ if (isset($_GET['getpdf']) && !empty($_GET['test'])) {
 if (!empty($_FILES)) {
     foreach ($scannedTest = ScannedTest::retrieveByDetail(ScannedTest::STUDENT_ID, $student->getId()) as $st) {
         if (isset($_FILES["input-file-{$st->getId()}"])) {
+            if ($st->secondsRemaining() < 0) {
+                die("Oops, sorry, too late!  Please email the test to your teacher immediately with an explanation as to why it was late!");
+            }
             $f = $_FILES["input-file-{$st->getId()}"];
             if ($f['size'] > 0) {
                 $pages = [];
@@ -211,6 +219,10 @@ if (!isset($_GET['test'])) {
         echo "<li class=\"list-group-item\">";
         echo "<a href=\"?test={$st->get(ScannedTest::TEST_ID)}&masquerade={$auth_user}\">$test_name, {$time_left} minutes allowed</a>";
         if ($st->get(ScannedTest::STUDENT_UPLOAD_ALLOWED) == true) {
+            echo "<br>Your teacher has allowed you to download a pdf of this test, so that you can print and scan it, and reupload it here.";
+            echo "<br>You will gain 10 minutes extra as a grace period for printing and scanning, but you <b>must</b> upload it before the timer";
+            echo "<br>expires or the option will disappear and you will have to explain to your teacher.";
+            echo "<br>In case it wasn't clear, clicking <i>Download<i> starts the timer.";
             echo "<br><a class=\"btn btn-primary\" href=\"?test={$st->get(ScannedTest::TEST_ID)}&masquerade={$auth_user}&getpdf=yes\">Download to complete on paper</a>";
             echo "<br><label class=\"form-label\" for=\"input-file-{$st->getId()}\">Scanned test to upload (jpgs in zip or pdf)</label>";
             echo "<input type=\"file\" class=\"form-control-file\" name=\"input-file-{$st->getId()}\" id=\"input-file-{$st->getId()}\">";

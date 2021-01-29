@@ -229,7 +229,10 @@ case 19:
 case 20:
     $db->dosql("ALTER TABLE `Staff` ADD large_marking TINYINT NOT NULL DEFAULT 0;");
     
-    $db->dosql("UPDATE `db_version` SET version = 21;");
+case 21:
+    $db->dosql("ALTER TABLE `ScannedTest` ADD downloaded TINYINT NOT NULL DEFAULT 0;");
+    
+    $db->dosql("UPDATE `db_version` SET version = 22;");
     
 default:
 

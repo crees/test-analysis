@@ -12,6 +12,7 @@ class ScannedTest extends DatabaseCollection
     const TS_UNLOCKED = 'ts_unlocked';
     const STAFF_ID = 'Staff_id';
     const STUDENT_UPLOAD_ALLOWED = 'student_upload_allowed';
+    const DOWNLOADED = 'downloaded';
     
     public function __construct(array $details)
     {
@@ -28,6 +29,7 @@ class ScannedTest extends DatabaseCollection
                     self::TS_STARTED,
                     self::TS_UNLOCKED,
                     self::STAFF_ID,
+                    self::DOWNLOADED,
                 ] as $d) {
             $this->details[$d] = $details[$d] ?? null;
         }
@@ -40,6 +42,10 @@ class ScannedTest extends DatabaseCollection
             $this->details[self::TS_STARTED] = time();
             $this->commit();
         }
+    }
+    
+    function markAsDownloaded() {
+        $this->details[self::DOWNLOADED] = 1;
     }
     
     function setTime(int $newTime) {
