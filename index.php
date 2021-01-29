@@ -144,22 +144,20 @@ eof;
 		        $baseline = $s->getShortIndicative($subject);
 		        echo "<td id=\"baseline-{$s->getId()}\">$baseline</td>";
 		        
-		        $cwag = $s->getAverageGrade($subject) ?? '&nbsp';
+		        $cwag = $s->getAverageGrade($subject) ?? '&nbsp;';
 		        echo "<td id=\"cwag-0-{$s->getId()}\">$cwag</td>";
 		        
-		        $results = TestComponentResult::retrieveByDetail(TestComponentResult::STUDENT_ID, $s->getId(), TestComponentResult::RECORDED_TS . ' DESC');
 		        foreach ($tests as $t) {
-		            $result_components = [];
+		            $results = $t->getTestComponentResults($s);
 		            foreach ($t->getTestComponents() as $c) {
-		                $resultForThisComponent = null;
+		                $result = null;
 		                foreach ($results as $r) {
 		                    if ($r->get(TestComponentResult::TESTCOMPONENT_ID) == $c->getId()) {
-		                        $resultForThisComponent = $r;
+		                        $result = $r;
 		                        break;
 		                    }
 		                }
-		                array_push($result_components, $resultForThisComponent);
-		                echo "<td class=\"score-input\" id=\"" . TestComponentResult::SCORE . "-{$c->getId()}-{$s->getId()}\">" . (is_null($resultForThisComponent) ? "" : $resultForThisComponent->get(TestComponentResult::SCORE)) . "</td>";
+		                echo "<td class=\"score-input\" id=\"" . TestComponentResult::SCORE . "-{$c->getId()}-{$s->getId()}\">" . (is_null($result) ? "" : $result->get(TestComponentResult::SCORE)) . "</td>";
 		            }
 		            echo "<td id=\"percent-{$t->getId()}-{$s->getId()}\">{$t->calculatePercent($s)}</td>";
 		            echo "<td id=\"grade-{$t->getId()}-{$s->getId()}\">{$t->calculateGrade($s, $subject)}</td>";

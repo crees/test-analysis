@@ -85,15 +85,24 @@ class Test extends DatabaseCollection
      */
     public function calculateGrade(Student $student, Subject $subject) {
         $score = 0;
+        
+        $resultComponents = $this->getTestComponentResults($student);
+        
         foreach ($this->getTestComponents() as $c) {
             if ($c->get(TestComponent::INCLUDED_IN_GRADE)) {
-                $r = TestComponentResult::retrieveByDetails([TestComponentResult::STUDENT_ID, TestComponentResult::TESTCOMPONENT_ID], [$student->getId(), $c->getId()], TestComponentResult::RECORDED_TS . ' DESC');
-                if (!isset($r[0])) {
+                $noResult = true;
+                foreach ($resultComponents as $r) {
+                    if (!is_null($r) && $r->get(TestComponentResult::TESTCOMPONENT_ID) == $c->getId()) {
+                        $score += $r->get(TestComponentResult::SCORE);
+                        $noResult = false;
+                    }
+                }
+                if ($noResult) {
                     return '';
                 }
-                $score += $r[0]->get(TestComponentResult::SCORE);
             }
         }
+
         $grade = 0;
         // First, get the grades ordered by highest to lowest
         foreach ($this->getGradeBoundaries($subject) as $g) {
@@ -115,21 +124,56 @@ class Test extends DatabaseCollection
     public function calculatePercent(Student $student) {
         $score = 0;
         $percentTotal = 0;
+        
+        $resultComponents = $this->getTestComponentResults($student);
+
+        if (empty($resultComponents)) {
+            return '';
+        }
+        
         foreach ($this->getTestComponents() as $c) {
             if ($c->get(TestComponent::INCLUDED_IN_PERCENT)) {
-                $r = TestComponentResult::retrieveByDetails([TestComponentResult::STUDENT_ID, TestComponentResult::TESTCOMPONENT_ID], [$student->getId(), $c->getId()], TestComponentResult::RECORDED_TS . ' DESC');
-                if (!isset($r[0])) {
+                $percentTotal += $c->get(TestComponent::TOTAL);
+                $noResult = true;
+                foreach ($resultComponents as $r) {
+                    if (!is_null($r) && $r->get(TestComponentResult::TESTCOMPONENT_ID) == $c->getId()) {
+                        $score += $r->get(TestComponentResult::SCORE);
+                        $noResult = false;
+                    }
+                }
+                if ($noResult) {
                     return '';
                 }
-                $score += $r[0]->get(TestComponentResult::SCORE);
-                $percentTotal += $c->get(TestComponent::TOTAL);
             }
         }
+
         if ($percentTotal == 0) {
             return NAN;
         } else {
             return round($score * 100.0 / $percentTotal, 0);
         }
+    }
+    
+    public function getTestComponentResults(Student $student) {
+        if (isset($this->getLabels()["TestResultComponents-{$student->getId()}"])) {
+            return $this->getLabels()["TestResultComponents-{$student->getId()}"];
+        }   
+        $result_components = [];
+        $results = TestComponentResult::retrieveByDetail(TestComponentResult::STUDENT_ID, $student->getId(), TestComponentResult::RECORDED_TS . ' DESC');
+        foreach ($this->getTestComponents() as $c) {
+            $resultForThisComponent = null;
+            foreach ($results as $r) {
+                if ($r->get(TestComponentResult::TESTCOMPONENT_ID) == $c->getId()) {
+                    $resultForThisComponent = $r;
+                    break;
+                }
+            }
+            if (!is_null($resultForThisComponent)) {
+                array_push($result_components, $resultForThisComponent);
+            }
+        }
+        $this->setLabel("TestResultComponents-{$student->getId()}", $result_components);
+        return $result_components;
     }
     
     public function getGradeBoundaries(Subject $subject, bool $forceForSubject = false) {
