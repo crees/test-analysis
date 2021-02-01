@@ -232,7 +232,10 @@ case 20:
 case 21:
     $db->dosql("ALTER TABLE `ScannedTest` ADD downloaded TINYINT NOT NULL DEFAULT 0;");
     
-    $db->dosql("UPDATE `db_version` SET version = 22;");
+case 22:
+    $db->dosql("ALTER TABLE `Subject` DROP code;");
+    
+    $db->dosql("UPDATE `db_version` SET version = 23;");
     
 default:
 

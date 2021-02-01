@@ -11,11 +11,10 @@ if (isset($_GET['removeGroup'])) {
     Subject::retrieveByDetail(Subject::ID, $_GET['removeFromSubject'])[0]->removeMember(TeachingGroup::retrieveByDetail(TeachingGroup::ID, $_GET['removeGroup'])[0]);
     header('Location: manage_subjects.php');
     die();
-} elseif (isset($_POST['newsubjectcode'])) {
+} elseif (isset($_POST['newsubjectname'])) {
     if (!empty($_POST['newsubjectname'])) {
         (new Subject([
             Subject::NAME => $_POST['newsubjectname'],
-            Subject::CODE => $_POST['newsubjectcode'],
             Subject::DEPARTMENT_ID => $_POST['newsubjectdept'],
         ]))->commit();
     }
@@ -34,10 +33,6 @@ if (isset($_GET['removeGroup'])) {
             } elseif (str_contains($k, "subject-baseline-")) {
                 $subject = Subject::retrieveByDetail(Subject::ID, str_replace("subject-baseline-", "", $k))[0];
                 $subject->setBaseLine($value);
-                $subject->commit();
-            } elseif (str_contains($k, "subject-code-")) {
-                $subject = Subject::retrieveByDetail(Subject::ID, str_replace("subject-code-", "", $k))[0];
-                $subject->setCode($value);
                 $subject->commit();
             } elseif (str_contains($k, "subject-name-")) {
                 $subject = Subject::retrieveByDetail(Subject::ID, str_replace("subject-name-", "", $k))[0];
@@ -83,7 +78,7 @@ if (isset($_GET['removeGroup'])) {
     </nav>
 <form method="post">
 <table class="table table-sm table-hover">
-<thead><tr><th>Code</th><th>Name</th><th>Department</th><th>Baseline source</th><th>Feedback sheet template</th><th>Groups (click to remove)</th><th>Add group</th><th>Save</th></tr></thead>
+<thead><tr><th>Name</th><th>Department</th><th>Baseline source</th><th>Feedback sheet template</th><th>Groups (click to remove)</th><th>Add group</th><th>Save</th></tr></thead>
 <?php
 
 // Let's get the List of baseline subject IDs
@@ -108,7 +103,6 @@ foreach ($departments as $department) {
     foreach (Subject::retrieveByDetail(Subject::DEPARTMENT_ID, $department->getId(), Subject::NAME) as $s) {
         $allGroups = TeachingGroup::retrieveAll(TeachingGroup::NAME);
         echo "<tr>";
-        echo View::makeTextBoxCell("subject-code-{$s->getId()}", $s->get(Subject::CODE));
         echo View::makeTextBoxCell("subject-name-{$s->getId()}", $s->get(Subject::NAME), 0, 'text', 'style="width: min-content;"');
         echo "<td>";
         echo "<select name=\"subject-dept-{$s->getid()}\" onchange=\"this.form.submit()\">";
@@ -174,8 +168,6 @@ foreach ($departments as $department) {
 }
 ?>
 <tr>
-	<td><input class="form-control" type="text" name="newsubjectcode"></td>
-
 	<td><input class="form-control" type="text" name="newsubjectname"></td>
 <?php
         echo "<td>";

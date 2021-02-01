@@ -3,7 +3,6 @@ namespace TestAnalysis;
 
 class Subject extends DatabaseCollection
 {
-    const CODE = 'code';
     const BASELINE_ID = 'Baseline_id';
     const DEPARTMENT_ID = 'Department_id';
     const FEEDBACKSHEET_ID = 'FeedbackSheet_id';
@@ -11,7 +10,6 @@ class Subject extends DatabaseCollection
     public function __construct(array $details)
     {
         $this->details[self::NAME] = $details[self::NAME];
-        $this->details[self::CODE] = $details[self::CODE];
         $this->details[self::DEPARTMENT_ID] = $details[self::DEPARTMENT_ID];
         if (isset($details[self::ID])) {
             $this->details[self::ID] = $details[self::ID];
@@ -67,10 +65,6 @@ class Subject extends DatabaseCollection
     
     public function setBaseline(int $bId) {
         $this->details[self::BASELINE_ID] = $bId;
-    }
-    
-    public function setCode(string $code) {
-        $this->details[self::CODE] = $code;
     }
     
     public function setDepartmentId(int $dId) {
