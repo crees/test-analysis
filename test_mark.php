@@ -213,16 +213,25 @@ EOF;
             echo "<label for=\"score\">Total page score: </label>";
             echo "<input class=\"form-control\" type=\"number\" id=\"score\" value=\"{$testPage->get(ScannedTestPage::PAGE_SCORE)}\">";
 		    echo '</div>';
-		    echo "<div onclick=\"$('span#kidname')[0].style.display = 'inline';\">Student name (press ?): <span id=\"kidname\" style=\"display: none\">{$student->getName()}</span><br /> Shortcut keys: Z for ticks, X for crosses.  Every tick placed increments the total by one.  Press Enter to save, or type a number (no clicks necessary) to jump to the score box.  Spacebar also saves.  Mark title page as zero!</div>";
-            echo "<div><ul>";
-            echo "<li>ECF - error carried forward</li>";
-            echo "<li>TV - too vague</li>";
-            echo "<li>BOD - benefit of doubt</li>";
-            echo "<li>NAQ - not answered question</li>";
-            echo "<li>ECF - error carried forward</li>";
-            echo "<li>^ - something missing here</li>";
-            echo "<li>REP - student has repeated a marking point</li>";
-            echo "</div></ul>";
+		    echo "<div onclick=\"$('span#kidname')[0].style.display = 'inline';\">Student name (press ?): <span id=\"kidname\" style=\"display: none\">{$student->getName()}</span><br />Every tick placed increments the total by one.  Press Enter to save, or type a number (no clicks necessary) to jump to the score box.  Spacebar also saves.  Mark title page as zero!</div>";
+            echo "<div>Shortcut keys:<dl class=\"row\">";
+            $defs = [
+                ["Key", "Function", "<span class=\"font-weight-bold\">Definition</span>"],
+                ["z", "Tick", "Correct"],
+                ["x", "Cross", "Incorrect"],
+                ["c", "ECF", "Error carried forward"],
+                ["v", "TV", "Too vague"],
+                ["b", "BOD", "Benefit of doubt"],
+                ["n", "NAQ", "Not answered question"],
+                ["m", "&#x2227;", "Something missing here"],
+                [",", "REP", "Student has repeated a marking point"],
+            ];
+            foreach ($defs as $def) {
+                echo "<dt class=\"col-2\">{$def[0]}</dt>";
+                echo "<dt class=\"col-3\">{$def[1]}</dt>";
+                echo "<dd class=\"col-7\">{$def[2]}</dd>";
+            }
+            echo "</dl></div>";
 		    echo '</div>';
 		    echo "</div>";
 		    echo '</div>';
