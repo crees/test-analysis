@@ -214,15 +214,7 @@ foreach ($students as $s) {
                 $canCommit = false;
             } else {
                 $tcId = $page->get(ScannedTestPage::TESTCOMPONENT_ID);
-                if (count(TestComponentResult::retrieveByDetails(
-                    [TestComponentResult::STUDENT_ID, TestComponentResult::TESTCOMPONENT_ID],
-                    [$s->getId(), $tcId])) > 0
-                ) {
-                    // This was a slow test, but no biggie as we don't have many kids
-                    $canCommit = false;
-                } else {
-                    $sectionTotal[$tcId] = ($sectionTotal[$tcId] ?? 0) + $pTotal;
-                }
+                $sectionTotal[$tcId] = ($sectionTotal[$tcId] ?? 0) + $pTotal;
             }
         }
     }
@@ -232,13 +224,27 @@ foreach ($students as $s) {
     echo "<td>$total</td>";
     if ($canCommit) {
         $args = [];
+        $scoreChanged = false;
+        $resultsRecorded = false;
         foreach ($sectionTotal as $id => $total) {
             array_push($args, "\\\"$id\\\": $total");
+            $results = TestComponentResult::retrieveByDetails(
+                [TestComponentResult::STUDENT_ID, TestComponentResult::TESTCOMPONENT_ID],
+                [$s->getId(), $id],
+                TestComponentResult::RECORDED_TS . ' DESC');
+            if (isset($results[0])) {
+                $resultsRecorded = true;
+                if ($results[0]->get(TestComponentResult::SCORE) != $total) {
+                    $scoreChanged = true;
+                }
+            }
         }
         $args = '{' . implode(", ", $args) . '}';
-        echo "<td><input class=\"form-control\" type=\"button\" id=\"commit-{$s->getId()}\" onclick='commit({$s->getId()}, \"$args\")' value=\"Commit score\"></td>";
-    } else {
-        echo "<td><input class=\"form-control\" type=\"button\" disabled value=\"Commit score (score already present for this student, click name to check)\"></td>";
+        if ($resultsRecorded == false || $scoreChanged == true) {
+            echo "<td><input class=\"form-control\" type=\"button\" id=\"commit-{$s->getId()}\" onclick='commit({$s->getId()}, \"$args\")' value=\"Commit score\"></td>";
+        } else {
+            echo "<td><input class=\"form-control\" type=\"button\" disabled value=\"Commit score (score already present for this student, click name to check)\"></td>";
+        }
     }
     echo "</tr>";
 }
