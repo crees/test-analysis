@@ -71,7 +71,7 @@ $student = $student[0];
 			<?php
 			$staffCache = [];
 			foreach (TestComponentResult::retrieveByDetail(TestComponentResult::STUDENT_ID, $student->getId(), TestComponentResult::RECORDED_TS . ' DESC') as $r) {
-			    $link = "<a href=\"?student=" . $student->getId() . "&resultToDelete=" . $r->getId() . "\" class=\"stretched-link\">";
+			    $link = "<a href=\"?student=" . $student->getId() . "&resultToDelete=" . $r->getId() . "\">";
 			    echo "<tr>";
                 $component = TestComponent::retrieveByDetail(TestComponent::ID, $r->get(TestComponentResult::TESTCOMPONENT_ID))[0];
 			    $test = Test::retrieveByDetail(Test::ID, $component->get(TestComponent::TEST_ID))[0];
