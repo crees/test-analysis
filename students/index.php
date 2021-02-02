@@ -290,7 +290,7 @@ if ($st->get(ScannedTest::TS_UNLOCKED) > time()) {
 $testPage = ScannedTestPage::retrieveByDetails([ScannedTestPage::SCANNEDTEST_ID, ScannedTestPage::PAGE_NUM], [$st->getId(), $page_num]);
 
 if (!isset($testPage[0])) {
-    echo "<h3>Test complete!</h3>";
+    echo "<h3>Test complete, and saved!  You can now close the window.</h3>";
     
     die ("<a class=\"btn btn-warning\" href=\"?page=" . ($page_num - 1) . "&test=$testId&masquerade=$auth_user\">Previous page</a>");
 }
