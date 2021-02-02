@@ -128,15 +128,23 @@ if (!empty($_FILES)) {
                         break;
                 }
                 if (count($pages) > 0) {
+                    // Store the component-page mapping, but only use if the number of pages matches
+                    $component = [];
+                    $old_pages = 0;
                     // Delete all the old ones first!
                     foreach (ScannedTestPage::retrieveByDetail(ScannedTestPage::SCANNEDTEST_ID, $st->getId()) as $p) {
+                        $component[$p->get(ScannedTestPage::PAGE_NUM)] = $p->get(ScannedTestPage::TESTCOMPONENT_ID);
+                        $old_pages++;
                         ScannedTestPage::delete($p->getId());
+                    }
+                    if ($old_pages != count($pages)) {
+                        unset ($component);
                     }
                     $num = 0;
                     foreach ($pages as $p) {
                         $page = new ScannedTestPage([
                             ScannedTestPage::SCANNEDTEST_ID => $st->getId(),
-                            ScannedTestPage::TESTCOMPONENT_ID => null,
+                            ScannedTestPage::TESTCOMPONENT_ID => $component[$num] ?? null,
                             ScannedTestPage::PAGE_NUM => $num,
                             ScannedTestPage::IMAGEDATA => $p,
                         ]);
@@ -222,7 +230,8 @@ if (!isset($_GET['test'])) {
             echo "<br>Your teacher has allowed you to download a pdf of this test, so that you can print and scan it, and reupload it here.";
             echo "<br>You will gain 10 minutes extra as a grace period for printing and scanning, but you <b>must</b> upload it before the timer";
             echo "<br>expires or the option will disappear and you will have to explain to your teacher.";
-            echo "<br>In case it wasn't clear, clicking <i>Download<i> starts the timer.";
+            echo "<br>In case it wasn't clear, clicking <i>Download</i> starts the timer.";
+            echo "<br>You <b>must</b> use either a scanner to generate the pdf in order, or use Adobe Scan, Google Drive or Onedrive to make a readable PDF.";
             echo "<br><a class=\"btn btn-primary\" href=\"?test={$st->get(ScannedTest::TEST_ID)}&masquerade={$auth_user}&getpdf=yes\">Download to complete on paper</a>";
             echo "<br><label class=\"form-label\" for=\"input-file-{$st->getId()}\">Scanned test to upload (jpgs in zip or pdf)</label>";
             echo "<input type=\"file\" class=\"form-control-file\" name=\"input-file-{$st->getId()}\" id=\"input-file-{$st->getId()}\">";
