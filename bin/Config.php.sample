@@ -37,6 +37,12 @@ class Config {
     
     const debug = true;
     
+    // The site won't work until you make a backup key, used with /dev/backup.php
+    // https://codepen.io/corenominal/pen/rxOmMJ
+    // ^^^ Use this site to generate a key, and put it between the quotes on the following line.
+    const backups_key = '';
+    
+    
     // It is beyond a nightmare to get Imagick to play with Ghostscript on IIS.
     // Let's save ourselves the headache and just use it directly-- please say where it is
     //const windows_path_to_gs_exe = '"C:\\Program Files\\gs\\gs9.53.3\\bin\\gswin64c.exe"';

@@ -37,6 +37,8 @@ $staff = Staff::me($auth_user);
     			<h3 class="card-title">Database tools:</h3>
     
     			<?php if ($staff->isGlobalAdmin()) { ?>
+    			<div class="card-text"><a href="backup.php" class="btn btn-success" role="button">Download a csv dump of all non-Arbor generated data</a></div>
+    			
     			<div class="card-text"><a href="arbor_import.php" class="btn btn-success" role="button">Refresh from Arbor (might take ten minutes or so, be patient!)</a></div>
     
     			<div class="card-text"><a href="manage_departments.php" class="btn btn-warning" role="button">Manage departments</a></div>
