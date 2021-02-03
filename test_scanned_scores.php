@@ -187,11 +187,11 @@ foreach ($students as $s) {
                 echo "<td class=\"bta-upload_allowed\" id=\"{$stu->getId()}\"></td>";
                 echo "<td>";
                 if (is_null($stu->get(ScannedTest::TS_STARTED))) {
-                    echo "Not started";
+                    echo "&#x1f4d5; Not started";
                 } else if ($stu->secondsRemaining() > 0) {
-                    echo "Started, but not finished";
+                    echo "&#x1f4d6; Started, but not finished";
                 } else {
-                    echo "Not yet completely marked";
+                    echo "&#x2611; &#x2611; &#x2610; &#x2610; Not yet completely marked";
                 }
                 echo "</td>";
                 echo "</tr>";
@@ -276,6 +276,15 @@ function saved(studentId) {
 	button.disabled = true;
 }
 
+function editableTiming(studentId, value) {
+	cell = $('#' + studentId + '.bta-timer')[0];
+	cell.classList.add('nopadding');
+	cell.innerHTML = '<input class="form-control border-0 px-1 timingBox" id="' + studentId + '" type="number" value="' + value + '" onblur="redrawTiming(' + studentId + ', this.value);">';
+	box = $('#' + studentId + '.timingBox')[0];
+	box.focus();
+	box.select();
+}
+
 function redrawTiming(stId, newTime) {
 	if (stId !== null) {
 		timerId = '#' + stId;
@@ -295,20 +304,22 @@ function redrawTiming(stId, newTime) {
 	        if (this.readyState == 4 && this.status == 200) {
 			  [id, remainingTime, ts_started, upload_allowed] = this.responseText.split(':');
 			  remainingTime = parseInt(remainingTime);
-		      innerHTML  = '<span class="text-danger" onclick="redrawTiming(' + id + ', ' + (remainingTime-1) + ')">-</span>';
-		      innerHTML += remainingTime;
-		      innerHTML += '<span class="text-success" onclick="redrawTiming(' + id + ', ' + (remainingTime+1) + ')">+</span>';
+		      innerHTML  = '<span class="text-danger" onclick="redrawTiming(' + id + ', ' + (remainingTime-1) + ')">&#x21e9;</span>';
+		      innerHTML += '<span class="editableTiming" id="' + id + '" onclick="editableTiming(' + id + ', ' + remainingTime + ');">' + remainingTime + '</span>';
+		      innerHTML += '<span class="text-success" onclick="redrawTiming(' + id + ', ' + (remainingTime+1) + ')">&#x21e7;</span>';
 			  innerHTML += ' min';
 			  if (ts_started !== '') {
 				  innerHTML += '<span class="text-success" onclick="redrawTiming('  + id + ', -2)">(reset)</span>';
 			  } else {
 				  innerHTML += '<span class="text-warning" onclick="redrawTiming('  + id + ', 0)">(end test)</span>';
 			  }
-			  $('td.bta-timer#' + id)[0].innerHTML = innerHTML;
+			  cell = $('td.bta-timer#' + id)[0];
+			  cell.classList.remove('nopadding');
+			  cell.innerHTML = innerHTML;
 			  if (upload_allowed == 1) {
-				  $('td#' + id + '.bta-upload_allowed')[0].innerHTML = '<span class="text-success" onclick="redrawTiming(' + id + ', -3)">allowed</span>';
+				  $('td#' + id + '.bta-upload_allowed')[0].innerHTML = '<span class="text-success" onclick="redrawTiming(' + id + ', -3)">&#x2601; allowed</span>';
 			  } else {
-				  $('td#' + id + '.bta-upload_allowed')[0].innerHTML = '<span class="text-danger" onclick="redrawTiming(' + id + ', -4)">not allowed</span>';				  
+				  $('td#' + id + '.bta-upload_allowed')[0].innerHTML = '<span class="text-danger" onclick="redrawTiming(' + id + ', -4)">&#x1f6ab; not allowed</span>';				  
 			  }
 	        }
 	    };
