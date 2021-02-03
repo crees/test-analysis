@@ -329,23 +329,49 @@ echo "</h3>";
 
 echo "<div class=\"savebar\"></div>";
 
-echo "<br /><br /><div id=\"testpage\"></div><div id=\"errors\"></div><div class=\"savebar\"></div>";
+echo "<div class=\"row\">";
+
+echo "<div class=\"col-lg-9\" id=\"testpage-container\"><div class=\"toolbar-container\" style=\"position: sticky; top: 0px; z-index: 100;\"></div><br /><br /><div id=\"testpage\"></div><div class=\"savebar\"></div></div>";
+echo "<div class=\"col-lg-3\">";
+
+echo "<dl class=\"row\">";
+$defs = [
+    ["", "<span class=\"font-weight-bold\">Use</span>"],
+    ["<i class=\"fa fa-ban\"></i>", "Disable tools- use this on a tablet when you want to move without changing anything"],
+    ["<i class=\"fa fa-check\"></i>", "Use this for multiple-choice answers"],
+    ["<i class=\"fas fa-times\"></i>", "Use this for points on graphs"],
+    ["<i class=\"fas fa-square\"></i>", "Eraser tool- use to erase parts."],
+    ["<i class=\"fa fa-circle-o\"></i>", "Draw an ellipse/circle"],
+    ["<i class=\"fa fa-font\"></i>", "Type text"],
+    ["<i class=\"fa fa-arrow-up\"></i>", "Draw a long arrow (use this for straight lines on too)"],
+    ["<i class=\"fa fa-paint-brush\"></i>", "Freehand tool"],
+];
+foreach ($defs as $def) {
+    echo "<dt class=\"col-2 text-lg-right\">{$def[0]}</dt>";
+    echo "<dd class=\"col-10\">{$def[1]}</dd>";
+}
+echo "</dl>";
+
+echo "</div>"; // col-md-2
+
+echo "</div><div id=\"errors\"></div>";
 
 ?>
 
 <script>
     options = {
-    		  width: $('.container')[0].clientWidth,
-    		  height: $('.container')[0].clientWidth * 1.414,
+    		  width: $('#testpage-container')[0].clientWidth - 30,
+    		  height: ($('#testpage-container')[0].clientWidth - 30) * 1.414,
     		  color: "blue",           // Color for shape and text
     		  type : "text",    // default shape: can be "rectangle", "arrow" or "text"
-			  tools: ['undo', 'unselect', 'tick', 'rectangle-filled', 'circle', 'text', 'arrow', 'pen', 'redo'], // Tools
+			  tools: ['undo', 'unselect', 'tick', 'cross', 'rectangle-filled', 'circle', 'text', 'arrow', 'pen', 'redo'], // Tools
     		  images: ["../async/getScannedImage.php?stpid=<?= $testPage->getId() ?>"],          // Array of images path : ["images/image1.png", "images/image2.png"]
     		  linewidth: 2,           // Line width for rectangle and arrow shapes
-    		  fontsize: $('.container')[0].clientWidth * 1.414 * 0.033 / 2 + "px",       // font size for text
-			  lineheight: $('.container')[0].clientWidth * 1.414 * 0.033 / 2,
+    		  fontsize: $('#testpage-container')[0].clientWidth * 1.414 * 0.033 / 2 + "px",       // font size for text
+			  lineheight: $('#testpage-container')[0].clientWidth * 1.414 * 0.033 / 2,
     		  bootstrap: true,       // Bootstrap theme design
-    		  position: "top",       // Position of toolbar (available only with bootstrap)
+    		  position: "top-inside",       // Position of toolbar (available only with bootstrap)
+			  toolbarContainer: '.toolbar-container',
     		  selectEvent: "change", // listened event on .annotate-image-select selector to select active images
     		  unselectTool: false,   // Add a unselect tool button in toolbar (useful in mobile to enable zoom/scroll)
 			  imageExport: { type: "image/jpg", quality: 1 },
