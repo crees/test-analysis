@@ -128,23 +128,25 @@ if (!empty($_FILES)) {
                         break;
                 }
                 if (count($pages) > 0) {
-                    // Store the component-page mapping, but only use if the number of pages matches
+                    // Store the component-page mapping
                     $component = [];
-                    $old_pages = 0;
+                    $old_pageIds = [];
                     // Delete all the old ones first!
                     foreach (ScannedTestPage::retrieveByDetail(ScannedTestPage::SCANNEDTEST_ID, $st->getId()) as $p) {
                         $component[$p->get(ScannedTestPage::PAGE_NUM)] = $p->get(ScannedTestPage::TESTCOMPONENT_ID);
-                        $old_pages++;
-                        ScannedTestPage::delete($p->getId());
+                        array_push($old_pageIds, $p->getId());
                     }
-                    if ($old_pages != count($pages)) {
-                        unset ($component);
+                    if (count($old_pageIds) != count($pages)) {
+                        die("The provided test had " . count($old_pageIds) . " pages and your uploaded test has only " . count($pages) . ".  Please click \"Back\" and try uploading the complete test.");
+                    }
+                    foreach ($old_pageIds as $p) {
+                        ScannedTestPage::delete($p);
                     }
                     $num = 0;
                     foreach ($pages as $p) {
                         $page = new ScannedTestPage([
                             ScannedTestPage::SCANNEDTEST_ID => $st->getId(),
-                            ScannedTestPage::TESTCOMPONENT_ID => $component[$num] ?? null,
+                            ScannedTestPage::TESTCOMPONENT_ID => $component[$num],
                             ScannedTestPage::PAGE_NUM => $num,
                             ScannedTestPage::IMAGEDATA => $p,
                         ]);
