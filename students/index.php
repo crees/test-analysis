@@ -327,9 +327,9 @@ if (isset($is_staff) && $is_staff) {
 }
 echo "</h3>";
 
-echo "<div id=\"savebar\"></div>";
+echo "<div class=\"savebar\"></div>";
 
-echo "<br /><br /><div id=\"testpage\"></div><div id=\"errors\"></div>";
+echo "<br /><br /><div id=\"testpage\"></div><div id=\"errors\"></div><div class=\"savebar\"></div>";
 
 ?>
 
@@ -350,7 +350,9 @@ echo "<br /><br /><div id=\"testpage\"></div><div id=\"errors\"></div>";
     		  unselectTool: false,   // Add a unselect tool button in toolbar (useful in mobile to enable zoom/scroll)
 			  imageExport: { type: "image/jpg", quality: 1 },
 			  onAnnotate: function() {
-				  document.getElementById('savebar').innerHTML = savebutton + dontsavebutton;
+				  for (elem of $('.savebar')) {
+				  	elem.innerHTML = savebutton + dontsavebutton;
+				  }
 			  },
     };
     savebutton = '<a class="btn btn-success" onclick="save()">Save this page</a>';
@@ -365,11 +367,15 @@ echo "<br /><br /><div id=\"testpage\"></div><div id=\"errors\"></div>";
 
 	$(document).ready(function(){
 	  $('#testpage').annotate(options);
-	  document.getElementById('savebar').innerHTML = prevbutton + nextbutton;
+	  for (elem of $('.savebar')) {
+		  	elem.innerHTML = prevbutton + nextbutton;
+	  }
 	});
 
 	function dontsave() {
-		document.getElementById('savebar').innerHTML = savebutton + prevbutton + nextbutton;
+		for (elem of $('.savebar')) {
+		  	elem.innerHTML = savebutton + prevbutton + nextbutton;
+	  	}
 	}
 	
 	function save() {
@@ -389,7 +395,9 @@ echo "<br /><br /><div id=\"testpage\"></div><div id=\"errors\"></div>";
 	}
 
 	function saved() {
-		document.getElementById('savebar').innerHTML = "Saved! " + prevbutton + nextbutton;
+		for (elem of $('.savebar')) {
+		  	elem.innerHTML = "Saved! " + prevbutton + nextbutton;
+	  	}
 	}
 	
 </script>
