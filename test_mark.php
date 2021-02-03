@@ -185,11 +185,11 @@ EOF;
 		            } else {
 		                $page_num++;
 		                if (isset($_GET['my_tests_only']) && $_GET['my_tests_only'] == 1) {
-		                    $link = "?my_tests_only=1&test={$_GET['test']}&page=$page_num&student_number=0";
+		                    $link = "?my_tests_only=1&test={$_GET['test']}&page=$page_num&student_number=0" . (isset($_GET['skipMarked']) ? '&skipMarked=1' : '');
 		                } else {
-                            $link = "?subject={$_GET['subject']}&teaching_group=$teaching_group&test={$_GET['test']}&page=$page_num&student_number=0";
+                            $link = "?subject={$_GET['subject']}&teaching_group=$teaching_group&test={$_GET['test']}&page=$page_num&student_number=0" . (isset($_GET['skipMarked']) ? '&skipMarked=1' : '');
 		                }
-		                die ("No tests have been set for this group.  This could be a bug-- if so, click <a href=\"$link\">here</a> for the next page.");
+		                die("<script>window.location.replace(\"$link\");</script>");
 		            }
 		        }
 		    }
@@ -299,17 +299,23 @@ if ($staff->get(Staff::LARGE_MARKING) == 1) {
 			return 0;
 		  }
 		  tool = null;
-		  if (event.key === 'Enter' || event.key === ' ') {
-		    // "Submit"
-		    event.preventDefault();
-			save();
-		  } else /* if (event.keyCode >= 48 && event.keyCode <= 57) */
-			  if (event.key >= 0 && event.key <= 9) {
-			if (document.activeElement.id !== 'score') {
-				document.getElementById('score').value = '';
-				document.getElementById('score').focus();
-			}
-		  } else switch (event.key) {
+		  switch (event.key) {
+		    case '0': case '1': case '2': case '3': case '4':
+		    case '5': case '6': case '7': case '8': case '9':
+		    	if (document.activeElement.id !== 'score') {
+			    	document.getElementById('score').value = '';
+					document.getElementById('score').focus();
+		    	}
+				break;
+		    case ' ':
+			    if (document.getElementById('score').value == '') {
+			    	document.getElementById('score').value = 0;
+			    }
+			    // FALLTHROUGH
+		    case 'Enter':
+		    	event.preventDefault();
+				save();
+				break;
 		  	case 'z':
 		    	tool = $("[name='tool_option_testpage'][data-tool='tick']");
 		    	break;
