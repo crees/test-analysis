@@ -48,8 +48,7 @@ $result->commit();
 
 // If the old result was put in less than five minutes ago, we'll just overwrite
 
-if (!is_null($oldResult) && strtotime($oldResult->get(TestComponentResult::RECORDED_TS)) + 43200 > time()) {
-    echo "Deleting {$oldResult->getId()}";
+if (!is_null($oldResult) && $oldResult->get(TestComponentResult::RECORDED_TS) + 43200 > time()) {
     TestComponentResult::delete($oldResult->getId());
 }
 
