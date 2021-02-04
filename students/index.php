@@ -333,7 +333,7 @@ echo "<div class=\"savebar\"></div>";
 
 echo "<div class=\"row\">";
 
-echo "<div class=\"col-lg-9\" id=\"testpage-container\"><div class=\"toolbar-container\" style=\"position: sticky; top: 0px; z-index: 100;\"></div><br /><br /><div id=\"testpage\"></div><div class=\"savebar\"></div></div>";
+echo "<div class=\"col-lg-9\" id=\"testpage-container\"><div class=\"toolbar-container\" style=\"position: sticky; top: 0px; z-index: 100;\"></div><div id=\"testpage\"></div><div class=\"savebar\"></div></div>";
 echo "<div class=\"col-lg-3\">";
 
 echo "<dl class=\"row\">";
