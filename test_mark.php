@@ -149,7 +149,6 @@ EOF;
 		    /* So, do we have any papers? */
 		    $page_num = $_GET['page'] ?? 0;
 		    $student_number = $_GET['student_number'] ?? 0;
-		    $firstLoop = true;
 		    for (;;) {
 		        if (isset($students[$student_number])) {
 		            $student = $students[$student_number];
@@ -164,7 +163,7 @@ EOF;
 		                    } else {
 		                        $link = "<a class=\"btn btn-success\" href=\"test_worklist.php\">Back to the worklist</a>";
 		                    }
-		                    die ("<div>No more tests remaining.$link</div>");
+		                    die ("<div>No more tests remaining.  $link</div>");
 		                }
 		                $testPage = $testPages[$page_num];
 		                // Do not put up a test for marking until the timer is up.
@@ -178,19 +177,8 @@ EOF;
 		            }
 		            $student_number++;
 		        } else {
-		            if ($firstLoop) {
-    		            $student_number = 0;
-    		            $page_num++;
-    		            $firstLoop = false;
-		            } else {
-		                $page_num++;
-		                if (isset($_GET['my_tests_only']) && $_GET['my_tests_only'] == 1) {
-		                    $link = "?my_tests_only=1&test={$_GET['test']}&page=$page_num&student_number=0" . (isset($_GET['skipMarked']) ? '&skipMarked=1' : '');
-		                } else {
-                            $link = "?subject={$_GET['subject']}&teaching_group=$teaching_group&test={$_GET['test']}&page=$page_num&student_number=0" . (isset($_GET['skipMarked']) ? '&skipMarked=1' : '');
-		                }
-		                die("<script>window.location.replace(\"$link\");</script>");
-		            }
+		            $student_number = 0;
+		            $page_num++;
 		        }
 		    }
 		    $testPage = $testPages[$page_num];
