@@ -81,7 +81,7 @@ if (!empty($_FILES)) {
             $f = $_FILES["input-file-{$st->getId()}"];
             if ($f['size'] > 0) {
                 $pages = [];
-                switch (substr($f['name'], -4, 4)) {
+                switch (strtolower(substr($f['name'], -4, 4))) {
                     case ".pdf":
                         try {
                             if (defined('TestAnalysis\Config::windows_path_to_gs_exe')) {
