@@ -63,7 +63,7 @@ if (isset($_GET['getpdf']) && !empty($_GET['test'])) {
     
     header("Content-type:application/pdf");
     header("Content-Disposition:attachment;filename={$test->getName()}.pdf");
-    if ($scannedTest->get(ScannedTest::DOWNLOADED) == 0) {
+    if ($scannedTest->get(ScannedTest::DOWNLOADED) == 0 && $scannedTest->secondsRemaining() > 0) {
         $scannedTest->markAsDownloaded();
         $scannedTest->setTime(intdiv($scannedTest->secondsRemaining(), 60) + 10);
     }
