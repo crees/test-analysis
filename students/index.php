@@ -333,12 +333,17 @@ echo "<div class=\"savebar\"></div>";
 
 echo "<div class=\"row\">";
 
-echo "<div class=\"col-lg-9\" id=\"testpage-container\"><div class=\"toolbar-container\" style=\"position: sticky; top: 0px; z-index: 100;\"></div><div id=\"testpage\"></div><div class=\"savebar\"></div></div>";
+echo "<div class=\"col-lg-9\" id=\"testpage-container\">";
+echo "<div class=\"prevPage\" onclick=\"togglePrevPage();\" hidden></div>";
+echo "<div class=\"toolbar-container\" style=\"position: sticky; top: 0px; z-index: 100;\"></div><div id=\"testpage\"></div><div class=\"savebar\"></div></div>";
 echo "<div class=\"col-lg-3\">";
+if ($page_num > 0) {
+    echo "<button class=\"btn btn-success\" onclick=\"togglePrevPage();\">Click to show previous page</button>";
+}
 
 echo "<dl class=\"row\">";
 $defs = [
-    ["", "<span class=\"font-weight-bold\">Use</span>"],
+    ["Tool", "<span class=\"font-weight-bold\">Use</span>"],
     ["<i class=\"fa fa-ban\"></i>", "Disable tools- use this on a tablet when you want to move without changing anything"],
     ["<i class=\"fa fa-check\"></i>", "Use this for multiple-choice answers"],
     ["<i class=\"fas fa-times\"></i>", "Use this for points on graphs"],
@@ -427,7 +432,33 @@ echo "</div><div id=\"errors\"></div>";
 		  	elem.innerHTML = "Saved! " + prevbutton + nextbutton;
 	  	}
 	}
+
+	<?php
 	
+	if ($page_num > 0) {
+	    $previous_page_id = ScannedTestPage::retrieveByDetails([ScannedTestPage::SCANNEDTEST_ID, ScannedTestPage::PAGE_NUM], [$st->getId(), $page_num - 1])[0]->getId();
+	} else {
+	    $previous_page_id = -1; 
+	}
+	
+	?>
+	
+	function togglePrevPage() {
+		previous_page_id = <?= $previous_page_id; ?>;
+		if (previous_page_id == -1) {
+			return;
+		}
+		for (elem of $('div.prevPage')) {
+			if (elem.hidden) {
+    			if (elem.innerHTML == '') {
+    				elem.innerHTML = "<img src=../async/getScannedImage.php?stpid=" + previous_page_id + " style=\"max-width: 100%\">";
+    			}
+    			elem.hidden = false;
+			} else {
+				elem.hidden = true;
+			}
+		}
+	}
 </script>
 </body>
 </html>
