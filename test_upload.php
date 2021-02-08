@@ -244,7 +244,7 @@ eof;
 		    if (isset($components[0])) {
 		        // More than one component, so let's ask which page each one starts on
     		    foreach ($components as $c) {
-    		        echo "<input class=\"form-control\" type=\"number\" name=\"page-for-component-{$c->getId()}\" placeholder=\"Section {$c->getName()} begins on page...\">";
+    		        echo "<input class=\"form-control\" required type=\"number\" name=\"page-for-component-{$c->getId()}\" placeholder=\"Section {$c->getName()} begins on page...\">";
     		    }
 		    }
             echo <<< eof
