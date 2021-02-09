@@ -73,6 +73,11 @@ if (!empty($getVars)) {
                 	<?php } else { ?>
                 		<a class="dropdown-item" href="?large_marking=0">Make the tests fill screen height</a>
                 	<?php } ?>
+                	<?php if ($staff->get(Staff::DEFAULT_MARKING_TOOL) === 'pen') { ?>
+                		<a class="dropdown-item" href="?default_marking_tool=tick">Set the default marking tool to tick</a>
+                	<?php } else { ?>
+                		<a class="dropdown-item" href="?default_marking_tool=pen">Set the default marking tool to pen</a>
+                	<?php } ?>
                 	<div class="dropdown-divider"></div>
                 	<a class="dropdown-item" href="change_name.php">Change my display name</a>
                 </div>

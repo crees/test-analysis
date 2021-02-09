@@ -227,6 +227,7 @@ EOF;
 ?>
 
 <script>
+default_tool = '<?= $staff->get(Staff::DEFAULT_MARKING_TOOL); ?>';
     options = {
 <?php // Deal with staff who want the test to take the width of the browser window
 if ($staff->get(Staff::LARGE_MARKING) == 1) {
@@ -238,7 +239,7 @@ if ($staff->get(Staff::LARGE_MARKING) == 1) {
 			  height: Math.trunc($('html')[0].clientHeight * 0.95),
 <?php } ?>
 			  color: "red",           // Color for shape and text
-    		  type : "tick",    // default shape: can be "rectangle", "arrow" or "text"
+    		  type: default_tool,
 			  // for the stamps, stamp_\u2227 is logical AND symbol, basically a huge caret for "missing"
 			  tools: ['undo', 'tick', 'cross', 'stamp_ECF', 'stamp_TV', 'stamp_BOD', 'stamp_NAQ', 'stamp_\u2227', 'stamp_REP', 'text', 'rectangle-filled', 'circle', 'arrow', 'pen', 'redo'], // Tools
     		  images: ["async/getScannedImage.php?stpid=<?= $testPage->getId() ?>"],          // Array of images path : ["images/image1.png", "images/image2.png"]

@@ -235,7 +235,10 @@ case 21:
 case 22:
     $db->dosql("ALTER TABLE `Subject` DROP code;");
     
-    $db->dosql("UPDATE `db_version` SET version = 23;");
+case 23:
+    $db->dosql("ALTER TABLE `Staff` ADD default_marking_tool VARCHAR(20) NULL;");
+    
+    $db->dosql("UPDATE `db_version` SET version = 24;");
     
 default:
 

@@ -25,6 +25,10 @@ if (!is_null($staff)) {
         $staff->setLargeMarking($_GET['large_marking'] == 0 ? 0 : 1);
         $staff->commit();
     }
+    if (isset($_GET['default_marking_tool'])) {
+        $staff->setDefaultMarkingTool($_GET['default_marking_tool']);
+        $staff->commit();
+    }
 }
 
 if (!is_null($staff) && !is_null($staff->get(Staff::THEME))) {
