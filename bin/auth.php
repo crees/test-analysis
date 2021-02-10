@@ -14,7 +14,7 @@ if (isset($_GET['backupkey']) && $_GET['backupkey'] == Config::backups_key && is
         header('HTTP/1.0 401 Unauthorized');
     }
     
-    $auth_user = strtolower(preg_replace('/@' . Config::site_emaildomain . '/', "", $_SERVER['PHP_AUTH_USER']));
+    $auth_user = preg_replace('/@' . strtolower(Config::site_emaildomain) . '/', "", strtolower($_SERVER['PHP_AUTH_USER']));
     
     /* So, let's check this user should actually be here! */
     
