@@ -9,6 +9,7 @@ class Staff extends DatabaseCollection
     const THEME = 'theme';
     const USERNAME = 'username';
     const GLOBAL_ADMIN = 'global_admin';
+    const DEFAULT_MARKING_TOOL= 'default_marking_tool';
     const LARGE_MARKING = 'large_marking';
     
     const ADMIN_TYPE_GLOBAL = 'global_admin';
@@ -25,6 +26,7 @@ class Staff extends DatabaseCollection
         $this->details[self::THEME] = $details[self::THEME] ?? null;
         $this->details[self::GLOBAL_ADMIN] = $details[self::GLOBAL_ADMIN] ?? 0;
         $this->details[self::LARGE_MARKING] = $details[self::LARGE_MARKING] ?? 0;
+        $this->details[self::DEFAULT_MARKING_TOOL] = $details[self::DEFAULT_MARKING_TOOL] ?? 'tick';
     }
     
     public static function me(String $username) {
@@ -55,6 +57,10 @@ class Staff extends DatabaseCollection
     
     public function setLargeMarking(int $val) {
         $this->details[self::LARGE_MARKING] = (($val == 0) ? 0 : 1);
+    }
+    
+    public function setDefaultMarkingTool(String $tool) {
+        $this->details[self::DEFAULT_MARKING_TOOL] = $tool;
     }
     
     public function getName() {
