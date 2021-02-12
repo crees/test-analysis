@@ -184,7 +184,7 @@ EOF;
 		    $testPage = $testPages[$page_num];
 		    echo "<div class=\"row\">";
 		    if ($staff->get(Staff::LARGE_MARKING) == 1) {
-		        echo '<div class="col-lg-12"><div id="testpage"></div></div>';
+		        echo '<div class="col-lg-12"><div class="toolbar-container" style="position: sticky; top: 0px; z-index: 100;"></div><div id="testpage"></div></div>';
 		    } else {
 		        echo '<div class="col-lg-9"><div id="testpage"></div></div>';
 		    }
@@ -234,9 +234,12 @@ if ($staff->get(Staff::LARGE_MARKING) == 1) {
 ?>
               width: Math.trunc($('html')[0].clientWidth * 0.8),
               height: Math.trunc($('html')[0].clientWidth * 0.8 * 1.414),
+              position: "top-inside",
+			  toolbarContainer: '.toolbar-container',
 <?php } else { ?>
     		  width: Math.trunc($('html')[0].clientHeight * 0.95 / 1.414),
 			  height: Math.trunc($('html')[0].clientHeight * 0.95),
+    		  position: "right",       // Position of toolbar (available only with bootstrap)
 <?php } ?>
 			  color: "red",           // Color for shape and text
     		  type: default_tool,
@@ -254,7 +257,6 @@ if ($staff->get(Staff::LARGE_MARKING) == 1) {
               lineheight: Math.trunc($('html')[0].clientHeight * 0.022),
 <?php } ?>
     		  bootstrap: true,       // Bootstrap theme design
-    		  position: "right",       // Position of toolbar (available only with bootstrap)
     		  selectEvent: "change", // listened event on .annotate-image-select selector to select active images
     		  unselectTool: false,   // Add a unselect tool button in toolbar (useful in mobile to enable zoom/scroll)
 			  imageExport: { type: "image/jpg", quality: 1 },
