@@ -324,7 +324,9 @@ if (isset($is_staff) && $is_staff) {
         } else {
             $testName = $test->getName();
         }
-        echo " $minutes minutes remaining on {$testName}- finishing at $end.";
+        $pagecount = count(ScannedTestPage::retrieveByDetail(ScannedTestPage::SCANNEDTEST_ID, $st->getId()));
+        $p = $page_num + 1;
+        echo " $minutes minutes remaining on {$testName}- finishing at $end.  You are on page $p of $pagecount.";
     }
 }
 echo "</h3>";
