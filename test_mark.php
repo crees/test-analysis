@@ -184,7 +184,7 @@ EOF;
 		    $testPage = $testPages[$page_num];
 		    echo "<div class=\"row\">";
 		    if ($staff->get(Staff::LARGE_MARKING) == 1) {
-		        echo '<div class="col-lg-12"><div class="toolbar-container" style="position: sticky; top: 0px; z-index: 100;"></div><div id="testpage"></div></div>';
+		        echo '<div class="col-11" id="testpage-container"><div id="testpage"></div></div><div class="col-1"><div class="toolbar-container" style="position: sticky; top: 0px; z-index: 100;"></div></div>';
 		    } else {
 		        echo '<div class="col-lg-9"><div id="testpage"></div></div>';
 		    }
@@ -232,9 +232,11 @@ default_tool = '<?= $staff->get(Staff::DEFAULT_MARKING_TOOL); ?>';
 <?php // Deal with staff who want the test to take the width of the browser window
 if ($staff->get(Staff::LARGE_MARKING) == 1) {
 ?>
-              width: Math.trunc($('html')[0].clientWidth * 0.8),
-              height: Math.trunc($('html')[0].clientWidth * 0.8 * 1.414),
-              position: "top-inside",
+              //width: Math.trunc($('html')[0].clientWidth * 0.8),
+              //height: Math.trunc($('html')[0].clientWidth * 0.8 * 1.414),
+              width: Math.trunc($('#testpage-container')[0].clientWidth),
+              height: Math.trunc($('#testpage-container')[0].clientWidth * 1.414),
+              position: "vertical",
 			  toolbarContainer: '.toolbar-container',
 <?php } else { ?>
     		  width: Math.trunc($('html')[0].clientHeight * 0.95 / 1.414),
