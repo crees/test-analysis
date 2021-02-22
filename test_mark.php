@@ -206,6 +206,7 @@ EOF;
             $defs = [
                 ["Key", "Function", "<span class=\"font-weight-bold\">Definition</span>"],
                 ["z", "Tick", "Correct"],
+                ["Z", "(Tick)", "Correct, but no mark"],
                 ["x", "Cross", "Incorrect"],
                 ["c", "ECF", "Error carried forward"],
                 ["v", "TV", "Too vague"],
@@ -246,7 +247,7 @@ if ($staff->get(Staff::LARGE_MARKING) == 1) {
 			  color: "red",           // Color for shape and text
     		  type: default_tool,
 			  // for the stamps, stamp_\u2227 is logical AND symbol, basically a huge caret for "missing"
-			  tools: ['undo', 'tick', 'cross', 'stamp_ECF', 'stamp_TV', 'stamp_BOD', 'stamp_NAQ', 'stamp_\u2227', 'stamp_REP', 'text', 'rectangle-filled', 'circle', 'arrow', 'pen', 'redo'], // Tools
+			  tools: ['undo', 'tick', 'stamp_(\u2713)', 'cross', 'stamp_ECF', 'stamp_TV', 'stamp_BOD', 'stamp_NAQ', 'stamp_\u2227', 'stamp_REP', 'text', 'rectangle-filled', 'circle', 'arrow', 'pen', 'redo'], // Tools
     		  images: ["async/getScannedImage.php?stpid=<?= $testPage->getId() ?>"],          // Array of images path : ["images/image1.png", "images/image2.png"]
     		  linewidth: 2,           // Line width for rectangle and arrow shapes
 <?php // Deal with staff who want the test to take the width of the browser window
@@ -312,6 +313,9 @@ if ($staff->get(Staff::LARGE_MARKING) == 1) {
 		  	case 'z':
 		    	tool = $("[name='tool_option_testpage'][data-tool='tick']");
 		    	break;
+		  	case 'Z':
+			  	tool = $("[name='tool_option_testpage'][data-tool='stamp_(\u2713)']");
+			  	break;
 		  	case 'x':
 			  	tool = $("[name='tool_option_testpage'][data-tool='cross']");
 			  	break;
