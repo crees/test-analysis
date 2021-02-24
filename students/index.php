@@ -248,6 +248,13 @@ if (!isset($_GET['test'])) {
         $test_name = Test::retrieveByDetail(Test::ID, $testId)[0]->getName();
         echo "<li class=\"list-group-item\">";
         echo "<a href=\"?test={$st->get(ScannedTest::TEST_ID)}&getpdf=yes&masquerade={$auth_user}\">$test_name</a>";
+        $total = 0;
+        foreach (ScannedTestPage::retrieveByDetail(ScannedTestPage::SCANNEDTEST_ID, $st->getId()) as $p) {
+            $total += $p->get(ScannedTestPage::PAGE_SCORE);
+        }
+        if ($total > 0) {
+            echo " ($total marks)";
+        }
         $test = Test::retrieveByDetail(Test::ID, $st->get(ScannedTest::TEST_ID))[0];
         $feedback_able = true;
         if (empty($test->get(Test::TARGETS)[0])) {
@@ -264,7 +271,7 @@ if (!isset($_GET['test'])) {
             }
         }
         if ($feedback_able) {
-            echo " (and <a href=\"feedback_sheet.php?test={$st->get(ScannedTest::TEST_ID)}&subject={$st->get(ScannedTest::SUBJECT_ID)}&student={$student->getId()}&masquerade=$auth_user\">feedback sheet</a>)";
+            echo " and <a href=\"feedback_sheet.php?test={$st->get(ScannedTest::TEST_ID)}&subject={$st->get(ScannedTest::SUBJECT_ID)}&student={$student->getId()}&masquerade=$auth_user\">feedback sheet</a>";
         }
         echo "</li>";
     }
