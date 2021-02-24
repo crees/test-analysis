@@ -90,15 +90,10 @@ class Test extends DatabaseCollection
         
         foreach ($this->getTestComponents() as $c) {
             if ($c->get(TestComponent::INCLUDED_IN_GRADE)) {
-                $noResult = true;
-                foreach ($resultComponents as $r) {
-                    if (!is_null($r) && $r->get(TestComponentResult::TESTCOMPONENT_ID) == $c->getId()) {
-                        $score += $r->get(TestComponentResult::SCORE);
-                        $noResult = false;
-                    }
-                }
-                if ($noResult) {
+                if (empty($resultComponents[$c->getId()])) {
                     return '';
+                } else {
+                    $score += $resultComponents[$c->getId()][0]->get(TestComponentResult::SCORE);
                 }
             }
         }
@@ -134,15 +129,10 @@ class Test extends DatabaseCollection
         foreach ($this->getTestComponents() as $c) {
             if ($c->get(TestComponent::INCLUDED_IN_PERCENT)) {
                 $percentTotal += $c->get(TestComponent::TOTAL);
-                $noResult = true;
-                foreach ($resultComponents as $r) {
-                    if (!is_null($r) && $r->get(TestComponentResult::TESTCOMPONENT_ID) == $c->getId()) {
-                        $score += $r->get(TestComponentResult::SCORE);
-                        $noResult = false;
-                    }
-                }
-                if ($noResult) {
+                if (empty($resultComponents[$c->getId()])) {
                     return '';
+                } else {
+                    $score += $resultComponents[$c->getId()][0]->get(TestComponentResult::SCORE);
                 }
             }
         }
@@ -154,26 +144,32 @@ class Test extends DatabaseCollection
         }
     }
     
+    /**
+     * Gets results for each component;
+     * [ componentAid => [most recent TestComponentResult, ...],
+     *   componentBid => [most recent TestComponentResult, ...], ...
+     * ]
+     * 
+     * @param Student $student
+     * @return array
+     */
     public function getTestComponentResults(Student $student) {
         if (isset($this->getLabels()["TestResultComponents-{$student->getId()}"])) {
             return $this->getLabels()["TestResultComponents-{$student->getId()}"];
         }   
-        $result_components = [];
+        $ret = [];
         $results = TestComponentResult::retrieveByDetail(TestComponentResult::STUDENT_ID, $student->getId(), TestComponentResult::RECORDED_TS . ' DESC');
         foreach ($this->getTestComponents() as $c) {
-            $resultForThisComponent = null;
+            $resultsForThisComponent = [];
             foreach ($results as $r) {
                 if ($r->get(TestComponentResult::TESTCOMPONENT_ID) == $c->getId()) {
-                    $resultForThisComponent = $r;
-                    break;
+                    array_push($resultsForThisComponent, $r);
                 }
             }
-            if (!is_null($resultForThisComponent)) {
-                array_push($result_components, $resultForThisComponent);
-            }
+            $ret[$c->getId()] = $resultsForThisComponent;
         }
-        $this->setLabel("TestResultComponents-{$student->getId()}", $result_components);
-        return $result_components;
+        $this->setLabel("TestResultComponents-{$student->getId()}", $ret);
+        return $ret;
     }
     
     public function getGradeBoundaries(Subject $subject, bool $forceForSubject = false) {

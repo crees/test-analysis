@@ -135,6 +135,12 @@ eof;
 		    }
 		    echo "</tr>\n</thead>\n";
 		    
+		    $staffNames = [];
+		    foreach (Staff::retrieveAll() as $stf) {
+		        $staffNames[$stf->getId()] = $stf->getName();
+		    }
+		    $staffNames[0] = "Unknown";
+		    
 		    foreach ($students as $s) {
 		        echo "<tr>\n";
 		        echo "<th scope=\"row\"><a href=\"student_individual_scores.php?student=" . $s->getId() . "\">" . $s->getName() . "</a></th>\n";
@@ -150,14 +156,15 @@ eof;
 		        foreach ($tests as $t) {
 		            $results = $t->getTestComponentResults($s);
 		            foreach ($t->getTestComponents() as $c) {
-		                $result = null;
-		                foreach ($results as $r) {
-		                    if ($r->get(TestComponentResult::TESTCOMPONENT_ID) == $c->getId()) {
-		                        $result = $r;
-		                        break;
-		                    }
+		                $result = $results[$c->getId()][0] ?? null;
+		                $popupResults = [];
+		                foreach ($results[$c->getId()] as $r) {
+                            $date = date("y-m-d");
+                            array_push($popupResults, "{$r->get(TestComponentResult::SCORE)}, $date, {$staffNames[$r->get(TestComponentResult::STAFF_ID)]}");
 		                }
-		                echo "<td class=\"score-input\" id=\"" . TestComponentResult::SCORE . "-{$c->getId()}-{$s->getId()}\">" . (is_null($result) ? "" : $result->get(TestComponentResult::SCORE)) . "</td>";
+	                    $title = empty($popupResults) ? '' : "title=\"" . implode('&#xA;', $popupResults) . "\"";
+		                $highlight = (count($popupResults) > 1) ? 'corner-mark' : '';
+		                echo "<td class=\"score-input $highlight\" $title id=\"" . TestComponentResult::SCORE . "-{$c->getId()}-{$s->getId()}\">" . (is_null($result) ? "" : $result->get(TestComponentResult::SCORE)) . "</td>";
 		            }
 		            echo "<td id=\"percent-{$t->getId()}-{$s->getId()}\">{$t->calculatePercent($s)}</td>";
 		            echo "<td id=\"grade-{$t->getId()}-{$s->getId()}\">{$t->calculateGrade($s, $subject)}</td>";
