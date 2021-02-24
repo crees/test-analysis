@@ -215,6 +215,9 @@ EOF;
                 ["n", "NAQ", "Not answered question"],
                 ["m", "&#x2227;", "Something missing here"],
                 [",", "REP", "Student has repeated a marking point"],
+                ["q", "L1", "Answer is Level 1 (for 6/9 markers)"],
+                ["w", "L2", "Answer is Level 2 (for 6/9 markers)"],
+                ["e", "L3", "Answer is Level 3 (for 6/9 markers)"],
             ];
             foreach ($defs as $def) {
                 echo "<dt class=\"col-2\">{$def[0]}</dt>";
@@ -248,7 +251,7 @@ if ($staff->get(Staff::LARGE_MARKING) == 1) {
 			  color: "red",           // Color for shape and text
     		  type: default_tool,
 			  // for the stamps, stamp_\u2227 is logical AND symbol, basically a huge caret for "missing"
-			  tools: ['undo', 'tick', 'stamp_(\u2713)', 'cross', 'stamp_ECF', 'stamp_TV', 'stamp_BOD', 'stamp_NAQ', 'stamp_\u2227', 'stamp_REP', 'text', 'rectangle-filled', 'circle', 'arrow', 'pen', 'redo'], // Tools
+			  tools: ['undo', 'tick', 'stamp_(\u2713)', 'cross', 'stamp_ECF', 'stamp_TV', 'stamp_BOD', 'stamp_NAQ', 'stamp_\u2227', 'stamp_REP', 'stamp_L1', 'stamp_L2', 'stamp_L3', 'text', 'rectangle-filled', 'circle', 'arrow', 'pen', 'redo'], // Tools
     		  images: ["async/getScannedImage.php?stpid=<?= $testPage->getId() ?>"],          // Array of images path : ["images/image1.png", "images/image2.png"]
     		  linewidth: 2,           // Line width for rectangle and arrow shapes
 <?php // Deal with staff who want the test to take the width of the browser window
@@ -340,6 +343,15 @@ if ($staff->get(Staff::LARGE_MARKING) == 1) {
 			  	break;
 		  	case ',':
 		  		tool = $("[name='tool_option_testpage'][data-tool='stamp_REP']");
+			  	break;
+		  	case 'q':
+			  	tool = $("[name='tool_option_testpage'][data-tool='stamp_L1']");
+			  	break;
+		  	case 'w':
+			  	tool = $("[name='tool_option_testpage'][data-tool='stamp_L2']");
+			  	break;
+		  	case 'e':
+			  	tool = $("[name='tool_option_testpage'][data-tool='stamp_L3']");
 			  	break;
 		  	case '?':
 			  	$('span#kidname')[0].style.display = 'inline';
