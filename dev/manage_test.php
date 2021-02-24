@@ -17,6 +17,22 @@ if (isset($_GET['test']) && !isset($_POST['form_serial'])) {
     }
     if (isset($_GET['delete'])) {
         TestComponent::delete($_GET['delete']);
+        if (count($components) == 1 && $_GET['delete'] === $components[0]->getId()) {
+            // Remove from all subjects
+            foreach (TestSubjectMembership::retrieveByDetail(TestSubjectMembership::TEST_ID, $test->getId()) as $m) {
+                TestSubjectMembership::delete($m->getId());
+            }
+            
+            // Delete any custom grade boundaries
+            foreach (GradeBoundary::retrieveByDetail(GradeBoundary::TEST_ID, $test->getId()) as $g) {
+                GradeBoundary::delete($g->getId());
+            }
+            
+            // Delete the entire test!
+            Test::delete($test->getId());
+            header("Location: manage_tests.php");
+            die();
+        }
         header("Location: manage_test.php?test={$_GET['test']}");
         die();
     }
@@ -163,10 +179,18 @@ foreach ($components as $component) {
         $checked = $component->get($box) == 1 ? " checked" : "";
         echo "<td><input type=\"checkbox\" name=\"component-$box-{$component->getId()}\"" . $checked . "></td>";
     }
-    if (count(TestComponentResult::retrieveByDetail(TestComponentResult::TESTCOMPONENT_ID, $component->getId())) == 0) {
-        echo "<td><a href=\"?test={$test->getId()}&delete={$component->getId()}\" class=\"btn btn-sm btn-danger\">Delete</a></td>";
-    } else {
+    if (count(TestComponentResult::retrieveByDetail(TestComponentResult::TESTCOMPONENT_ID, $component->getId())) > 0) {
         echo "<td>(results exist, delete not allowed)</td>";
+    } elseif (count(ScannedTest::retrieveByDetail(ScannedTest::TEST_ID, $test->getId())) > 0) {
+        echo "<td>(scanned tests exist, delete not allowed)</td>";
+    } else {
+        echo "<td><a href=\"?test={$test->getId()}&delete={$component->getId()}\" class=\"btn btn-sm btn-danger\">";
+        if (count($components) == 1) {
+            echo "&#x1f4a3; Delete this entire test (and targets and grade boundaries if they exist)";
+        } else {
+            echo "Delete";
+        }
+        echo "</a></td>";
     }
     echo "</tr>";
 }
