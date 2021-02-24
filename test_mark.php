@@ -205,6 +205,7 @@ EOF;
             echo "<div>Shortcut keys:<dl class=\"row\">";
             $defs = [
                 ["Key", "Function", "<span class=\"font-weight-bold\">Definition</span>"],
+                ["\\", "Undo", "Remove the last annotation (but does not deduct marks-- check your total!)"],
                 ["z", "Tick", "Correct"],
                 ["Z", "(Tick)", "Correct, but no mark"],
                 ["x", "Cross", "Incorrect"],
@@ -310,6 +311,9 @@ if ($staff->get(Staff::LARGE_MARKING) == 1) {
 		    	event.preventDefault();
 				save();
 				break;
+		    case '\\':
+		    	tool = $("button#undoaction");
+		    	break;
 		  	case 'z':
 		    	tool = $("[name='tool_option_testpage'][data-tool='tick']");
 		    	break;
@@ -344,7 +348,6 @@ if ($staff->get(Staff::LARGE_MARKING) == 1) {
 				break;
 		  }
 		  if (tool != null) {
-		  	tool.prop("checked", true);
 		  	tool.click();
 		  }
 		});
