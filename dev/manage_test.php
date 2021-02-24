@@ -211,16 +211,21 @@ if ($test->get(Test::CUSTOM_GRADE_BOUNDARIES)) {
     $existingBoundaries = GradeBoundary::retrieveByDetail(GradeBoundary::TEST_ID, $test->getId(), GradeBoundary::BOUNDARY);
     if (empty($existingBoundaries)) {
         // Arbitrarily base off the first subject match for the test
-        $membership = TestSubjectMembership::retrieveByDetail(TestSubjectMembership::TEST_ID, $test->getId())[0];
-        $subject = Subject::retrieveByDetail(Subject::ID, $membership->get(TestSubjectMembership::SUBJECT_ID))[0];
-        foreach ($test->getGradeBoundaries($subject, true) as $b) {
-            (new GradeBoundary([
-                GradeBoundary::TEST_ID => $test->getId(),
-                GradeBoundary::NAME => $b->get(GradeBoundary::NAME),
-                GradeBoundary::BOUNDARY => $b->get(GradeBoundary::BOUNDARY)
-            ]))->commit();
+        $memberships = TestSubjectMembership::retrieveByDetail(TestSubjectMembership::TEST_ID, $test->getId());
+        if (isset($memberships[0])) {
+            $membership = $memberships[0];
+            $subject = Subject::retrieveByDetail(Subject::ID, $membership->get(TestSubjectMembership::SUBJECT_ID))[0];
+            foreach ($test->getGradeBoundaries($subject, true) as $b) {
+                (new GradeBoundary([
+                    GradeBoundary::TEST_ID => $test->getId(),
+                    GradeBoundary::NAME => $b->get(GradeBoundary::NAME),
+                    GradeBoundary::BOUNDARY => $b->get(GradeBoundary::BOUNDARY)
+                ]))->commit();
+            }
+            $existingBoundaries = GradeBoundary::retrieveByDetail(GradeBoundary::TEST_ID, $test->getId(), GradeBoundary::BOUNDARY);
+        } else {
+            $existingBoundaries = [];
         }
-        $existingBoundaries = GradeBoundary::retrieveByDetail(GradeBoundary::TEST_ID, $test->getId(), GradeBoundary::BOUNDARY);
     }
     
     foreach ($existingBoundaries as $b) {
