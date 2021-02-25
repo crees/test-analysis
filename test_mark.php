@@ -184,12 +184,15 @@ EOF;
 		    $testPage = $testPages[$page_num];
 		    echo "<div class=\"row\">";
 		    if ($staff->get(Staff::LARGE_MARKING) == 1) {
+		        echo '<div class="col-12"><div class="savebar"></div></div>';
 		        echo '<div class="col-11" id="testpage-container"><div id="testpage"></div></div><div class="col-1"><div class="toolbar-container" style="position: sticky; top: 0px; z-index: 100;"></div></div>';
+                $savebarClass = "col-12";
 		    } else {
 		        echo '<div class="col-lg-9"><div id="testpage"></div></div>';
+		        $savebarClass = "col-lg-3";
 		    }
-		    echo "<div class=\"col-lg-3\">";
-		    echo "<div id=\"savebar\"></div><br>";
+		    echo "<div class=\"$savebarClass\">";
+		    echo "<div class=\"savebar\"></div><br>";
 		    echo "<div class=\"form-inline form-group\">";
             if (isset($_GET['skipMarked'])) {
                 $skipMarked = 'checked';
@@ -282,7 +285,7 @@ if ($staff->get(Staff::LARGE_MARKING) == 1) {
 						score.value = parseInt(score.value) + 1;
 					}
 				  }
-				  document.getElementById('savebar').innerHTML = savebutton + dontsavebutton;
+				  setSaveBar(savebutton + dontsavebutton);
 			  },
     };
 
@@ -377,6 +380,12 @@ if ($staff->get(Staff::LARGE_MARKING) == 1) {
 		});
 	});
 
+	function setSaveBar(contents) {
+		for (bar of $('div.savebar')) {
+			bar.innerHTML = contents;
+		}
+	}
+
 	function doButtons() {
 		<?php if (isset($_GET['my_tests_only']) && $_GET['my_tests_only']) { ?>
 		getvars = 'my_tests_only=1&test=<?= $_GET['test'] ?>';
@@ -399,11 +408,11 @@ if ($staff->get(Staff::LARGE_MARKING) == 1) {
 	    }
 	    nextbutton = '<a class="btn btn-success" id="button-down" href="?' + getvars + '&page=<?= ($page_num + 1) ?>&student_number=<?= $student_number ?>">(j) Next page<i class="fa fa-arrow-down"></i></a>';
 	    nextbutton += '<a class="btn btn-primary" id="button-right" href="?' + getvars + '&page=<?= $page_num ?>&student_number=<?= $student_number + 1 ?>">(l) Next student<i class="fa fa-arrow-right"></i></a><a class="btn btn-secondary" onclick="visibleTop()">Change test/class</a>';
-	    document.getElementById('savebar').innerHTML = savebutton + prevbutton + nextbutton;
+		setSaveBar(savebutton + prevbutton + nextbutton);
 	}
 
 	function dontsave() {
-		document.getElementById('savebar').innerHTML = savebutton + prevbutton + nextbutton;
+		setSaveBar(savebutton + prevbutton + nextbutton);
 	}
 	
 	function save() {
@@ -427,7 +436,7 @@ if ($staff->get(Staff::LARGE_MARKING) == 1) {
 	}
 
 	function saved() {
-		document.getElementById('savebar').innerHTML = "Saved! " + prevbutton + nextbutton;
+		setSaveBar("Saved! " + prevbutton + nextbutton);
 		if (scorepart !== '') {
 			location.href = '?' + getvars + '&page=<?= $page_num ?>&student_number=<?= $student_number + 1 ?>';
 		}
