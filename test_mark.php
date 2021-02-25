@@ -353,6 +353,18 @@ if ($staff->get(Staff::LARGE_MARKING) == 1) {
 		  	case 'e':
 			  	tool = $("[name='tool_option_testpage'][data-tool='stamp_L3']");
 			  	break;
+		  	case 'h':
+			  	tool = $("a#button-left")[0];
+			  	break;
+		  	case 'j':
+			  	tool = $("a#button-down")[0];
+			  	break;
+		  	case 'k':
+			  	tool = $("a#button-up")[0];
+			  	break;
+		  	case 'l':
+			  	tool = $("a#button-right")[0];
+			  	break;
 		  	case '?':
 			  	$('span#kidname')[0].style.display = 'inline';
 			  	break;
@@ -378,15 +390,15 @@ if ($staff->get(Staff::LARGE_MARKING) == 1) {
 	    dontsavebutton = '<a class="btn btn-danger" onclick="dontsave()">Do not save</a>';
 		currentPage = <?= $page_num ?>;
 		if (<?= $student_number ?> > 0) {
-			prevbutton = '<a class="btn btn-danger" href="?' + getvars + '&page=' + currentPage + '&student_number=<?= $student_number-1 ?>"><i class="fa fa-arrow-left"></i>Previous student</a>';
+			prevbutton = '<a class="btn btn-danger" id="button-left" href="?' + getvars + '&page=' + currentPage + '&student_number=<?= $student_number-1 ?>"><i class="fa fa-arrow-left"></i>Previous student (h)</a>';
 		} else {
 			prevbutton = '<a class="btn btn-secondary"><i class="fa fa-arrow-left"></i>Previous student</a>';
 		}
 		if (currentPage > 0) {
-	        prevbutton += '<a class="btn btn-warning" href="?' + getvars + '&page=' + (currentPage-1) + '&student_number=<?= $student_number ?>"><i class="fa fa-arrow-up"></i>Previous page</a>';
+	        prevbutton += '<a class="btn btn-warning" id="button-up" href="?' + getvars + '&page=' + (currentPage-1) + '&student_number=<?= $student_number ?>"><i class="fa fa-arrow-up"></i>Previous page (k)</a>';
 	    }
-	    nextbutton = '<a class="btn btn-success" href="?' + getvars + '&page=<?= ($page_num + 1) ?>&student_number=<?= $student_number ?>">Next page<i class="fa fa-arrow-down"></i></a>';
-	    nextbutton += '<a class="btn btn-primary" href="?' + getvars + '&page=<?= $page_num ?>&student_number=<?= $student_number + 1 ?>">Next student<i class="fa fa-arrow-right"></i></a><a class="btn btn-secondary" onclick="visibleTop()">Change test/class</a>';
+	    nextbutton = '<a class="btn btn-success" id="button-down" href="?' + getvars + '&page=<?= ($page_num + 1) ?>&student_number=<?= $student_number ?>">(j) Next page<i class="fa fa-arrow-down"></i></a>';
+	    nextbutton += '<a class="btn btn-primary" id="button-right" href="?' + getvars + '&page=<?= $page_num ?>&student_number=<?= $student_number + 1 ?>">(l) Next student<i class="fa fa-arrow-right"></i></a><a class="btn btn-secondary" onclick="visibleTop()">Change test/class</a>';
 	    document.getElementById('savebar').innerHTML = savebutton + prevbutton + nextbutton;
 	}
 
