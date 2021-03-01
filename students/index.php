@@ -245,7 +245,12 @@ if (!isset($_GET['test'])) {
     echo '<div class="h4">Marked tests to review:</div><ul class="list-group">';
     foreach ($tests_marked as $st) {
         $testId = $st->get(ScannedTest::TEST_ID);
-        $test_name = Test::retrieveByDetail(Test::ID, $testId)[0]->getName();
+        $test = Test::retrieveByDetail(Test::ID, $testId)[0];
+        $test_name = $test->getName();
+        $test_total = 0;
+        foreach (TestComponent::retrieveByDetail(TestComponent::TEST_ID, $testId) as $c) {
+            $test_total += $c->get(TestComponent::TOTAL);
+        }
         echo "<li class=\"list-group-item\">";
         echo "<a href=\"?test={$st->get(ScannedTest::TEST_ID)}&getpdf=yes&masquerade={$auth_user}\">$test_name</a>";
         $total = 0;
@@ -253,9 +258,8 @@ if (!isset($_GET['test'])) {
             $total += $p->get(ScannedTestPage::PAGE_SCORE);
         }
         if ($total > 0) {
-            echo " ($total marks)";
+            echo " ($total/$test_total)";
         }
-        $test = Test::retrieveByDetail(Test::ID, $st->get(ScannedTest::TEST_ID))[0];
         $feedback_able = true;
         if (empty($test->get(Test::TARGETS)[0])) {
             $feedback_able = false;
