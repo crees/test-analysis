@@ -379,16 +379,20 @@ echo "</div><div id=\"errors\"></div>";
 ?>
 
 <script>
+	cWidth = $('#testpage-container')[0].clientWidth;
+	if (cWidth < 350) {
+		cWidth = 350;
+	}
     options = {
-    		  width: $('#testpage-container')[0].clientWidth - 30,
-    		  height: ($('#testpage-container')[0].clientWidth - 30) * 1.414,
+    		  width: cWidth - 30,
+    		  height: (cWidth - 30) * 1.414,
     		  color: "blue",           // Color for shape and text
     		  type : "text",    // default shape: can be "rectangle", "arrow" or "text"
 			  tools: ['undo', 'unselect', 'tick', 'cross', 'rectangle-filled', 'circle', 'text', 'arrow', 'pen', 'redo'], // Tools
     		  images: ["../async/getScannedImage.php?stpid=<?= $testPage->getId() ?>"],          // Array of images path : ["images/image1.png", "images/image2.png"]
     		  linewidth: 2,           // Line width for rectangle and arrow shapes
-    		  fontsize: $('#testpage-container')[0].clientWidth * 1.414 * 0.033 / 2 + "px",       // font size for text
-			  lineheight: $('#testpage-container')[0].clientWidth * 1.414 * 0.033 / 2,
+    		  fontsize: cWidth * 1.414 * 0.033 / 2 + "px",       // font size for text
+			  lineheight: cWidth * 1.414 * 0.033 / 2,
     		  bootstrap: true,       // Bootstrap theme design
     		  position: "top-inside",       // Position of toolbar (available only with bootstrap)
 			  toolbarContainer: '.toolbar-container',
