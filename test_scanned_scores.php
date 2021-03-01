@@ -17,6 +17,19 @@ foreach ($departments as $d) {
     }
 }
 
+function studentNameRow(Student $s) {
+    $id = $s->getId();
+    $name = $s->getName();
+    $firstName = $s->get(Student::FIRST_NAME);
+    $username = $s->get(Student::USERNAME);
+    if (!empty($username)) {
+        $eye = "<a href=\"" . Config::site_url . "/students/?masquerade=$username\" title=\"Login as $username\">&#x1F50D;</a>";
+    } else {
+        $eye = "";
+    }
+    return "<a href=\"student_individual_scores.php?student=$id\" title=\"$firstName's mark history\">&#x023F0</a> $eye $name";
+}
+
 if (isset($_GET['subject']) && !empty($_GET['subject'])) {
     $subject = Subject::retrieveByDetail(Subject::ID, $_GET['subject'])[0];
     $teachingGroups = $subject->getTeachingGroups();
@@ -199,7 +212,7 @@ foreach ($students as $s) {
         }
         continue;
     }
-    echo "<tr><th scope=\"row\"><a href=\"student_individual_scores.php?student={$s->getId()}\">{$s->getName()}</a></th><td>&nbsp;</td><td>&nbsp;</td>";
+    echo "<tr><th scope=\"row\">" . studentNameRow($s) . "</th><td>&nbsp;</td><td>&nbsp;</td>";
     $pagesLeft = $maxPages;
     $canCommit = true;
     $total = 0;
