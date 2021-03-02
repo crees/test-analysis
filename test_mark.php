@@ -147,35 +147,51 @@ EOF;
 		<?php
 		if (isset($test) && count($students) > 0) {
 		    /* So, do we have any papers? */
+		    $i = 0;
+		    $scannedTests = $scannedTest = ScannedTest::retrieveByDetail(
+		        ScannedTest::TEST_ID,
+		        $test->getId()
+		    );
+		    // Remove students from the list with no tests or unfinished tests
+		    foreach ($students as $i => $s) {
+		        foreach ($scannedTests as $st) {
+		            // Do not put up a test for marking until the timer is up.
+		            if ($st->get(ScannedTest::STUDENT_ID) == $s->getId() && $st->secondsRemaining() == 0) {
+		                $s->setLabel("scannedTest", $st);
+		            }
+		        }
+		        if (is_null($s->getLabel("scannedTest")))
+		            unset($students[$i]);
+		    }
+		    if (empty($students)) {
+		        die("No tests completed for this group");
+		    }
+		    // Close gaps
+		    $students = array_values($students);
 		    $page_num = $_GET['page'] ?? 0;
 		    $student_number = $_GET['student_number'] ?? 0;
-		    for (;;) {
+		    $pageFound = false;
+		    while (!$pageFound) {
 		        if (isset($students[$student_number])) {
 		            $student = $students[$student_number];
-		            $scannedTest = ScannedTest::retrieveByDetails(
-		                [ScannedTest::STUDENT_ID, ScannedTest::TEST_ID],
-		                [$student->getId(), $test->getId()]);
-		            if (count($scannedTest) != 0) {
-		                $testPages = $scannedTest[0]->getPages();
-		                if (!isset($testPages[$page_num])) {
-		                    if (isset($teaching_group)) {
-		                        $link = "<a class=\"btn btn-success\" href=\"test_scanned_scores.php?subject={$subject->getId()}&teaching_group={$teaching_group}&test={$test->getId()}\">Get results</a>";
-		                    } else {
-		                        $link = "<a class=\"btn btn-success\" href=\"test_worklist.php\">Back to the worklist</a>";
-		                    }
-		                    die ("<div>No more tests remaining.  $link</div>");
-		                }
-		                $testPage = $testPages[$page_num];
-		                // Do not put up a test for marking until the timer is up.
-		                // Also, do not show a page if it's already been marked and I've ticked to hide already marked pages.
-		                if ($scannedTest[0]->secondsRemaining() > 0 ||
-		                    ($testPage->get(ScannedTestPage::PAGE_SCORE) != null && isset($_GET['skipMarked']))) {
-		                    $student_number++;
-		                    continue;
-		                }
-		                break;
-		            }
-		            $student_number++;
+		            $scannedTest = $student->getLabel("scannedTest");
+	                $testPages = $scannedTest->getPages();
+	                if (!isset($testPages[$page_num])) {
+	                    if (isset($teaching_group)) {
+	                        $link = "<a class=\"btn btn-success\" href=\"test_scanned_scores.php?subject={$subject->getId()}&teaching_group={$teaching_group}&test={$test->getId()}\">Get results</a>";
+	                    } else {
+	                        $link = "<a class=\"btn btn-success\" href=\"test_worklist.php\">Back to the worklist</a>";
+	                    }
+	                    die ("<div>No more tests remaining.  $link</div>");
+	                }
+	                $testPage = $testPages[$page_num];
+	                // Do not show a page if it's already been marked and I've ticked to hide already marked pages.
+	                if ($testPage->get(ScannedTestPage::PAGE_SCORE) != null && isset($_GET['skipMarked'])) {
+	                    $student_number++;
+	                    continue;
+	                } else {
+	                    $pageFound = true;
+	                }
 		        } else {
 		            $student_number = 0;
 		            $page_num++;
