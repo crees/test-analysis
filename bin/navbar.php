@@ -57,6 +57,7 @@ if (!empty($getVars)) {
                     <a class="dropdown-item" href="<?= Config::site_url ?>/test_completed_upload.php<?= $getVars ?>">Upload tests already completed on paper</a>
                     <a class="dropdown-item" href="<?= Config::site_url ?>/test_mark.php<?= $getVars ?>">Mark tests</a>
                     <a class="dropdown-item" href="<?= Config::site_url ?>/test_scanned_scores.php<?= $getVars ?>">Review test scores</a>
+                    <a class="dropdown-item" href="<?= Config::site_url ?>/test_bulk_download.php<?= $getVars ?>">Download a class's tests for printing</a>
                     <a class="dropdown-item" href="<?= Config::site_url ?>/test_worklist.php">My worklist</a>
                 </div>
             </li>
