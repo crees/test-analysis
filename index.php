@@ -143,7 +143,7 @@ eof;
 		    
 		    foreach ($students as $s) {
 		        echo "<tr>\n";
-		        echo "<th scope=\"row\"><a href=\"student_individual_scores.php?student=" . $s->getId() . "\">" . $s->getName() . "</a></th>\n";
+		        echo "<th scope=\"row\" studentId=\"{$s->getId()}\"><a href=\"student_individual_scores.php?student=" . $s->getId() . "\">" . $s->getName() . "</a></th>\n";
 		        echo "<td>";
 		        echo ($s->getLabel('group') ?? $teaching_group)->getName();
 		        echo "</td>";
@@ -242,6 +242,11 @@ function inputify() {
 
 function excel_export() {
 	var table = $('table#data-table')[0];
+	// Add Arbor IDs
+	table.rows[1].insertCell(0).appendChild(document.createTextNode("Arbor ID"));
+	for (r of table.lastChild.rows) {
+		r.insertCell(0).appendChild(document.createTextNode(r.cells[1].attributes["studentId"].value));
+	}
 	colouriseAll(literalColours = true);
 	// Grab the title rows and add filter element.
 	for (th of $('tr.excel-filtered')[0].children) {
@@ -257,7 +262,10 @@ function excel_export() {
 		cell = $('td#baseline-' + s)[0];
 		cell.innerHTML = '="' + cell.innerHTML + '"';
 	}
-    window.open('data:application/vnd.ms-excel,' + encodeURIComponent(table.outerHTML));
+	var link = document.createElement('a');
+    link.download = "export.xls";
+    link.href = 'data:application/vnd.ms-excel,' + encodeURIComponent(table.outerHTML);
+    link.click();
     location.reload();
 }
 
