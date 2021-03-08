@@ -44,6 +44,10 @@ class ScannedTest extends DatabaseCollection
         }
     }
     
+    function setStudentId(int $id) {
+        $this->details[self::STUDENT_ID] = $id;
+    }
+    
     function markAsDownloaded() {
         $this->details[self::DOWNLOADED] = 1;
     }
