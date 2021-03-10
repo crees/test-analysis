@@ -36,41 +36,6 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
     } else {
         $students = $subject->getStudents();
     }
-    
-    if (isset($_GET['download']) && $_GET['download'] == "yes" && isset($test)) {
-        $pages = [];
-        
-        $blankPage = new \Imagick();
-        $blankPage->newImage(210, 297, new \ImagickPixel('white'));
-        $blankPage->setImageFormat('jpeg');
-        
-        $pdf = new \Imagick();
-        $pdf->setresolution(150, 150);
-        
-        foreach ($students as $s) {
-            $st = ScannedTest::retrieveByDetails([ScannedTest::STUDENT_ID, ScannedTest::TEST_ID], [$s->getId(), $test->getId()]);
-            if (isset($st[1]))
-                die("Something is wrong; {$s->getName()} appears to have multiple scanned versions of {$test->getName()}.");
-            if (isset($st[0])) {
-                $stps = $st[0]->getPages();
-                $cnt = 0;
-                while (isset($stps[$cnt])) {
-                    $pdf->readimageblob($stps[$cnt++]->get(ScannedTestPage::IMAGEDATA));
-                    $pdf->scaleimage(0, 1700);
-                    $pdf->setImageFormat('pdf');
-                }
-                while ($cnt++ % 4 != 0) {
-                    $pdf->readimageblob($blankPage);
-                    $pdf->scaleimage(0, 1700);
-                    $pdf->setImageFormat('pdf');
-                }
-            }
-        }
-        header("Content-type:application/pdf");
-        header("Content-Disposition:attachment;filename={$test->getName()}-{$teachingGroup->getName()}.pdf");
-        echo $pdf->getimagesblob();
-        die();
-    }
 }
 
 ?>
@@ -79,6 +44,82 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
 
 <head>
 <?php require "bin/head.php"; ?>
+<?php if (isset($test)) { ?>
+<script src='https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js'></script>
+<script>
+
+const students = [<?php 
+    $scannedTestExists = false;
+    foreach ($students as $s) {
+        if (count(ScannedTest::retrieveByDetails([ScannedTest::STUDENT_ID, ScannedTest::TEST_ID], [$s->getId(), $test->getId()])) > 0) {
+            $scannedTestExists = true;
+            echo "{ id: {$s->getId()}, name: '{$s->getName()}'},";
+        }
+    }
+?>];
+
+function notify(msg) {
+	$('div#status')[0].innerHTML ='<div class="col-12">' + msg + '</div>';
+}
+
+function workingOn(i) {
+	for (s of students) {
+		if (i-- == 0) {
+			msg = "Processing " + s.name + "'s test...";
+		}
+	}
+	if (i == 0) {
+		msg = "Completed!";
+	}
+	notify(msg);
+}
+
+async function mergeAllPDFs(urls) {
+
+	/* Thanks dude! https://stackoverflow.com/a/65555135/2457487 */
+	
+	const pdfDoc = await PDFLib.PDFDocument.create();
+	const numDocs = urls.length;
+	
+	for(var i = 0; i < numDocs; i++) {
+		workingOn(i);
+		const donorPdfBytes = await fetch(urls[i]).then(res => res.arrayBuffer());
+		try {
+			const donorPdfDoc = await PDFLib.PDFDocument.load(donorPdfBytes);
+			const docLength = donorPdfDoc.getPageCount();
+			for(var k = 0; k < docLength; k++) {
+				const [donorPage] = await pdfDoc.copyPages(donorPdfDoc, [k]);
+				pdfDoc.addPage(donorPage);
+			}
+		} catch (err) {
+			location.replace(urls[i]);
+			return;
+		}
+	}
+	
+	notify("Merging...");
+	
+	const pdfDataUri = await pdfDoc.saveAsBase64({ dataUri: true });
+	
+	var link = document.createElement('a');
+	link.download = "<?= "{$test->getName()}-{$teachingGroup->getName()}.pdf"; ?>";
+	link.href = pdfDataUri;
+	link.click();
+	
+	notify("Complete.");
+}
+
+function pdfmerge_doit(multiple) {
+	var urls = [];
+	for (s of students) {
+		urls.push('async/getScannedTestPdf.php?testId=<?= $test->getId(); ?>&pagesPerSheet=' + multiple + '&studentId=' + s.id);
+	}
+	mergeAllPDFs(urls);
+}
+
+</script>
+<?php } /* isset($tests) */ ?>
 </head>
 
 <body>
@@ -160,18 +201,11 @@ EOF;
 
 		<?php
 		if (isset($test)) {
-		    $scannedTestExists = false;
-		    foreach ($students as $s) {
-		        if (count(ScannedTest::retrieveByDetails([ScannedTest::STUDENT_ID, ScannedTest::TEST_ID], [$s->getId(), $test->getId()])) > 0) {
-		            $scannedTestExists = true;
-		            break;
-		        }
-		    }
 		    if ($scannedTestExists) {
 		        echo <<< eof
-        <div class="row">
+        <div class="row" id="status">
             <div class="col-5">
-                <a href="?teaching_group={$_GET['teaching_group']}&subject={$_GET['subject']}&test={$_GET['test']}&download=yes">Download so that I can print 2 per page, double sided</a>.
+                <a class="btn btn-primary" onclick="pdfmerge_doit(4)">Download</a> so I can print 2 per page.
             </div>
 
             <div class="col-7">
