@@ -59,7 +59,7 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
                             shell_exec(Config::windows_path_to_gs_exe . " -sDEVICE=jpeg -sOutputFile={$f['tmp_name']}-page-%03d.jpg -r150x150 -f -dBATCH -dNOPAUSE -q {$f['tmp_name']}");
                             $pages = [];
                             foreach (glob("{$f['tmp_name']}-page-[0-9][0-9][0-9].jpg") as $page) {
-                                array_push($pages, addslashes(file_get_contents($page)));
+                                array_push($pages, file_get_contents($page));
                                 unlink($page);
                             }
                         } else {
@@ -70,7 +70,7 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
                                 $im->setiteratorindex($i);
                                 $im->setimageformat('jpg');
                                 $im->setImageAlphaChannel(\Imagick::ALPHACHANNEL_REMOVE);
-                                array_push($pages, addslashes($im->getimageblob()));
+                                array_push($pages, $im->getimageblob());
                             }
                             $im->destroy();
                         }
@@ -91,7 +91,7 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
                     }
                     sort($zipcontents);
                     foreach ($zipcontents as $name) {
-                        array_push($pages, addslashes($zip->getFromName($name)));
+                        array_push($pages, $zip->getFromName($name));
                     }
                     break;
                 default:
@@ -134,13 +134,12 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
                         $currentComponentIndex++;
                     }
                         
-                    $page = new ScannedTestPage([
+                    $p = new ScannedTestPage([
                         ScannedTestPage::SCANNEDTEST_ID => $scannedTest->getId(),
                         ScannedTestPage::TESTCOMPONENT_ID => $components[$currentComponentIndex]->getId(),
                         ScannedTestPage::PAGE_NUM => $currentPage,
-                        ScannedTestPage::IMAGEDATA => $page,
                     ]);
-                    $page->commit();
+                    $p->setImageData($page);
                     $currentPage++;
                     $currentPage %= $num_pages;
                 }

@@ -21,7 +21,7 @@ abstract class DatabaseCollection
         return 0;
     }
     
-    protected static function _retrieveByDetails(array $detailType, array $detail, string $orderBy = "", array $selectQuery = []) {
+    protected static function _retrieveByDetails(array $detailType, array $detail, string $orderBy = "", array $selectQuery = [], bool $distinct = false) {
         if (is_null(self::$db)) {
             self::$db = new Database();
         }
@@ -55,8 +55,10 @@ abstract class DatabaseCollection
             $orderBy = "ORDER BY $orderBy";
         }
         
-        $result = $db->dosql("SELECT $selections FROM " . explode('\\', static::class)[1] . "$where $orderBy;")->fetch_all(MYSQLI_ASSOC);
-        
+        $d = $distinct ? "DISTINCT" : "";
+
+        $result = $db->dosql("SELECT $d $selections FROM " . explode('\\', static::class)[1] . "$where $orderBy;")->fetch_all(MYSQLI_ASSOC);
+
         if (!isset($result[0])) {
             return [];
         }
@@ -94,6 +96,13 @@ abstract class DatabaseCollection
     
     public static function retrieveAll(string $orderBy = "") {
         return static::retrieveByDetail("", self::OPERATOR_MATCH_ALL, $orderBy);
+    }
+    
+    public static function retrieveUniqueValues(string $detailType) {
+        $ret = [];
+        foreach (static::_retrieveByDetails([""], [self::OPERATOR_MATCH_ALL], $detailType, [$detailType], true) as $c)
+            array_push($ret, $c->get($detailType));
+            return $ret;
     }
     
     public static function delete(int $id) {

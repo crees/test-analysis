@@ -4,6 +4,8 @@ namespace TestAnalysis;
 
 include "../bin/classes.php";
 
+ScannedTestPage::garbageCollect();
+
 die("This really is for specialised work");
 
 $tests = explode(",",  "P4,P5a,P5b,P6a,P6b,P7a,P7b,P8");

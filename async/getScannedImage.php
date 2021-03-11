@@ -29,4 +29,4 @@ if (Config::is_student($auth_user)) {
 
 header('Content-Type: image/jpeg');
 
-echo $stp->get(ScannedTestPage::IMAGEDATA);
+echo $stp->getImageData();

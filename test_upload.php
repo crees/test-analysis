@@ -36,17 +36,21 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
     } else {
         $students = $subject->getStudents();
     }
-    
     if (isset($_POST['form_serial']) && (session_status() != PHP_SESSION_ACTIVE || $_POST['form_serial'] != $_SESSION['form_serial'] - 1)) {
+        $garbageCollect_required = false;
         foreach ($students as $s) {
             if (isset($_POST["delete-for-{$s->getId()}"]) && $_POST["delete-for-{$s->getId()}"] == 'on') {
                 foreach (ScannedTest::retrieveByDetails([ScannedTest::STUDENT_ID, ScannedTest::TEST_ID], [$s->getId(), $test->getId()]) as $st) {
                     foreach ($st->getPages() as $p) {
                         ScannedTestPage::delete($p->getId());
+                        $garbageCollect_required = true;
                     }
                     ScannedTest::delete($st->getId());
                 }
             }
+        }
+        if ($garbageCollect_required) {
+            ScannedTestPage::garbageCollect();
         }
         if (isset($_FILES["input-file"])) {
             $f = $_FILES["input-file"];
@@ -59,7 +63,7 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
                             shell_exec(Config::windows_path_to_gs_exe . " -sDEVICE=jpeg -sOutputFile={$f['tmp_name']}-page-%03d.jpg -r150x150 -f -dBATCH -dNOPAUSE -q {$f['tmp_name']}");
                             $pages = [];
                             foreach (glob("{$f['tmp_name']}-page-[0-9][0-9][0-9].jpg") as $page) {
-                                array_push($pages, addslashes(file_get_contents($page)));
+                                array_push($pages, file_get_contents($page));
                                 unlink($page);
                             }
                         } else {
@@ -70,7 +74,7 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
                                 $im->setiteratorindex($i);
                                 $im->setimageformat('jpg');
                                 $im->setImageAlphaChannel(\Imagick::ALPHACHANNEL_REMOVE);
-                                array_push($pages, addslashes($im->getimageblob()));
+                                array_push($pages, $im->getimageblob());
                             }
                             $im->destroy();
                         }
@@ -91,7 +95,7 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
                     }
                     sort($zipcontents);
                     foreach ($zipcontents as $name) {
-                        array_push($pages, addslashes($zip->getFromName($name)));
+                        array_push($pages, $zip->getFromName($name));
                     }
                     break;
                 default:
@@ -130,9 +134,9 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
                                 ScannedTestPage::SCANNEDTEST_ID => $scannedTest->getId(),
                                 ScannedTestPage::TESTCOMPONENT_ID => $components[$currentComponentIndex]->getId(),
                                 ScannedTestPage::PAGE_NUM => $num,
-                                ScannedTestPage::IMAGEDATA => $p,
                             ]);
-                            $page->commit();
+                            $page->setImageData($p);
+                            // Committed
                         }   
                     }
                 }

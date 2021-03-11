@@ -29,7 +29,6 @@ if (Config::is_student($auth_user)) {
     $stp->setPageScore($_POST['pagescore'] ?? null);
 }
 
-$stp->setImage(addslashes(base64_decode(explode(',', str_replace(' ', '+', $_POST['img']), 2)[1])));
-$stp->commit();
+$stp->setImageData(base64_decode(explode(',', str_replace(' ', '+', $_POST['img']), 2)[1]));
 
 echo "Success!";

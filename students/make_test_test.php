@@ -42,7 +42,7 @@ if (isset($existingTest[0])) {
     }
     sort($zipcontents);
     foreach ($zipcontents as $name) {
-        array_push($pages, addslashes($zip->getFromName($name)));
+        array_push($pages, $zip->getFromName($name));
     }
     
     $scannedTest = new ScannedTest([
@@ -60,9 +60,8 @@ if (isset($existingTest[0])) {
             ScannedTestPage::SCANNEDTEST_ID => $scannedTest->getId(),
             ScannedTestPage::TESTCOMPONENT_ID => 0,
             ScannedTestPage::PAGE_NUM => $num,
-            ScannedTestPage::IMAGEDATA => $p,
         ]);
-        $page->commit();
+        $page->setImageData($p);
     }
     $scannedTest->startTimer();
     header("Location: index.php$msq");

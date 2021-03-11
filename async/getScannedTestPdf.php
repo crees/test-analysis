@@ -36,7 +36,7 @@ if (isset($st[0])) {
     $stps = $st[0]->getPages();
     $cnt = 0;
     while (isset($stps[$cnt])) {
-        $pdf->readimageblob($stps[$cnt++]->get(ScannedTestPage::IMAGEDATA));
+        $pdf->readimageblob($stps[$cnt++]->getImageData());
         $pdf->scaleimage(0, 1700);
         $pdf->setImageFormat('pdf');
     }

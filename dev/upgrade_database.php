@@ -238,7 +238,10 @@ case 22:
 case 23:
     $db->dosql("ALTER TABLE `Staff` ADD default_marking_tool VARCHAR(20) NULL;");
     
-    $db->dosql("UPDATE `db_version` SET version = 24;");
+case 24:
+    $db->dosql("ALTER TABLE `ScannedTestPage` ADD sha CHAR(64) NULL;");
+    
+    $db->dosql("UPDATE `db_version` SET version = 25;");
     
 default:
 

@@ -10,6 +10,7 @@ class ScannedTestPage extends DatabaseCollection
     const ANNOTATIONS = 'annotations';
     const STUDENT_ANNOTATIONS = 'annotations';
     const PAGE_SCORE = 'page_score';
+    const SHA = 'sha';
     
     public function __construct(array $details)
     {
@@ -25,17 +26,32 @@ class ScannedTestPage extends DatabaseCollection
                     self::ANNOTATIONS,
                     self::PAGE_SCORE,
                     self::STUDENT_ANNOTATIONS,
+                    self::SHA,
                 ] as $d) {
             $this->details[$d] = $details[$d] ?? null;
         }
     }
     
     public function get(String $detail) {
-        if ($detail == self::IMAGEDATA && is_null($this->details[self::IMAGEDATA])) {
+        if ($detail == self::IMAGEDATA) {
+            // XXX deprecated
+            return $this->getImageData();
+        }
+        return $this->details[$detail];
+    }
+    
+    public function getImageData() {
+        if (!is_null($this->details[self::SHA])) {
+            $filename = Config::scannedTestPagedir . "/{$this->details[self::SHA]}.jpg";
+            $f = fopen($filename, 'rb');
+            $data = fread($f, filesize($filename));
+            fclose($f);
+            return $data;
+        }
+        if (is_null($this->details[self::IMAGEDATA])) {
             $this->details[self::IMAGEDATA] = parent::_retrieveByDetails([self::ID], [$this->getId()], "", [self::IMAGEDATA])[0]->get(self::IMAGEDATA);
         }
-        
-        return $this->details[$detail];
+        return $this->details[self::IMAGEDATA];
     }
     
     public static function retrieveByDetails(array $detailType, array $detail, string $orderBy = "") {
@@ -47,18 +63,61 @@ class ScannedTestPage extends DatabaseCollection
             self::PAGE_NUM,
             self::ANNOTATIONS,
             self::PAGE_SCORE,
-            self::STUDENT_ANNOTATIONS
+            self::STUDENT_ANNOTATIONS,
+            self::SHA
         ]);
     }
     
-    public function setImage($img) {
-        $this->details[self::IMAGEDATA] = $img;
+    public function setImageData($img) {
+        $oldsha = $this->details[self::SHA] ?? null;
+        $newsha = hash('sha256', $img);
+        
+        $filename = Config::scannedTestPagedir . "/$newsha.jpg";
+        
+        if ($file = @fopen($filename, 'xb')) {
+            fwrite($file, $img);
+            fclose($file);
+        }
+        
+        if (!file_exists($filename)) {
+            // BIG PROBLEM
+            throw new Exception('File creation failed-- does ' . 
+                Config::scannedTestPagedir . ' exist and can I write to it?');
+        }
+        
+        $this->details[self::SHA] = $newsha;
+        
+        // We can't afford to allow the change to not be atomic
+        $this->commit([self::IMAGEDATA]);
+        
+        if (!is_null($oldsha)) {
+            self::garbageCollect($oldsha);
+        }
     }
     
     public function setPageScore($score) {
         $this->details[self::PAGE_SCORE] = $score;
     }
-  
+    
+    public static function garbageCollect($sha = null) {
+        if (!is_null($sha)) {
+            if (self::retrieveByDetail(self::SHA, $sha) == []) {
+                // No more references, garbage collect
+                unlink(Config::scannedTestPagedir . "/$sha.jpg");
+            }
+        } else {
+            $hashes = self::retrieveUniqueValues(self::SHA);
+            $files = scandir(Config::scannedTestPagedir);
+            $files = array_diff($files, array('.', '..'));
+            foreach ($hashes as $h) {
+                $files = array_diff($files, array("$h.jpg"));
+            }
+            foreach ($files as $f) {
+                unlink(Config::scannedTestPagedir . "/$f");
+            }
+        }
+    }
+    
     function __destruct()
     {}
 }

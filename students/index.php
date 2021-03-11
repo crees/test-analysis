@@ -56,7 +56,7 @@ if (isset($_GET['getpdf']) && !empty($_GET['test'])) {
     $test = Test::retrieveByDetail(Test::ID, $_GET['test'])[0];
     $scannedTest = ScannedTest::retrieveByDetails([ScannedTest::TEST_ID, ScannedTest::STUDENT_ID], [$test->getId(), $student->getId()])[0];
     foreach (ScannedTestPage::retrieveByDetail(ScannedTestPage::SCANNEDTEST_ID, $scannedTest->getId(), ScannedTestPage::PAGE_NUM) as $page) {
-        $pdf->readimageblob($page->get(ScannedTestPage::IMAGEDATA));
+        $pdf->readimageblob($page->getImageData());
         $pdf->scaleimage(0, 1700);
         $pdf->setImageFormat('pdf');
     }
@@ -88,7 +88,7 @@ if (!empty($_FILES)) {
                                 shell_exec(Config::windows_path_to_gs_exe . " -sDEVICE=jpeg -sOutputFile={$f['tmp_name']}-page-%03d.jpg -r150x150 -f -dBATCH -dNOPAUSE -q {$f['tmp_name']}");
                                 $pages = [];
                                 foreach (glob("{$f['tmp_name']}-page-[0-9][0-9][0-9].jpg") as $page) {
-                                    array_push($pages, addslashes(file_get_contents($page)));
+                                    array_push($pages, file_get_contents($page));
                                     unlink($page);
                                 }
                             } else {
@@ -99,7 +99,7 @@ if (!empty($_FILES)) {
                                     $im->setiteratorindex($i);
                                     $im->setimageformat('jpg');
                                     $im->setImageAlphaChannel(\Imagick::ALPHACHANNEL_REMOVE);
-                                    array_push($pages, addslashes($im->getimageblob()));
+                                    array_push($pages, $im->getimageblob());
                                 }
                                 $im->destroy();
                             }
@@ -120,7 +120,7 @@ if (!empty($_FILES)) {
                         }
                         sort($zipcontents);
                         foreach ($zipcontents as $name) {
-                            array_push($pages, addslashes($zip->getFromName($name)));
+                            array_push($pages, $zip->getFromName($name));
                         }
                         break;
                     default:
@@ -148,9 +148,8 @@ if (!empty($_FILES)) {
                             ScannedTestPage::SCANNEDTEST_ID => $st->getId(),
                             ScannedTestPage::TESTCOMPONENT_ID => $component[$num],
                             ScannedTestPage::PAGE_NUM => $num,
-                            ScannedTestPage::IMAGEDATA => $p,
                         ]);
-                        $page->commit();
+                        $page->setImageData($p);
                         $num++;
                     }
                     $st->setTime(0);
