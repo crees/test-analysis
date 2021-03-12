@@ -64,7 +64,7 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
 </head>
 
 <body>
-	<div class="container">
+	<div class="container-fluid">
 	  <div id="top-part">
 		<?php require "bin/navbar.php"; ?>
 <?php if (!(isset($_GET['my_tests_only']) && $_GET['my_tests_only'])) { ?>
@@ -301,7 +301,7 @@ if ($staff->get(Staff::LARGE_MARKING) == 1) {
 						score.value = parseInt(score.value) + 1;
 					}
 				  }
-				  setSaveBar(savebutton + dontsavebutton);
+				  setSaveBar(savebutton + dontsavebutton + scorebuttons);
 			  },
     };
 
@@ -413,6 +413,11 @@ if ($staff->get(Staff::LARGE_MARKING) == 1) {
 		}
 	    savebutton = '<a class="btn btn-success" onclick="save()">Save page</a>';
 	    dontsavebutton = '<a class="btn btn-danger" onclick="dontsave()">Do not save</a>';
+	    scorebuttons = '';
+	    for (i = 0; i < 10; i++) {
+			colour = (i % 2) ? 'secondary' : 'primary';
+		    scorebuttons += '<a class="btn btn-' + colour + '" onclick="document.getElementById(\'score\').value = ' + i + '; save();">' + i + '</a>';
+	    }
 		currentPage = <?= $page_num ?>;
 		if (<?= $student_number ?> > 0) {
 			prevbutton = '<a class="btn btn-danger" id="button-left" href="?' + getvars + '&page=' + currentPage + '&student_number=<?= $student_number-1 ?>"><i class="fa fa-arrow-left"></i>Previous student (h)</a>';
