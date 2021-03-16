@@ -74,6 +74,10 @@ if (isset($_GET['backupkey']) && $_GET['backupkey'] == Config::backups_key && is
                 $staff->commit();
             }
             $_SESSION['staff'] = $staff;
+            
+            if (empty($staff->getDepartments()) && !$staff->isGlobalAdmin()) {
+                die("Please get in touch with your head of department to give you access.");
+            }
         }
         switch (basename(dirname($_SERVER['PHP_SELF']))) {
         case 'dev':
