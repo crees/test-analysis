@@ -5,6 +5,12 @@ $students_allowed = true;
 
 require "../bin/classes.php";
 
+if (isset($_GET['imghash'])) {
+    header('Content-Type: image/jpeg');
+    
+    echo ScannedTestPage::getImageFromHash($_GET['imghash']);
+}
+
 if (!isset($_GET['stpid'])) {
     die("Why are you trying to open this?");
 }

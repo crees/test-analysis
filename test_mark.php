@@ -208,7 +208,7 @@ EOF;
 		        $savebarClass = "col-lg-3";
 		    }
 		    echo "<div class=\"$savebarClass\">";
-		    echo "<div class=\"savebar\"></div><br>";
+		    echo "<div class=\"savebar\"></div><a class=\"btn btn-secondary\" onclick=\"visibleTop()\">Change test/class</a><br>";
 		    echo "<div class=\"form-inline form-group\">";
             if (isset($_GET['skipMarked'])) {
                 $skipMarked = 'checked';
@@ -258,8 +258,8 @@ if ($staff->get(Staff::LARGE_MARKING) == 1) {
 ?>
               //width: Math.trunc($('html')[0].clientWidth * 0.8),
               //height: Math.trunc($('html')[0].clientWidth * 0.8 * 1.414),
-              width: Math.trunc($('#testpage-container')[0].clientWidth),
-              height: Math.trunc($('#testpage-container')[0].clientWidth * 1.414),
+              width: Math.trunc($('#testpage-container')[0].clientWidth * 0.95),
+              height: Math.trunc($('#testpage-container')[0].clientWidth * 0.95 * 1.414),
               position: "vertical",
 			  toolbarContainer: '.toolbar-container',
 <?php } else { ?>
@@ -271,7 +271,7 @@ if ($staff->get(Staff::LARGE_MARKING) == 1) {
     		  type: default_tool,
 			  // for the stamps, stamp_\u2227 is logical AND symbol, basically a huge caret for "missing"
 			  tools: ['undo', 'tick', 'stamp_(\u2713)', 'cross', 'stamp_ECF', 'stamp_TV', 'stamp_BOD', 'stamp_NAQ', 'stamp_\u2227', 'stamp_REP', 'stamp_L1', 'stamp_L2', 'stamp_L3', 'text', 'rectangle-filled', 'circle', 'arrow', 'pen', 'redo'], // Tools
-    		  images: ["async/getScannedImage.php?stpid=<?= $testPage->getId() ?>"],          // Array of images path : ["images/image1.png", "images/image2.png"]
+    		  images: ["async/getScannedImage.php?imghash=<?= $testPage->get(ScannedTestPage::SHA) ?>"],          // Array of images path : ["images/image1.png", "images/image2.png"]
     		  linewidth: 2,           // Line width for rectangle and arrow shapes
 <?php // Deal with staff who want the test to take the width of the browser window
 if ($staff->get(Staff::LARGE_MARKING) == 1) {
@@ -420,15 +420,15 @@ if ($staff->get(Staff::LARGE_MARKING) == 1) {
 	    }
 		currentPage = <?= $page_num ?>;
 		if (<?= $student_number ?> > 0) {
-			prevbutton = '<a class="btn btn-danger" id="button-left" href="?' + getvars + '&page=' + currentPage + '&student_number=<?= $student_number-1 ?>"><i class="fa fa-arrow-left"></i>Previous student (h)</a>';
+			prevbutton = '<a class="btn btn-danger" id="button-left" href="?' + getvars + '&page=' + currentPage + '&student_number=<?= $student_number-1 ?>"><i class="fa fa-arrow-left"></i>Prev student (h)</a>';
 		} else {
-			prevbutton = '<a class="btn btn-secondary"><i class="fa fa-arrow-left"></i>Previous student</a>';
+			prevbutton = '<a class="btn btn-secondary"><i class="fa fa-arrow-left"></i>Prev student</a>';
 		}
 		if (currentPage > 0) {
-	        prevbutton += '<a class="btn btn-warning" id="button-up" href="?' + getvars + '&page=' + (currentPage-1) + '&student_number=<?= $student_number ?>"><i class="fa fa-arrow-up"></i>Previous page (k)</a>';
+	        prevbutton += '<a class="btn btn-warning" id="button-up" href="?' + getvars + '&page=' + (currentPage-1) + '&student_number=<?= $student_number ?>"><i class="fa fa-arrow-up"></i>Prev page (k)</a>';
 	    }
 	    nextbutton = '<a class="btn btn-success" id="button-down" href="?' + getvars + '&page=<?= ($page_num + 1) ?>&student_number=<?= $student_number ?>">(j) Next page<i class="fa fa-arrow-down"></i></a>';
-	    nextbutton += '<a class="btn btn-primary" id="button-right" href="?' + getvars + '&page=<?= $page_num ?>&student_number=<?= $student_number + 1 ?>">(l) Next student<i class="fa fa-arrow-right"></i></a><a class="btn btn-secondary" onclick="visibleTop()">Change test/class</a>';
+	    nextbutton += '<a class="btn btn-primary" id="button-right" href="?' + getvars + '&page=<?= $page_num ?>&student_number=<?= $student_number + 1 ?>">(l) Next student<i class="fa fa-arrow-right"></i></a>';
 		setSaveBar(savebutton + prevbutton + nextbutton);
 	}
 
