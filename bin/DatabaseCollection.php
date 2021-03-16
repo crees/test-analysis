@@ -112,6 +112,20 @@ abstract class DatabaseCollection
         self::$db->dosql("DELETE FROM " . explode('\\', static::class)[1] . " WHERE id = $id;");
     }
     
+    public static function lock(bool $readonly = false) {
+        if (is_null(self::$db)) {
+            self::$db = new Database();
+        }
+        $readwrite = $readonly ? "READ" : "WRITE";
+        self::$db->dosql("LOCK TABLES " . explode('\\', static::class)[1] . " $readwrite;");
+    }
+    
+    public static function unlock() {
+        if (!is_null(self::$db)) {
+            self::$db->dosql("UNLOCK TABLES;");
+        }
+    }
+        
     /**
      * Commits changes-- any that need setting to null should be explicitly
      * listed in the first argument as an array
