@@ -68,13 +68,6 @@ class Staff extends DatabaseCollection
     }
     
     protected function _getDepartments(bool $sort, bool $admin) {
-        if ($this->isGlobalAdmin()) {
-            if ($sort) {
-                return Department::retrieveAll(Department::NAME);
-            } else {
-                return Department::retrieveAll();
-            }
-        }
         $depts = [];
         $details = [StaffDepartmentMembership::STAFF_ID];
         $values = [$this->getId()];
