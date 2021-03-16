@@ -201,10 +201,12 @@ case 15:
         $db->dosql("ALTER TABLE `Staff` ADD theme VARCHAR(30) NULL;");
     }
     
+    $db->dosql("UPDATE `db_version` SET version = 16;");
 case 16:
     $db->dosql("CREATE TABLE db_version (version INT UNSIGNED NOT NULL);");
     $db->dosql("INSERT INTO `db_version` (version) VALUES (17);");
 
+    $db->dosql("UPDATE `db_version` SET version = 17;");
 case 17:
     $db->dosql("CREATE TABLE StaffDepartmentMembership (
             id INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -220,28 +222,66 @@ case 17:
             $db->dosql("INSERT INTO StaffDepartmentMembership (Staff_id, Department_id) VALUES ({$staffId[0]}, {$deptId[0]});");
         }
     }
+    
+    $db->dosql("UPDATE `db_version` SET version = 18;");
 case 18:
     $db->dosql("ALTER TABLE `Test` MODIFY name VARCHAR(100) NOT NULL;");
     
+    $db->dosql("UPDATE `db_version` SET version = 19;");
 case 19:
     $db->dosql("ALTER TABLE `Student` ADD username VARCHAR(30) NULL;");
     
+    $db->dosql("UPDATE `db_version` SET version = 20;");
 case 20:
     $db->dosql("ALTER TABLE `Staff` ADD large_marking TINYINT NOT NULL DEFAULT 0;");
     
+    $db->dosql("UPDATE `db_version` SET version = 21;");
 case 21:
     $db->dosql("ALTER TABLE `ScannedTest` ADD downloaded TINYINT NOT NULL DEFAULT 0;");
     
+    $db->dosql("UPDATE `db_version` SET version = 22;");
 case 22:
     $db->dosql("ALTER TABLE `Subject` DROP code;");
     
+    $db->dosql("UPDATE `db_version` SET version = 23;");
 case 23:
     $db->dosql("ALTER TABLE `Staff` ADD default_marking_tool VARCHAR(20) NULL;");
     
+    $db->dosql("UPDATE `db_version` SET version = 24;");
 case 24:
-    $db->dosql("ALTER TABLE `ScannedTestPage` ADD sha CHAR(64) NULL;");
-    
+    if ($db->dosql("SHOW COLUMNS FROM `ScannedTestPage` LIKE 'sha'")->num_rows < 1)
+        $db->dosql("ALTER TABLE `ScannedTestPage` ADD sha CHAR(64) NULL;");
     $db->dosql("UPDATE `db_version` SET version = 25;");
+    
+case 25:
+    $limit = $version_25_limit ?? 20;
+    $query = $db->dosql("SELECT `id`,`imagedata` FROM `ScannedTestPage` WHERE `sha` IS NULL LIMIT $limit;");
+    if ($query->num_rows != 0) {
+        while ($i = $query->fetch_row()) {
+            $id = $i[0];
+            $img = $i[1];
+            $sha = hash('sha256', $img);
+            $filename = Config::scannedTestPagedir . "/$sha.jpg";
+            
+            if ($file = @fopen($filename, 'xb')) {
+                fwrite($file, $img);
+                fclose($file);
+            }
+            
+            if (!file_exists($filename)) {
+                // BIG PROBLEM
+                throw new \Exception('File creation failed-- does ' .
+                    Config::scannedTestPagedir . ' exist and can I write to it?');
+            }
+            
+            $db->dosql("UPDATE `ScannedTestPage` SET `sha` = '$sha', `imagedata` = NULL WHERE `id` = $id;");
+        }
+    } else {
+        $db->dosql("ALTER TABLE `ScannedTestPage` DROP COLUMN `imagedata`;");
+        $db->dosql("UPDATE `db_version` SET version = 26;");
+    }
+    
+case 26:
     
 default:
 
