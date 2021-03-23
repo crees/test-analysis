@@ -47,7 +47,7 @@ if (!class_exists("Config")) {
      */
     
     if (rand(1, 100) == 1) {
-        ScannedTestPage::garbageCollect();
+        ScannedTestPage::garbageCollect(true);
     }
     
     if (Config::use_sessions == true) {

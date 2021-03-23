@@ -92,22 +92,19 @@ class ScannedTestPage extends DatabaseCollection
         $this->details[self::PAGE_SCORE] = $score;
     }
     
-    public static function garbageCollect($sha = null) {
+    public static function garbageCollect(bool $silent = false) {
         self::lock();
-        if (!is_null($sha)) {
-            if (self::retrieveByDetail(self::SHA, $sha) == []) {
-                // No more references, garbage collect
-                unlink(Config::scannedTestPagedir . "/$sha.jpg");
-            }
-        } else {
-            $hashes = self::retrieveUniqueValues(self::SHA);
-            $files = scandir(Config::scannedTestPagedir);
-            $files = array_diff($files, array('.', '..'));
-            foreach ($hashes as $h) {
-                $files = array_diff($files, array("$h.jpg"));
-            }
-            foreach ($files as $f) {
-                unlink(Config::scannedTestPagedir . "/$f");
+        $hashes = self::retrieveUniqueValues(self::SHA);
+        $files = scandir(Config::scannedTestPagedir);
+        $files = array_diff($files, array('.', '..'));
+        foreach ($hashes as $h) {
+            $files = array_diff($files, array("$h.jpg"));
+        }
+        foreach ($files as $f) {
+            if (!@unlink(Config::scannedTestPagedir . "/$f")) {
+                if (!$silent) {
+                    echo "Failed to garbage collect page: error was '" . error_get_last()['message'] . "'";
+                }
             }
         }
         self::unlock();
