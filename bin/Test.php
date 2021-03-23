@@ -13,6 +13,9 @@ class Test extends DatabaseCollection
     {
         $this->components = null;
         $this->details[self::ID] = $details[self::ID] ?? null;
+        while (($ampersand = strpos($details[self::NAME], '&')) !== false) {
+            $details[self::NAME][$ampersand] = '+';
+        }
         $this->details[self::NAME] = $details[self::NAME];
         $this->details[self::DEPARTMENT_ID] = $details[self::DEPARTMENT_ID];
         $this->details[self::CUSTOM_GRADE_BOUNDARIES] = self::parseBoolean($details, self::CUSTOM_GRADE_BOUNDARIES);
@@ -44,7 +47,13 @@ class Test extends DatabaseCollection
     
     public function get(String $detail) {
         if ($detail == self::TARGETS) {
-            return unserialize(base64_decode($this->details[self::TARGETS]));
+            $targets = unserialize(base64_decode($this->details[self::TARGETS]));
+            for ($i = 0; $i < count($targets); $i++) {
+                while (($ampersand = strpos($targets[$i], '&')) !== false) {
+                    $targets[$i][$ampersand] = '+';
+                }
+            }
+            return $targets;
         }
         return parent::get($detail);
     }
