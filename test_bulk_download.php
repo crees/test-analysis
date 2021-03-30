@@ -37,7 +37,7 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
         $students = $subject->getStudents();
     }
     
-    if (isset($_GET['teaching_group']) && isset($_GET['test']) && isset($_GET['download']) && $_GET['download'] == 'zip') {
+    if (isset($_GET['teaching_group']) && isset($_GET['test']) && isset($_GET['download'])) {
         $scannedTests = [];
         foreach ($students as $s) {
             $st = ScannedTest::retrieveByDetails([ScannedTest::STUDENT_ID, ScannedTest::TEST_ID], [$s->getId(), $test->getId()]);
@@ -48,35 +48,87 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
         if (count($scannedTests) == 0) {
             die("No tests!");
         }
-        $num = 0;
-        // Handy thing about here is, the garbage collector will have it if it crashes!
-        ScannedTestPage::lock(true);
-        $tempfile = tempnam(Config::scannedTestPagedir, "zipdownload");
-        $zip = new \ZipArchive();
-        $zip->open($tempfile, \ZipArchive::CREATE);
         $blankPage = new \Imagick();
         $blankPage->newImage(210, 297, new \ImagickPixel('white'));
         $blankPage->setImageFormat('jpeg');
+        $imgs = [];
+        $num = 0;
         foreach ($scannedTests as $st) {
+            $totalPages = 0;
             foreach (ScannedTestPage::retrieveByDetail(ScannedTestPage::SCANNEDTEST_ID, $st->getId()) as $page) {
-                $zip->addFile(Config::scannedTestPagedir . "/{$page->get(ScannedTestPage::SHA)}.jpg", "{$num}.jpg");
+                array_push($imgs, $page->get(ScannedTestPage::SHA));
+                $totalPages++;
                 $num++;
             }
             while ($num % 4 != 0) {
-                $zip->addFromString("{$num}.jpg", $blankPage);
+                array_push($imgs, "blank");
+                $totalPages++;
                 $num++;
             }
         }
-        $zip->close();
-        
-        header('Content-Type: application/zip');
-        $length = filesize($tempfile);
-        header('Content-Length: ' . $length);
-        header("Content-Disposition: attachment; filename=\"{$test->getName()}-{$teachingGroup->getName()}.zip\"");
-        echo file_get_contents($tempfile);
-        unlink($tempfile);
-        ScannedTestPage::unlock();
-        die();
+        $groupStapleSize = $totalPages / 4;
+        switch ($_GET['download']) {
+        case 'zip':
+            $num = 0;
+            // Handy thing about here is, the garbage collector will have it if it crashes!
+            ScannedTestPage::lock(true);
+            $tempfile = tempnam(Config::scannedTestPagedir, "zipdownload");
+            $zip = new \ZipArchive();
+            $zip->open($tempfile, \ZipArchive::CREATE);
+            foreach ($imgs as $p) {
+                if ($p === "blank") {
+                    $zip->addFromString("{$num}.jpg", $blankPage);
+                } else {
+                    $zip->addFile(Config::scannedTestPagedir . "/$p.jpg", "{$num}.jpg");
+                }
+                $num++;
+            }
+            $zip->close();
+            
+            header('Content-Type: application/zip');
+            $length = filesize($tempfile);
+            header('Content-Length: ' . $length);
+            header("Content-Disposition: attachment; filename=\"{$test->getName()}-{$teachingGroup->getName()}.zip\"");
+            echo file_get_contents($tempfile);
+            unlink($tempfile);
+            ScannedTestPage::unlock();
+            die();
+        case 'html':
+            echo <<<EOF
+<!doctype html><html><head>
+<style>
+.a4halfimg {
+  height: 180mm;
+}
+@media print
+{    
+    h1 {
+        display: none !important;
+    }
+}
+</style>
+</head><body>
+<h1>Please print this onto A4 landscape, stapling in groups of $groupStapleSize.</h1>
+EOF;
+            $left = true;
+            foreach ($imgs as $img) {
+                if ($img === 'blank') {
+                    $i = base64_encode($blankPage->getImageBlob());
+                    $i = "data:image/jpeg;base64,$i";
+                } else {
+                    $i = "async/getScannedImage.php?imghash=$img";
+                }
+                if ($left) {
+                    echo "<div>";
+                }
+                echo "<img class=\"a4halfimg\" src=\"$i\">";
+                if (!$left) {
+                    echo "</div>\n";
+                }
+                $left = !$left;
+            }
+            die();
+        }
     }
     
 }
@@ -265,6 +317,17 @@ EOF;
             <div class="col-7">
                 This pads with blank pages to ensure that title pages land on a 4-page boundary.
                 Unzip, and print as photos using 2 per page, and staple with "x sheets per group", where x is the number of test pages divided by 4.
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-5">
+                <a class="btn btn-primary" href="?subject={$_GET['subject']}&teaching_group={$_GET['teaching_group']}&test={$_GET['test']}&download=html">Print</a> in browser.
+            </div>
+
+            <div class="col-7">
+                This pads with blank pages to ensure that title pages land on a 4-page boundary.
+                Print on landscape and staple with "x sheets per group", where x is the number of test pages divided by 4.
             </div>
         </div>
     </div>
