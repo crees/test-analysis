@@ -36,6 +36,49 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
     } else {
         $students = $subject->getStudents();
     }
+    
+    if (isset($_GET['teaching_group']) && isset($_GET['test']) && isset($_GET['download']) && $_GET['download'] == 'zip') {
+        $scannedTests = [];
+        foreach ($students as $s) {
+            $st = ScannedTest::retrieveByDetails([ScannedTest::STUDENT_ID, ScannedTest::TEST_ID], [$s->getId(), $test->getId()]);
+            if (count($st) > 0) {
+                array_push($scannedTests, $st[0]);
+            }
+        }
+        if (count($scannedTests) == 0) {
+            die("No tests!");
+        }
+        $num = 0;
+        // Handy thing about here is, the garbage collector will have it if it crashes!
+        ScannedTestPage::lock(true);
+        $tempfile = tempnam(Config::scannedTestPagedir, "zipdownload");
+        $zip = new \ZipArchive();
+        $zip->open($tempfile, \ZipArchive::CREATE);
+        $blankPage = new \Imagick();
+        $blankPage->newImage(210, 297, new \ImagickPixel('white'));
+        $blankPage->setImageFormat('jpeg');
+        foreach ($scannedTests as $st) {
+            foreach (ScannedTestPage::retrieveByDetail(ScannedTestPage::SCANNEDTEST_ID, $st->getId()) as $page) {
+                $zip->addFile(Config::scannedTestPagedir . "/{$page->get(ScannedTestPage::SHA)}.jpg", "{$num}.jpg");
+                $num++;
+            }
+            while ($num % 4 != 0) {
+                $zip->addFromString("{$num}.jpg", $blankPage);
+                $num++;
+            }
+        }
+        $zip->close();
+        
+        header('Content-Type: application/zip');
+        $length = filesize($tempfile);
+        header('Content-Length: ' . $length);
+        header("Content-Disposition: attachment; filename=\"{$test->getName()}-{$teachingGroup->getName()}.zip\"");
+        echo file_get_contents($tempfile);
+        unlink($tempfile);
+        ScannedTestPage::unlock();
+        die();
+    }
+    
 }
 
 ?>
@@ -211,6 +254,17 @@ EOF;
             <div class="col-7">
                 This pads with blank pages to ensure that title pages land on a 4-page boundary.
                 Print using 2 per page, and staple with "x sheets per group", where x is the number of test pages divided by 4.
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-5">
+                <a class="btn btn-primary" href="?subject={$_GET['subject']}&teaching_group={$_GET['teaching_group']}&test={$_GET['test']}&download=zip">Download</a> as an image zip.
+            </div>
+
+            <div class="col-7">
+                This pads with blank pages to ensure that title pages land on a 4-page boundary.
+                Unzip, and print as photos using 2 per page, and staple with "x sheets per group", where x is the number of test pages divided by 4.
             </div>
         </div>
     </div>
