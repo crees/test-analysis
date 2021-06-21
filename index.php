@@ -275,14 +275,14 @@ function colouriseAll(literalColours = false) {
 			colourise([['percent', t, s].join('-')], literalColours);
 			colourise([['grade', t, s].join('-')], literalColours);
 		}
-		colourise([['cwag', 0, s].join('-')], literalColours);
+		calcCwag(s, literalColours);
 	}
 }
 
 function save(testComponentId, studentId) {
 
 	element = $('input#' + score + '-' + testComponentId + '-' + studentId);
-	//cwag = $('#' + ['cwag', 0, studentId].join('-'));
+	cwag = $('#' + ['cwag', 0, studentId].join('-'));
 	
 	result = parseInt(element[0].value);
 
@@ -303,14 +303,14 @@ function save(testComponentId, studentId) {
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     xhr.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
-          saved(element[0], this.responseText);
+          saved(element[0], studentId, this.responseText);
         }
         console.log(this.responseText);
     };
     xhr.send("studentId=" + studentId + "&testComponentId=" + testComponentId + "&result=" + result + "&subjectId=<?= $subject->getId() ?>");
 }
 
-function saved(element, responseText) {
+function saved(element, studentId, responseText) {
 	if (responseText.includes('Total out of range')) {
 		element.style.color = '#ffa500';
 		return;
@@ -326,6 +326,7 @@ function saved(element, responseText) {
 		$('#' + change[0])[0].innerHTML = change[1];
 		colourise(change);
 	}
+	calcCwag(studentId);
 }
 
 function colourise(arr, literalColours = false) {
@@ -374,6 +375,47 @@ function colourise(arr, literalColours = false) {
 			element.style.backgroundColor = literalColours ? '#f5c6cb' : 'var(--grade-below)';
 		}
 	}
+}
+
+function calcCwag(studentId, literalColours) {
+	cwagElement = $('#' + ['cwag', 0, studentId].join('-'))[0];
+
+	total_gradeboundaries = 0;
+	number_gradeboundaries = 0;
+	
+	for (t of tests) {
+		gradeElement = $('#' + ['grade', t, studentId].join('-'))[0];
+		grade = gradeElement.innerText;
+		if (grade !== "") {
+			total_gradeboundaries += gradeboundaries[0][grade] ?? 0;
+			number_gradeboundaries++;
+		}
+	}
+	if (number_gradeboundaries < 4) {
+		cwagElement.innerText = "-";
+		cwagElement.title = "Four or more test results required for a currently working at grade";
+		return;
+	}
+	avg_gradeboundaries = total_gradeboundaries / number_gradeboundaries;
+	// Look up grade from grade boundary
+	lower = -1;
+	for (grade in gradeboundaries[0]) {
+		if (gradeboundaries[0][grade] < avg_gradeboundaries && gradeboundaries[0][grade] > lower) {
+			lower = gradeboundaries[0][grade];
+		}
+	}
+	cwag = null;
+	for (grade in gradeboundaries[0]) {
+		if (gradeboundaries[0][grade] === lower) {
+			cwag = grade;
+			break;
+		}
+	}
+	if (cwag === null) {
+		return;
+	}
+	cwagElement.innerText = cwag;
+	colourise([['cwag', 0, studentId].join('-')], literalColours);
 }
 
 </script>
