@@ -397,12 +397,34 @@ function colourise(arr, literalColours = false) {
 		if (baseline.length == 0) {
 			return;
 		}
-		// We find the boundary for each grade
-		gradeb = gradeboundaries[testId][grade] ?? 0;
+		// We find the boundary for each grade, and go from the grade below
+		// So this is rather nasty, and it relies on the grades being reverse sorted
+		// as they are from TestAnalysis\Test and TestAnalysis\Subject
+		gradeb = null;
+		// If there isn't a grade scored for the test, let's just score zero
+		if (gradeboundaries[testId][grade] == null) {
+			gradeb = 0;
+		} else {
+			// We will keep going until we match the grade, then award green until the 'next' grade
+    		previousGrade = null;
+    		for (g in gradeboundaries[testId]) {
+        		// If they get the very top grade...
+				if (previousGrade == null) {
+					previousGrade = g;
+				}
+				// Aha, we've matched the grade, so let's (for colour purposes) award them one above
+    			if (g == grade) {
+    				gradeb = gradeboundaries[testId][previousGrade];
+    				break;
+    			}
+    			previousGrade = g;
+    		}
+		}
 		baselineb = gradeboundaries[testId][baseline] ?? null;
 		if (baselineb == null) {
 			return;
 		}
+
 		if (gradeb == baselineb) {
 			element.style.backgroundColor = literalColours ? '#ffeeba' : 'var(--grade-on)';
 		} else if (gradeb > baselineb) {
