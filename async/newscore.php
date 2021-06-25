@@ -52,10 +52,18 @@ if (!is_null($oldResult) && $oldResult->get(TestComponentResult::RECORDED_TS) + 
     TestComponentResult::delete($oldResult->getId());
 }
 
+$returns = [];
+
 $percent = $test->calculatePercent($student, $subject);
 
-echo ("percent-{$test->getId()}-$studentId:" . $percent . ",");
+if (!is_null($percent)) {
+    array_push($returns, "percent-{$test->getId()}-$studentId:" . $percent);
+}
 
 $grade = $test->calculateGrade($student, $subject);
 
-echo ("grade-{$test->getId()}-$studentId:$grade");
+if (!is_null($grade)) {
+    array_push($returns, "grade-{$test->getId()}-$studentId:$grade");
+}
+
+echo implode(",", $returns);

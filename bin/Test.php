@@ -89,14 +89,20 @@ class Test extends DatabaseCollection
         
         $resultComponents = $this->getTestComponentResults($student);
         
+        $gradeComponentExists = false;
         foreach ($this->getTestComponents() as $c) {
             if ($c->get(TestComponent::INCLUDED_IN_GRADE)) {
+                $gradeComponentExists = true;
                 if (empty($resultComponents[$c->getId()])) {
                     return '';
                 } else {
                     $score += $resultComponents[$c->getId()][0]->get(TestComponentResult::SCORE);
                 }
             }
+        }
+        
+        if (!$gradeComponentExists) {
+            return null;
         }
 
         $grade = 0;
@@ -127,8 +133,10 @@ class Test extends DatabaseCollection
             return '';
         }
         
+        $percentComponentExists = false;
         foreach ($this->getTestComponents() as $c) {
             if ($c->get(TestComponent::INCLUDED_IN_PERCENT)) {
+                $percentComponentExists = true;
                 $percentTotal += $c->get(TestComponent::TOTAL);
                 if (empty($resultComponents[$c->getId()])) {
                     return '';
@@ -136,6 +144,10 @@ class Test extends DatabaseCollection
                     $score += $resultComponents[$c->getId()][0]->get(TestComponentResult::SCORE);
                 }
             }
+        }
+        
+        if (!$percentComponentExists) {
+            return null;
         }
 
         if ($percentTotal == 0) {

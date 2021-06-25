@@ -117,7 +117,19 @@ EOF;
                         <th scope="col">&nbsp;</th>
 eof;
 		    foreach ($tests as $t) {
-		        $colspan = count($t->getTestComponents()) + 2;
+                $colspan = 0;
+                $percentComponentExists = false;
+                $gradeComponentExists = false;
+                foreach ($t->getTestComponents() as $c) {
+                    if ($c->get(TestComponent::INCLUDED_IN_PERCENT)) {
+                        $percentComponentExists = true;
+                    }
+                    if ($c->get(TestComponent::INCLUDED_IN_GRADE)) {
+                        $gradeComponentExists = true;
+                    }
+                    $colspan++;
+                }
+		        $colspan += ($percentComponentExists ? 1 : 0) + ($gradeComponentExists ? 1 : 0);
 		        if (isset($teaching_group)) {
 		          $link = "feedback_sheet.php?teaching_group={$teaching_group->getId()}&subject={$subject->getId()}&test={$t->getId()}";
 		          echo "<th colspan=\"$colspan\" class=\"text-center\"><a href=\"$link\">{$t->getName()}</a></th>\n";
@@ -128,10 +140,23 @@ eof;
 		    echo "</tr>\n<tr class=\"excel-filtered\"><th scope=\"col\">Name</th><th>Group</th><th>Ind.</th><th>CWAG</th>";
 		    
 		    foreach ($tests as $t) {
+		        $percentComponentExists = false;
+		        $gradeComponentExists = false;
 		        foreach ($t->getTestComponents() as $c) {
+		            if ($c->get(TestComponent::INCLUDED_IN_PERCENT)) {
+		                $percentComponentExists = true;
+		            }
+		            if ($c->get(TestComponent::INCLUDED_IN_GRADE)) {
+		                $gradeComponentExists = true;
+		            }
 		            echo "<td>{$c->getName()}</td>";
 		        }
-		        echo "<td>%</td><td>Grd</td>\n";
+		        if ($percentComponentExists) {
+		            echo "<td>%</td>";
+		        }
+		        if ($gradeComponentExists) {
+		            echo "<td>Grd</td>\n";
+		        }
 		    }
 		    echo "</tr>\n</thead>\n";
 		    
@@ -166,8 +191,14 @@ eof;
 		                $highlight = (count($popupResults) > 1) ? 'corner-mark' : '';
 		                echo "<td class=\"score-input $highlight\" $title id=\"" . TestComponentResult::SCORE . "-{$c->getId()}-{$s->getId()}\">" . (is_null($result) ? "" : $result->get(TestComponentResult::SCORE)) . "</td>";
 		            }
-		            echo "<td id=\"percent-{$t->getId()}-{$s->getId()}\">{$t->calculatePercent($s)}</td>";
-		            echo "<td id=\"grade-{$t->getId()}-{$s->getId()}\">{$t->calculateGrade($s, $subject)}</td>";
+		            $percent = $t->calculatePercent($s);
+		            if (!is_null($percent)) {
+		                echo "<td id=\"percent-{$t->getId()}-{$s->getId()}\">$percent</td>";
+		            }
+		            $grade = $t->calculateGrade($s, $subject);
+		            if (!is_null($grade)) {
+		                echo "<td id=\"grade-{$t->getId()}-{$s->getId()}\">$grade</td>";
+		            }
 		        }
 		        echo "</tr>\n";
 		    }
@@ -322,15 +353,20 @@ function saved(element, studentId, responseText) {
 	element.style.color = '#00ff00';
 	changes = responseText.split(',');
 	for (i = 0; i < changes.length; i++) {
-		change = changes[i].split(':');
-		$('#' + change[0])[0].innerHTML = change[1];
-		colourise(change);
+		if (changes[i].length > 0) {
+    		change = changes[i].split(':');
+    		$('#' + change[0])[0].innerHTML = change[1];
+    		colourise(change);
+		}
 	}
 	calcCwag(studentId);
 }
 
 function colourise(arr, literalColours = false) {
-	element = $('#' + arr[0])[0];
+	elements = $('#' + arr[0])
+	if (elements.length == 0)
+		return;
+	element = elements[0];
 	components = arr[0].split('-');
 	switch (components[0]) {
 	case 'percent':
@@ -384,7 +420,10 @@ function calcCwag(studentId, literalColours) {
 	number_gradeboundaries = 0;
 	
 	for (t of tests) {
-		gradeElement = $('#' + ['grade', t, studentId].join('-'))[0];
+		gradeElements = $('#' + ['grade', t, studentId].join('-'));
+		if (gradeElements.length == 0)
+			continue;
+		gradeElement = gradeElements[0];
 		grade = gradeElement.innerText;
 		if (grade !== "") {
 			total_gradeboundaries += gradeboundaries[0][grade] ?? 0;
