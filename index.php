@@ -184,7 +184,7 @@ eof;
 		                $result = $results[$c->getId()][0] ?? null;
 		                $popupResults = [];
 		                foreach ($results[$c->getId()] as $r) {
-                            $date = date("y-m-d");
+                            $date = date("y-m-d", $r->get(TestComponentResult::RECORDED_TS));
                             array_push($popupResults, "{$r->get(TestComponentResult::SCORE)}, $date, {$staffNames[$r->get(TestComponentResult::STAFF_ID)]}");
 		                }
 	                    $title = empty($popupResults) ? '' : "title=\"" . implode('&#xA;', $popupResults) . "\"";
