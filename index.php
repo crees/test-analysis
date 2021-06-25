@@ -374,11 +374,11 @@ function colourise(arr, literalColours = false) {
 		if (isNaN(percent)) {
 			return;
 		}
-		switch(Math.trunc(percent / 33)) {
+		switch(Math.trunc(percent / 25)) {
 		case 0:
 			element.style.color = '#dc3545';
 			break;
-		case 1:
+		case 1: case 2:
 			element.style.color = '#ffc107';
 			break;
 		default:
