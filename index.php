@@ -236,7 +236,9 @@ echo "},\n";
 foreach ($tests as $t) {
     echo "\t{$t->getId()}: {";
     foreach ($t->getGradeBoundaries($subject) as $boundary) {
-        echo "'{$boundary->getName()}': {$boundary->get(GradeBoundary::BOUNDARY)}, ";
+        // Here we prepend grade/ to ensure that they are all treated as strings.
+        // This makes sure they appear in the right order!
+        echo "'grade/{$boundary->getName()}': {$boundary->get(GradeBoundary::BOUNDARY)}, ";
     }
     echo "},\n";
 }
@@ -285,13 +287,19 @@ function excel_export() {
 	}
 	for (s of students) {
 		for (t of tests) {
-			cell = $('td#' + ['grade', t, s].join('-'))[0];
-			cell.innerHTML = '="' + cell.innerHTML + '"';
+			cells = $('td#' + ['grade', t, s].join('-'));
+			if (cells.length > 0) {
+				cells[0].innerHTML = '="' + cells[0].innerHTML + '"';
+			}
 		}
-		cell = $('td#' + ['cwag', 0, s].join('-'))[0];
-		cell.innerHTML = '="' + cell.innerHTML + '"';
-		cell = $('td#baseline-' + s)[0];
-		cell.innerHTML = '="' + cell.innerHTML + '"';
+		cells = $('td#' + ['cwag', 0, s].join('-'));
+		if (cells.length > 0) {
+			cells[0].innerHTML = '="' + cells[0].innerHTML + '"';
+		}
+		cells = $('td#baseline-' + s);
+		if (cells.length > 0) {
+			cells[0].innerHTML = '="' + cells[0].innerHTML + '"';
+		}
 	}
 	var link = document.createElement('a');
     link.download = "export.xls";
@@ -402,7 +410,7 @@ function colourise(arr, literalColours = false) {
 		// as they are from TestAnalysis\Test and TestAnalysis\Subject
 		gradeb = null;
 		// If there isn't a grade scored for the test, let's just score zero
-		if (gradeboundaries[testId][grade] == null) {
+		if (gradeboundaries[testId]['grade/'+grade] == null) {
 			gradeb = 0;
 		} else {
 			// We will keep going until we match the grade, then award green until the 'next' grade
@@ -413,14 +421,14 @@ function colourise(arr, literalColours = false) {
 					previousGrade = g;
 				}
 				// Aha, we've matched the grade, so let's (for colour purposes) award them one above
-    			if (g == grade) {
+    			if (g.replace('grade/', '') == grade) {
     				gradeb = gradeboundaries[testId][previousGrade];
     				break;
     			}
     			previousGrade = g;
     		}
 		}
-		baselineb = gradeboundaries[testId][baseline] ?? null;
+		baselineb = gradeboundaries[testId]['grade/'+baseline] ?? null;
 		if (baselineb == null) {
 			return;
 		}
@@ -448,7 +456,7 @@ function calcCwag(studentId, literalColours) {
 		gradeElement = gradeElements[0];
 		grade = gradeElement.innerText;
 		if (grade !== "") {
-			total_gradeboundaries += gradeboundaries[0][grade] ?? 0;
+			total_gradeboundaries += gradeboundaries[0]['grade/'+grade] ?? 0;
 			number_gradeboundaries++;
 		}
 	}
