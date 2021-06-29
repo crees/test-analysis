@@ -230,14 +230,14 @@ const gradeboundaries = {
 <?php
 echo "\t0: {";
 foreach ($subject->getGradeBoundaries() as $boundary) {
-    echo "'{$boundary->getName()}': {$boundary->get(GradeBoundary::BOUNDARY)}, ";
+    // Here we prepend grade/ to ensure that they are all treated as strings.
+    // This makes sure they appear in the right order!
+    echo "'grade/{$boundary->getName()}': {$boundary->get(GradeBoundary::BOUNDARY)}, ";
 }
 echo "},\n";
 foreach ($tests as $t) {
     echo "\t{$t->getId()}: {";
     foreach ($t->getGradeBoundaries($subject) as $boundary) {
-        // Here we prepend grade/ to ensure that they are all treated as strings.
-        // This makes sure they appear in the right order!
         echo "'grade/{$boundary->getName()}': {$boundary->get(GradeBoundary::BOUNDARY)}, ";
     }
     echo "},\n";
@@ -476,14 +476,11 @@ function calcCwag(studentId, literalColours) {
 	cwag = null;
 	for (grade in gradeboundaries[0]) {
 		if (gradeboundaries[0][grade] === lower) {
-			cwag = grade;
+			cwag = grade.replace('grade/', '');
 			break;
 		}
 	}
-	if (cwag === null) {
-		return;
-	}
-	cwagElement.innerText = cwag;
+	cwagElement.innerText = cwag ?? 0;
 	colourise([['cwag', 0, studentId].join('-')], literalColours);
 }
 
