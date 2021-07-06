@@ -28,6 +28,7 @@ if (isset($_POST['newtest-name']) && isset($_POST['form_serial']) && (session_st
             $detail[Test::ID] = $tId;
             $detail[Test::NAME] = $_POST[Test::NAME . "-$tId"];
             $detail[Test::DEPARTMENT_ID] = $_POST["test-department-{$t->getid()}"];
+            $detail[Test::CUSTOM_GRADE_BOUNDARIES] = $t->get(Test::CUSTOM_GRADE_BOUNDARIES);
             $newTest = new Test($detail);
             
             $newTest->commit();
