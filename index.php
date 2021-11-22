@@ -265,7 +265,7 @@ function inputify() {
     				continue;
     			}
                 //echo val, tabindex, "number", onchange=\"save('{$t->getId()}', '{$s->getId()}', '" . TestResult::SCORE_A . "')\"");
-    			elements[0].innerHTML = '<input class="form-control border-0 px-1" tabindex="' + tabindex + '" value="' + val + '" type="number" id="' + id + '" onchange="save(\'' + tc + '\', \'' + s + '\')">';
+    			elements[0].innerHTML = '<input class="form-control border-0 px-1" tabindex="' + tabindex + '" value="' + val + '" type="number" onwheel="this.blur()" id="' + id + '" onchange="save(\'' + tc + '\', \'' + s + '\')">';
     			elements[0].classList.add('nopadding');
     			tabindex++;
     		}
