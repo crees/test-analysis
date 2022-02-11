@@ -109,7 +109,6 @@ if ($year_page == 0) {
 }
 
 $year_page++;
-//echo "<div class=\"row\"><a href=\"?baseline_done=yes&year_page=$year_page\" class=\"btn btn-primary\">Now click for Page $year_page</a></div>";
 
 $allStudents = Student::retrieveAll();
 
@@ -163,4 +162,5 @@ foreach ($data['AcademicUnit'] as $group) {
     //echo "<div class=\"row\">Group {$dGroup->getName()} now has $numGroupMembers members.</div>";
 }
 
-header("Location: arbor_import.php?baseline_done=yes&year_page=$year_page");
+//header("Location: arbor_import.php?baseline_done=yes&year_page=$year_page");
+echo "<div class=\"row\"><a href=\"?baseline_done=yes&year_page=$year_page\" class=\"btn btn-primary\">Now click for Page $year_page</a></div>";
