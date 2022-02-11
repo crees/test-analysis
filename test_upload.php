@@ -127,17 +127,17 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
                             //     Fun exercise for the reader?
                             if (isset($components[$currentComponentIndex+1]) && 
                                 $_POST["page-for-component-{$components[$currentComponentIndex+1]->getId()}"] == $num+1
-                            ) {
-                                $currentComponentIndex++;
-                            }
-                            $page = new ScannedTestPage([
-                                ScannedTestPage::SCANNEDTEST_ID => $scannedTest->getId(),
-                                ScannedTestPage::TESTCOMPONENT_ID => $components[$currentComponentIndex]->getId(),
-                                ScannedTestPage::PAGE_NUM => $num,
-                            ]);
-                            $page->setImageData($p);
-                            // Committed
-                        }   
+                                ) {
+                                    $currentComponentIndex++;
+                                }
+                                $page = new ScannedTestPage([
+                                    ScannedTestPage::SCANNEDTEST_ID => $scannedTest->getId(),
+                                    ScannedTestPage::TESTCOMPONENT_ID => $components[$currentComponentIndex]->getId(),
+                                    ScannedTestPage::PAGE_NUM => $num,
+                                ]);
+                                $page->setImageData($p);
+                                // Committed
+                        }
                     }
                 }
             }
@@ -152,7 +152,18 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
 <html>
 
 <head>
-<?php require "bin/head.php"; ?>
+<?php require "bin/head.php";
+
+if (isset($test)) { ?>
+    <script>
+    $(function () {
+        $("#checkall_link").click(function () {
+            $("input.set-for-checkbox").prop('checked', 'checked');
+            this.style.display = 'none';
+        });
+    });
+    </script>
+<?php } ?>
 </head>
 
 <body>
@@ -272,7 +283,7 @@ eof;
                     <tr>
                         <th rowspan="2" scope="col">Name</th>
                         <th rowspan="2" scope="col">Group</th>
-                        <th rowspan="2" scope="col">Assign to this student</th>
+                        <th rowspan="2" scope="col">Assign to this student <a href="#void" id="checkall_link">(Select all)</a></th>
                         <th rowspan="2" scope="col">Extra time for test (+/- minutes allowed)</th>
                     </tr>
                 </thead>
@@ -285,7 +296,7 @@ eof;
 		            echo "<td class=\"text-success\">Assigned successfully</td><td><div class=\"form-check text-danger\"><input class=\"form-check-input\" type=\"checkbox\" name=\"delete-for-" . $s->getId() . "\" id=\"delete-for-" . $s->getId() . "\">";
 		            echo "<label class=\"form-check-label\" for=\"delete-for-" . $s->getId() . "\">Delete uploaded {$test->getName()}</label><div></td>";
 		        } else {
-		            echo "<td><div class=\"form-check\"><input type=\"checkbox\" class=\"form-check-input\" name=\"set-for-" . $s->getId() . "\" checked></div></td>";
+		            echo "<td><div class=\"form-check\"><input type=\"checkbox\" class=\"form-check-input set-for-checkbox\" name=\"set-for-" . $s->getId() . "\"></div></td>";
 		            echo "<td><input type=\"number\" class=\"form-control-input\" name=\"input-minutes-{$s->getId()}\" value=\"0\"></td>";
 		        }
 		        echo "</tr>\n";
