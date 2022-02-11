@@ -3,12 +3,14 @@ namespace TestAnalysis;
 
 /* User authenticated? */
 
+/* Skip auth if cron.php */
+
 if (isset($_GET['backupkey']) && $_GET['backupkey'] == Config::backups_key && isset($backup_key_override_auth)) {
     // No need to auth, special case for backups
     if (empty(Config::backups_key)) {
         die('You must first set a backup key in Config.php');
     }
-} else {
+} else if (!isset($cron_auth_skip)){
     if(!isset($_SERVER['PHP_AUTH_USER'])) {
         header('WWW-Authenticate: Basic realm="Username in lower case-- no capitals"');
         header('HTTP/1.0 401 Unauthorized');

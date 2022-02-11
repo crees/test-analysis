@@ -46,10 +46,6 @@ if (!class_exists("Config")) {
      * We start the session timer on creation, and destroy it after that time.
      */
     
-    if (rand(1, 100) == 1) {
-        ScannedTestPage::garbageCollect(true);
-    }
-    
     if (Config::use_sessions == true) {
         $timeout_duration = 6400;
         
