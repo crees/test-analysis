@@ -12,19 +12,44 @@ if (isset($_GET['removeTest'])) {
     $url = explode("?", "https://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]")[0];
     header("Location: $url");
 } else {
-    foreach ($_POST as $k => $value) {
-        if (!empty($value)) {
-            if (str_contains($k, "subject-add-test-")) {
-                $test = Test::retrieveByDetail(Test::ID, str_replace("subject-add-test-", "", $k))[0];
-                $subject = Subject::retrieveByDetail(Subject::ID, $value)[0];
-                $subject->addTest($test);
-            }
-        }
+    if (!empty($_GET['addTest']) && !empty($_GET['addToSubject'])) {
+        $test = Test::retrieveByDetail(Test::ID, $_GET['addTest'])[0];
+        $subject = Subject::retrieveByDetail(Subject::ID, $_GET['addToSubject'])[0];
+        $subject->addTest($test);
+        die("{$test->getId()} {$subject->getId()} {$subject->getName()}");
     }
 }
 ?>
 <!doctype html>
-<html><head><?php require "../bin/head.php" ?></head>
+<html><head><?php require "../bin/head.php" ?>
+<script>
+function addTest(testId) {
+	select = $('select#subject-add-test-' + testId)[0];
+	subjectSelOption = $('select#subject-add-test-' + testId + ' option:selected')[0];
+	subjectId = subjectSelOption.value;
+	if (subjectId != "") {
+    	console.log(select);
+    	console.log(subjectSelOption);
+    	select.remove(subjectSelOption.index);
+    	var xhr = new XMLHttpRequest();
+        xhr.addEventListener("load", testAdded);
+        xhr.open("GET", 'manage_test_subject_membership.php?addTest=' + testId + '&addToSubject=' + subjectId);
+    	xhr.send();
+	}
+}
+
+function testAdded() {
+	console.log(this.response);
+	m = this.response.match(/(\d+) (\d+) (.+)/);
+	console.log(m);
+	test = m[1];
+	sId = m[2];
+	subject = m[3];
+	cell = $('td#test-subjects-list-' + test)[0];
+	cell.innerHTML += ', <a href="?removeTest=' + test + '&removeFromSubject=' + sId + '">' + subject + '</a>';
+}
+</script>
+</head>
 <body>
 <div class="container">
     <nav class="navbar navbar-expand">
@@ -48,7 +73,6 @@ if (isset($_GET['removeTest'])) {
         	</ul>
     	</div>
     </nav>
-<form method="post">
 <table class="table table-sm table-hover">
 <thead><tr><th>Test</th><th>Subjects (click to remove)</th><th>Add subject</th></tr></thead>
 <?php
@@ -63,9 +87,9 @@ foreach ($departments as $dept) {
             array_push($names, "<a href=\"?removeTest=" . $t->getId() . "&removeFromSubject=" . $s->getId() . "\">" . $s->getName() . "</a>");
             unset($allSubjects[array_search($s, $allSubjects)]);
         }
-        echo "<td>" . implode(", ", $names) . "</td>";
+        echo "<td id=\"test-subjects-list-{$t->getId()}\">" . implode(", ", $names) . "</td>";
         
-        echo "<td><select name=\"subject-add-test-" . $t->getId() . "\" onchange=\"this.form.submit()\">";
+        echo "<td><select id=\"subject-add-test-" . $t->getId() . "\" onchange=\"addTest({$t->getId()})\">";
         echo "<option value=\"\" selected>Add subject to " . $t->getName() . "</option>";
         foreach ($allSubjects as $s) {
             echo "<option value=\"" . $s->getId() . "\">" . $s->getName() . "</option>";
@@ -76,7 +100,6 @@ foreach ($departments as $dept) {
 }
 ?>
 </table>
-</form>
 </div>
 </body>
 </html>
