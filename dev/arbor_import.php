@@ -30,10 +30,10 @@ if (empty($_GET['baseline_done'])) {
             $details = [];
             // Does this Baseline already exist?  Overwrite if so.
             $details[Baseline::ID] = $baseline['id'];
-            $details[Baseline::GRADE] = $baseline['grade']['displayName'];
-            if (is_null($details[Baseline::GRADE])) {
+            if (is_null($baseline['grade']) || is_null($baseline['grade']['displayName'])) {
                 continue;
             }
+            $details[Baseline::GRADE] = $baseline['grade']['displayName'];
             $details[Baseline::STUDENT_ID] = $baseline['student']['id'];
             $details[Baseline::NAME] = $baseline['assessment']['displayName'];
             $details[Baseline::MIS_ASSESSMENT_ID] = $baseline['assessment']['id'];
@@ -43,7 +43,42 @@ if (empty($_GET['baseline_done'])) {
         $page_num += 1;
     }
     
-    die('<a href="?baseline_done=yes" class="btn btn-primary">Baselines done!  Now click to import groups</a>');
+    ?>
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <title>Import from Arbor</title>
+    </head>
+    <body>
+    <h1>Importing from Arbor...</h1>
+    <div id="status">Baselines done!  Please wait while we work on Page 0...</div>
+    <script>
+	function requested() {
+		page = this.response.match(/\d+/)[0];
+		statusparagraph = document.getElementById('status');
+		if (page == 0) {
+			statusparagraph.innerHTML = 'Complete!  <a href="<?= Config::site_url ?>/dev">Back to database.';
+		} else {
+			statusparagraph.innerHTML = "Working on page " + page + "...";
+			doPage(page);
+		}			
+	}
+
+	function doPage(page) {
+		var xhr = new XMLHttpRequest();
+	    xhr.addEventListener("load", requested);
+	    xhr.open("GET", 'arbor_import.php?baseline_done=yes&year_page=' + page);
+		xhr.send();
+	}
+
+	doPage(0);
+
+    </script>
+    </body>
+    </html>
+    
+    <?php
+    die();
 }
 
 if (empty($_GET['year_page'])) {
@@ -74,33 +109,8 @@ $query = "query {
 $data = $client->rawQuery($query)->getData();
 
 if (empty($data['AcademicUnit'])) {
-?>    <!doctype html>
-    <html>
-    <head><?php require "../bin/head.php" ?></head>
-<body>
-	<div class="container">
-        <nav class="navbar navbar-expand">
-            <!-- Brand -->
-            <a class="navbar-brand">Navigation</a>
-            
-            <!-- Toggler/collapsibe Button -->
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
-            	<span class="navbar-toggler-icon">collapse</span>
-            </button>
-            
-            <!-- Navbar links -->
-            <div class="collapse navbar-collapse" id="collapsibleNavbar">
-            	<ul class="navbar-nav">
-            		<li class="nav-item">
-                		<a class="nav-link" href="../">Home</a>
-                	</li>
-                	<li class="nav-item">
-                		<a class="nav-link" href="index.php">Database management</a>
-                	</li>
-            	</ul>
-        	</div>
-        </nav>
-<?php die("<div class=\"row\">Complete!</div></div></body></html>");
+    // That's it, done.    
+    die('0');
 }
 
 // Clear old memberships out
@@ -163,4 +173,5 @@ foreach ($data['AcademicUnit'] as $group) {
 }
 
 //header("Location: arbor_import.php?baseline_done=yes&year_page=$year_page");
-echo "<div class=\"row\"><a href=\"?baseline_done=yes&year_page=$year_page\" class=\"btn btn-primary\">Now click for Page $year_page</a></div>";
+//echo "<div class=\"row\"><a href=\"?baseline_done=yes&year_page=$year_page\" class=\"btn btn-primary\">Now click for Page $year_page</a></div>";
+echo "$year_page";
