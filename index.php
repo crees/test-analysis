@@ -168,7 +168,7 @@ eof;
 		    
 		    foreach ($students as $s) {
 		        echo "<tr>\n";
-		        echo "<th scope=\"row\" studentId=\"{$s->getId()}\"><a href=\"student_individual_scores.php?student=" . $s->getId() . "\">" . $s->getName() . "</a></th>\n";
+		        echo "<th scope=\"row\" studentId=\"{$s->getId()}\"><a href=\"student_individual_scores.php?student=" . $s->getId() . "\">" . $s->getLastFirstName() . "</a></th>\n";
 		        echo "<td>";
 		        echo ($s->getLabel('group') ?? $teaching_group)->getName();
 		        echo "</td>";

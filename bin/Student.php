@@ -27,6 +27,10 @@ class Student extends DatabaseCollection
         return $this->details[self::FIRST_NAME] . " " . $this->details[self::LAST_NAME];
     }
     
+    public function getLastFirstName() {
+        return "{$this->details[self::LAST_NAME]}, {$this->details[self::FIRST_NAME]}";
+    }
+    
     /**
      * Returns the teaching group the student is in, in the context of the Subject
      * 
