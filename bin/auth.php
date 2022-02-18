@@ -1,6 +1,10 @@
 <?php
 namespace TestAnalysis;
 
+function auth_generate_key($prefix) {
+    return hash("sha256", $prefix . ";key:" . Config::secret_key);
+}
+
 /* User authenticated? */
 
 /* Skip auth if cron.php */
@@ -10,10 +14,17 @@ if (isset($_GET['backupkey']) && $_GET['backupkey'] == Config::backups_key && is
     if (empty(Config::backups_key)) {
         die('You must first set a backup key in Config.php');
     }
+} else if (isset($auth_key_prefix) && isset($_GET['key'])) {
+    if (auth_generate_key($auth_key_prefix) == $_GET['key']) {
+        $key_authed = true;
+    } else {
+        die('Auth key does not match');
+    }
 } else if (!isset($auth_skip)){
     if(!isset($_SERVER['PHP_AUTH_USER'])) {
         header('WWW-Authenticate: Basic realm="Username in lower case-- no capitals"');
         header('HTTP/1.0 401 Unauthorized');
+        die();
     }
     
     $auth_user = preg_replace('/@' . strtolower(Config::site_emaildomain) . '/', "", strtolower($_SERVER['PHP_AUTH_USER']));

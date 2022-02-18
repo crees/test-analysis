@@ -10,6 +10,10 @@ class Config {
     const site_supportemail = "reescm@droitwichspahigh.worcs.sch.uk";
     const site_small_logo = "dshs.jpg"; // Path relative to site_url/img/
     
+    // Put something long and random here.  This is deliberately a syntax error until you fix it!
+    REMOVE THIS LINE ONCE SECRET DONE
+    const secret_key = 'change_this!';
+
     const student_instruction_video = 'https://youtu.be/Hm42t_5_ijs';
     
     const use_sessions = false;

@@ -19,7 +19,7 @@ if (!empty($getVars)) {
 <nav class="navbar navbar-expand">
             <!-- Brand -->
     <a class="navbar-brand"><?php 
-    $staff = Staff::me($auth_user);
+    $staff = $staff ?? Staff::me($auth_user);
     echo $staff->getName();
     if ($staff->adminType() == Staff::ADMIN_TYPE_GLOBAL) {
         echo "<span class=\"text-danger\"> (admin)</span>";

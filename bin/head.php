@@ -7,7 +7,7 @@
 <?php
 // Sort themes
 
-$staff = Staff::me($auth_user);
+$staff = $staff ?? Staff::me($auth_user);
 
 if (!is_null($staff)) {
     if (isset($_GET['theme'])) {

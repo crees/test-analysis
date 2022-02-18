@@ -1,9 +1,21 @@
 <?php
 namespace TestAnalysis;
 
+// So we have a special case here.  If the user has selected subject *and* teaching group
+// *and* has a matching key, no need to auth.  Also, flag that we don't want headers.
+
+if (!empty($_GET['key']) && !empty($_GET['subject']) && !empty($_GET['teaching_group']) && !empty($_GET['user'])) {
+    $auth_key_prefix = "subject:{$_GET['subject']};teaching_group:{$_GET['teaching_group']};user:{$_GET['user']}";
+}
+
 require "bin/classes.php";
 
-$staff = Staff::me($auth_user);
+if ($key_authed ?? false == true) {
+    $table_only = true;
+    $staff = Staff::retrieveByDetail(Staff::ID, $_GET['user'])[0];
+} else {
+    $staff = Staff::me($auth_user);
+}
 
 $departments = $staff->getDepartments(true);
 $allSubjects = [];
@@ -104,6 +116,7 @@ EOF;
 		        echo "<div>No tests defined for selected subject.</div>";
 		        return;
 		    }
+		    $livedatalink = "?subject={$_GET['subject']}&teaching_group={$_GET['teaching_group']}&user={$staff->getId()}&key=" . auth_generate_key("subject:{$_GET['subject']};teaching_group:{$_GET['teaching_group']};user:{$staff->getId()}");
 		    echo <<< eof
             <input type="button" id="editbutton" class="form-control btn btn-success" value="Edit values" onclick="inputify()">
             <input type="button" id="exportbutton" class="form-control btn btn-warning" value="Export to Excel" onclick="excel_export()">
@@ -111,7 +124,7 @@ EOF;
             <table class="table table-bordered table-sm table-hover" id="data-table">
                 <thead>
                     <tr>
-                        <th scope="col">&nbsp;</th>
+                        <td scope="col"><a href="$livedatalink" title="Copy this link and use Excel's Data>Get Data>From Web and paste into there.  No need for authentication with this, but don't then share the spreadsheet outside the organisation!">Live data link</a></td>
                         <th scope="col">&nbsp;</th>
                         <th scope="col">&nbsp;</th>
                         <th scope="col">&nbsp;</th>
@@ -207,6 +220,9 @@ eof;
             </table>
             </div>
 eof;
+		}
+		if (isset($_GET['key'])) {
+		    die("<!--Do not allow users to use keys to mess around as other users!-->");
 		}
 		?>
 	</div>
