@@ -10,7 +10,7 @@ if (isset($_GET['backupkey']) && $_GET['backupkey'] == Config::backups_key && is
     if (empty(Config::backups_key)) {
         die('You must first set a backup key in Config.php');
     }
-} else if (!isset($cron_auth_skip)){
+} else if (!isset($auth_skip)){
     if(!isset($_SERVER['PHP_AUTH_USER'])) {
         header('WWW-Authenticate: Basic realm="Username in lower case-- no capitals"');
         header('HTTP/1.0 401 Unauthorized');

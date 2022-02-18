@@ -1,7 +1,7 @@
 <?php
 namespace TestAnalysis;
 
-$cron_auth_skip = true;
+$auth_skip = true;
 
 include "bin/classes.php";
 
