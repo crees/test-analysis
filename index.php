@@ -276,6 +276,7 @@ function inputify() {
 function excel_export() {
 	var table = $('table#data-table')[0];
 	// Add Arbor IDs
+	table.rows[0].insertCell(0).appendChild(document.createTextNode(" "));
 	table.rows[1].insertCell(0).appendChild(document.createTextNode("Arbor ID"));
 	for (r of table.lastChild.rows) {
 		r.insertCell(0).appendChild(document.createTextNode(r.cells[1].attributes["studentId"].value));
