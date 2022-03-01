@@ -180,6 +180,15 @@ abstract class DatabaseCollection
         }
     }
     
+    protected function update_direct($detail, $value) {
+        if (is_null(self::$db)) {
+            self::$db = new Database();
+        }
+        $db = self::$db;
+        
+        $db->dosql("UPDATE `" . explode('\\', static::class)[1] . "` SET `$detail` = '$value' WHERE `" . self::ID . "` = {$this->getId()};");
+    }
+    
     public function getId() { return $this->details[self::ID]; }
     public function getName() { return $this->details[self::NAME]; }
     

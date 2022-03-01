@@ -282,6 +282,10 @@ case 25:
     }
     
 case 26:
+    $db->dosql("ALTER TABLE `TestComponentResult` ADD inactive INT(1) NOT NULL DEFAULT 0;");
+    $db->dosql("UPDATE `db_version` SET version = 27;");
+    
+case 27:
     
 default:
 

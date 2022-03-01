@@ -8,6 +8,7 @@ class TestComponentResult extends DatabaseCollection
     const SCORE = 'score';
     const RECORDED_TS = 'recorded_ts';
     const STAFF_ID = 'Staff_id';
+    const INACTIVE = 'inactive';
     
     public function __construct(array $details)
     {
@@ -24,6 +25,19 @@ class TestComponentResult extends DatabaseCollection
             $this->details[self::RECORDED_TS] = null;
         }
         $this->details[self::STAFF_ID] = $details[self::STAFF_ID];
+        $this->details[self::INACTIVE] = $details[self::INACTIVE] ?? 0;
+    }
+    
+    public function set(String $field, String $value) {
+        if ($field == self::INACTIVE) {
+            $this->details[$field] = ($value ? 1 : 0);
+        } else {
+            $this->details[$field] = $value;
+        }
+    }
+    
+    public function toggleActive() {
+        $this->update_direct(self::INACTIVE, ($this->details[self::INACTIVE] ? 0 : 1));
     }
     
     function __destruct()

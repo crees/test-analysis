@@ -164,14 +164,15 @@ class Test extends DatabaseCollection
      * ]
      * 
      * @param Student $student
+     * @param bool $includeInactive=false Include inactive results
      * @return array
      */
-    public function getTestComponentResults(Student $student) {
+    public function getTestComponentResults(Student $student, bool $includeInactive = false) {
         if (isset($this->getLabels()["TestResultComponents-{$student->getId()}"])) {
             return $this->getLabels()["TestResultComponents-{$student->getId()}"];
         }   
         $ret = [];
-        $results = TestComponentResult::retrieveByDetail(TestComponentResult::STUDENT_ID, $student->getId(), TestComponentResult::RECORDED_TS . ' DESC');
+        $results = TestComponentResult::retrieveByDetails([TestComponentResult::STUDENT_ID, TestComponentResult::INACTIVE], [$student->getId(), 0], TestComponentResult::RECORDED_TS . ' DESC');
         foreach ($this->getTestComponents() as $c) {
             $resultsForThisComponent = [];
             foreach ($results as $r) {

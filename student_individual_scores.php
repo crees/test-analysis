@@ -19,6 +19,15 @@ if (isset($_GET['resultToDelete'])) {
     TestComponentResult::delete($_GET['resultToDelete']);
 }
 
+if (isset($_GET['resultToToggle'])) {
+    $r = TestComponentResult::retrieveByDetail(TestComponentResult::ID, $_GET['resultToToggle']);
+    if (isset($r[0])) {
+        $r[0]->toggleActive();
+        header("location: student_individual_scores.php?student={$_GET['student']}");
+        die();
+    }
+}
+
 $student = $student[0];
 
 ?>
@@ -54,7 +63,7 @@ $student = $student[0];
 		
 		<h4 class="mb-4">Student detail viewer for <?= $student->getName() ?></h4>
 		
-		<div>Here is a raw list of student scores-- you can delete one by clicking on it.  Take care!</div>
+		<div>Here is a raw list of student scores-- you can set one inactive by clicking on it-- effectively deleting it, although you can always undo deletion by clicking it again.</div>
 		
 		<table class="table table-hover">
 			<thead>
@@ -71,8 +80,12 @@ $student = $student[0];
 			<?php
 			$staffCache = [];
 			foreach (TestComponentResult::retrieveByDetail(TestComponentResult::STUDENT_ID, $student->getId(), TestComponentResult::RECORDED_TS . ' DESC') as $r) {
-			    $link = "<a href=\"?student=" . $student->getId() . "&resultToDelete=" . $r->getId() . "\">";
-			    echo "<tr>";
+			    $link = "<a href=\"?student=" . $student->getId() . "&resultToToggle=" . $r->getId() . "\">";
+			    if ($r->get(TestComponentResult::INACTIVE) == 1) {
+			        echo "<tr class=\"bg-danger\">";
+			    } else {
+			        echo "<tr>";
+			    }
                 $component = TestComponent::retrieveByDetail(TestComponent::ID, $r->get(TestComponentResult::TESTCOMPONENT_ID))[0];
 			    $test = Test::retrieveByDetail(Test::ID, $component->get(TestComponent::TEST_ID))[0];
                 echo "<td>$link{$test->getName()}: {$component->getName()}</a></td>";
