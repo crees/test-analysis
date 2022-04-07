@@ -4,7 +4,7 @@ namespace TestAnalysis;
 // So we have a special case here.  If the user has selected subject *and* teaching group
 // *and* has a matching key, no need to auth.  Also, flag that we don't want headers.
 
-if (!empty($_GET['key']) && !empty($_GET['subject']) && !empty($_GET['teaching_group']) && !empty($_GET['user'])) {
+if (!empty($_GET['key']) && !empty($_GET['subject']) && isset($_GET['teaching_group']) && !empty($_GET['user'])) {
     $auth_key_prefix = "subject:{$_GET['subject']};teaching_group:{$_GET['teaching_group']};user:{$_GET['user']}";
 }
 
@@ -129,6 +129,9 @@ EOF;
                         <th scope="col">&nbsp;</th>
                         <th scope="col">&nbsp;</th>
 eof;
+		    if (isset($table_only) && $table_only) {
+		        echo '<th scope="col">&nbsp;</th>';
+		    }
 		    foreach ($tests as $t) {
                 $colspan = 0;
                 $percentComponentExists = false;
@@ -150,7 +153,11 @@ eof;
 		          echo "<th colspan=\"$colspan\" class=\"text-center\">{$t->getName()}</th>\n";
 		        }
 		    }
-		    echo "</tr>\n<tr class=\"excel-filtered\"><th scope=\"col\">Name</th><th>Group</th><th>Ind.</th><th>CWAG</th>";
+		    echo "</tr>\n<tr class=\"excel-filtered\">";
+		    if (isset($table_only) && $table_only) {
+		        echo '<th scope="col">Arbor ID</th>';
+		    }
+		    echo "<th scope=\"col\">Name</th><th>Group</th><th>Ind.</th><th>CWAG</th>";
 		    
 		    foreach ($tests as $t) {
 		        $percentComponentExists = false;
@@ -181,6 +188,9 @@ eof;
 		    
 		    foreach ($students as $s) {
 		        echo "<tr>\n";
+		        if (isset($table_only) && $table_only) {
+		            echo "<th scope=\"row\">{$s->getId()}</th>";
+		        }
 		        echo "<th scope=\"row\" studentId=\"{$s->getId()}\"><a href=\"student_individual_scores.php?student=" . $s->getId() . "\">" . $s->getLastFirstName() . "</a></th>\n";
 		        echo "<td>";
 		        echo ($s->getLabel('group') ?? $teaching_group)->getName();
