@@ -8,10 +8,12 @@ class Test extends DatabaseCollection
     const TARGETS = 'targets';
     
     protected $components;
+    protected $subjects;
     
     public function __construct(array $details)
     {
         $this->components = null;
+        $this->subjects = null;
         $this->details[self::ID] = $details[self::ID] ?? null;
         $this->details[self::NAME] = $details[self::NAME];
         $this->details[self::DEPARTMENT_ID] = $details[self::DEPARTMENT_ID];
@@ -62,11 +64,13 @@ class Test extends DatabaseCollection
     }
     
     public function getSubjects() {
-        $s = [];
-        foreach(TestSubjectMembership::retrieveByDetail(TestSubjectMembership::TEST_ID, $this->getId()) as $m) {
-            array_push($s, Subject::retrieveByDetail(Subject::ID, $m->get(TestSubjectMembership::SUBJECT_ID))[0]);
+        if (is_null($this->subjects)) {
+            $this->subjects = [];
+            foreach(TestSubjectMembership::retrieveByDetail(TestSubjectMembership::TEST_ID, $this->getId()) as $m) {
+                array_push($this->subjects, Subject::retrieveByDetail(Subject::ID, $m->get(TestSubjectMembership::SUBJECT_ID))[0]);
+            }
         }
-        return $s;
+        return $this->subjects;
     }
     
     public function getTotal() {
