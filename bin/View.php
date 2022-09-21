@@ -15,7 +15,11 @@ abstract class View
         }
         $ret = "";
         $ret .= "<td style=\"padding: 0\" $tdextras>";
-        $ret .= "<input class=\"form-control border-0 px-1\" type=\"$type\" name=\"$name\" id=\"$name\" value=\"$value\" $tabindex $extras>";
+        if ($type == 'textarea') {
+            $ret .= "<textarea class=\"form-control border-0 px-1\" name=\"$name\" id=\"$name\" $tabindex $extras>$value</textarea>";
+        } else {
+            $ret .= "<input type=\"$type\" class=\"form-control border-0 px-1\" name=\"$name\" id=\"$name\" value=\"$value\" $tabindex $extras>";
+        }
         $ret .= "</td>\n";
         return $ret;
     }
