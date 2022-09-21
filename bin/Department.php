@@ -3,8 +3,11 @@ namespace TestAnalysis;
 
 class Department extends DatabaseCollection
 {
+    protected $subjects;
+    
     public function __construct(array $details)
     {
+        $this->subjects = null;
         $this->details[self::NAME] = $details[self::NAME];
         if (isset($details[self::ID])) {
             $this->details[self::ID] = $details[self::ID];
@@ -56,6 +59,13 @@ class Department extends DatabaseCollection
             array_push($s, Staff::retrieveByDetail(Staff::ID, $membership->get(StaffDepartmentMembership::STAFF_ID))[0]);
         }
         return $s;
+    }
+
+    public function getSubjects($sort = Subject::NAME) {
+        if (is_null($this->subjects)) {
+            $this->subjects = Subject::retrieveByDetail(Subject::DEPARTMENT_ID, $this->getId(), $sort);
+        }
+        return $this->subjects;
     }
     
     protected function _getUsers($isAdmin) {
