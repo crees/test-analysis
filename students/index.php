@@ -72,6 +72,15 @@ if (isset($_GET['getpdf']) && !empty($_GET['test'])) {
     die();
 }
 
+if (isset($_GET['getimgs']) && !empty($_GET['test'])) {
+    $test = Test::retrieveByDetail(Test::ID, $_GET['test'])[0];
+    $scannedTest = ScannedTest::retrieveByDetails([ScannedTest::TEST_ID, ScannedTest::STUDENT_ID], [$test->getId(), $student->getId()])[0];
+    foreach (ScannedTestPage::retrieveByDetail(ScannedTestPage::SCANNEDTEST_ID, $scannedTest->getId(), ScannedTestPage::PAGE_NUM) as $page) {
+        echo "<img style=\"width: 100%\" src=\"../async/getScannedImage.php?imghash={$page->get(ScannedTestPage::SHA)}\">";
+    }
+    die();
+}
+
 if (!empty($_FILES)) {
     foreach ($scannedTest = ScannedTest::retrieveByDetail(ScannedTest::STUDENT_ID, $student->getId()) as $st) {
         if (isset($_FILES["input-file-{$st->getId()}"])) {
@@ -251,7 +260,7 @@ if (!isset($_GET['test'])) {
             $test_total += $c->get(TestComponent::TOTAL);
         }
         echo "<li class=\"list-group-item\">";
-        echo "<a href=\"?test={$st->get(ScannedTest::TEST_ID)}&getpdf=yes&masquerade={$auth_user}\">$test_name</a>";
+        echo "<a href=\"?test={$st->get(ScannedTest::TEST_ID)}&getimgs=yes&masquerade={$auth_user}\">$test_name</a>";
         $total = 0;
         foreach (ScannedTestPage::retrieveByDetail(ScannedTestPage::SCANNEDTEST_ID, $st->getId()) as $p) {
             $total += $p->get(ScannedTestPage::PAGE_SCORE);
