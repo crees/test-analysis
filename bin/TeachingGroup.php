@@ -26,7 +26,7 @@ class TeachingGroup extends DatabaseCollection
         }
         $studentIds = array_map(function($x) { return $x['Student_id']; }, $arr);
         $students = array_map(function($x) { return Student::retrieveByDetail(Student::ID, $x)[0] ?? null; }, $studentIds);
-        uasort($students, function($a, $b) { return $a->getLastFirstName() > $b->getLastFirstName();});
+        uasort($students, function($a, $b) { return $a->getLastFirstName() <=> $b->getLastFirstName();});
         return $students;
     }
     
