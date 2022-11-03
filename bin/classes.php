@@ -13,6 +13,7 @@ if (!class_exists("Config")) {
     
     require "DatabaseCollection.php";
     require "Baseline.php";
+    require "Demographic.php";
     require "Department.php";
     require "FeedbackSheet.php";
     require "GradeBoundary.php";

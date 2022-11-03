@@ -53,21 +53,30 @@ if (empty($_GET['baseline_done'])) {
     <h1>Importing from Arbor...</h1>
     <div id="status">Baselines done!  Please wait while we work on Page 0...</div>
     <script>
+    var kidsDone = 0;
 	function requested() {
-		page = this.response.match(/\d+/)[0];
+		var page = this.response.match(/^\d+$/)[0];
 		statusparagraph = document.getElementById('status');
 		if (page == 0) {
-			statusparagraph.innerHTML = 'Complete!  <a href="<?= Config::site_url ?>/dev">Back to database.';
-		} else {
-			statusparagraph.innerHTML = "Working on page " + page + "...";
-			doPage(page);
-		}			
+			if (kidsDone == 0) {
+				kidsDone = 1;
+			} else {
+				statusparagraph.innerHTML = 'Complete!  <a href="<?= Config::site_url ?>/dev">Back to database.';
+				return true;
+			}
+		}
+		var status = kidsDone == 0 ? 'Working on importing students, ' : 'Now grouping students, ';
+		statusparagraph.innerHTML = status + "page " + page + "...";
+		doPage(page);
 	}
 
 	function doPage(page) {
 		var xhr = new XMLHttpRequest();
 	    xhr.addEventListener("load", requested);
-	    xhr.open("GET", 'arbor_import.php?baseline_done=yes&year_page=' + page);
+	    var queryString = 'arbor_import.php?baseline_done=yes&year_page=' + page;
+	    if (kidsDone == 1)
+		    queryString = queryString + '&kidsDone=yes';
+	    xhr.open("GET", queryString);
 		xhr.send();
 	}
 
@@ -87,6 +96,154 @@ if (empty($_GET['year_page'])) {
     $year_page = $_GET['year_page'];
 }
 
+// Let's get Students first
+
+if (empty($_GET['kidsDone'])) {
+    $query = "query { 
+      Student (currentlyEnrolled: true page_size: 1000 page_num: $year_page) {
+        id
+        firstName
+        lastName
+        gender {
+          code
+        }
+        activeSenNeeds {
+          id
+          displayName
+          description
+        }
+        senStatus {
+          id
+          displayName
+          code
+        }
+      	nativeLanguages {
+          id
+          dataOrder
+          displayName
+          __typename
+        }
+        inCareStatusAssignments {
+          id
+          displayName
+          inCareStatus {
+            active
+          }
+        }
+        pupilPremiumRecipients {
+          id
+          displayName
+          endDate
+        }
+      }
+    }";
+    
+    $data = $client->rawQuery($query)->getData();
+    
+    if (empty($data['Student'])) {
+        die('0');
+    }
+    
+    $allStudents = Student::retrieveAll();
+    
+    foreach ($data['Student'] as $student) {
+        $current_student = null;
+        $gender = '?';
+        if (isset($student['gender']['code'])) {
+            $gender = $student['gender']['code'][0];
+        }
+        foreach ($allStudents as $s) {
+            if ($s->getId() == $student['id']) {
+                $current_student = $s;
+            }
+        }
+        if (is_null($current_student)) {
+            // Create new Student
+            $current_student = new Student([
+                Student::ID     =>      $student['id'],
+                Student::FIRST_NAME =>  $student['firstName'],
+                Student::LAST_NAME =>   $student['lastName'],
+                Student::GENDER =>      $gender,
+            ]);
+        } else {
+            $current_student->setNames($student['firstName'], $student['lastName']);
+            $current_student->setGender($gender);
+        }
+        $current_student->commit();
+        // Now get Tagging
+        $olddemographics = Demographic::retrieveByDetail(Demographic::STUDENT_ID, $current_student->getId());
+        $newdemographics = [];
+        $tag = function($tagName, $mis_id, $value = null) use (&$olddemographics, &$newdemographics, $current_student) {
+            $exists = false;
+            foreach ($olddemographics as $index => $d) {
+                if ($d->get(Demographic::MIS_ID) == $mis_id && $d->get(Demographic::TAG) == $tagName) {
+                    $newdemographics[] = new Demographic([
+                        Demographic::ID => $d->getId(),
+                        Demographic::TAG => $tagName,
+                        Demographic::MIS_ID => $d->get(Demographic::MIS_ID),
+                        Demographic::STUDENT_ID => $d->get(Demographic::STUDENT_ID),
+                        Demographic::DETAIL => $value,
+                    ]);
+                    unset($olddemographics[$index]);
+                    $exists = true;
+                    break;
+                }
+            }
+            if ($exists == false) {
+                $newdemographics[] = new Demographic([
+                    Demographic::MIS_ID => $mis_id,
+                    Demographic::STUDENT_ID => $current_student->getId(),
+                    Demographic::TAG => $tagName,
+                    Demographic::DETAIL => $value
+                ]);
+            }
+        };
+        
+        foreach ($student['activeSenNeeds'] as $need) {
+            $tag(Demographic::TAG_SEN_NEED, $need['id'], "{$need['displayName']}: {$need['description']}");
+        }
+        
+        if (!is_null($student['senStatus']) && $student['senStatus']['code'] != Config::no_sen_code) {
+            $tag(Demographic::TAG_SEN_STATUS, $student['senStatus']['id'], "{$student['senStatus']['displayName']}");
+        }
+        
+        if (isset($student['nativeLanguages'][1]) || 
+            isset($student['nativeLanguages'][0]) &&
+                $student['nativeLanguages'][0]['displayName'] != Config::our_native_languge) {
+            foreach ($student['nativeLanguages'] as $lang) {
+                $tag(Demographic::TAG_NATIVE_LANGUAGES, $lang['id'], $lang['displayName']);
+            }
+        }
+        
+        if (isset($student['inCareStatusAssignments'][0])) {
+            foreach ($student['inCareStatusAssignments'] as $care) {
+                if ($care['inCareStatus']['active'] == true) {
+                    $tag(Demographic::TAG_IN_CARE_STATUS, $care['id'], $care['displayName']);
+                }
+            }
+        }
+        
+        if (isset($student['pupilPremiumRecipients'][0])) {
+            foreach ($student['pupilPremiumRecipients'] as $ppi) {
+                if (strtotime($ppi['endDate']) > time()) {
+                    $tag(Demographic::TAG_PUPIL_PREMIUM, $ppi['id'], $ppi['displayName']);
+                }
+            }
+        }
+        
+        foreach ($olddemographics as $d) {
+            Demographic::delete($d->getId());
+        }
+        
+        foreach ($newdemographics as $d) {
+            $d->commit();
+        }
+    }
+    
+    $year_page++;
+    die("$year_page");
+}
+
 $query = "query {
   AcademicUnit (academicYear__code: \"" . Config::academic_year . "\" page_size: 100 page_num: $year_page) {
     id
@@ -99,8 +256,6 @@ $query = "query {
       endDate
       student {
         id
-        lastName
-        firstName
       }
     }
   }
@@ -109,7 +264,6 @@ $query = "query {
 $data = $client->rawQuery($query)->getData();
 
 if (empty($data['AcademicUnit'])) {
-    // That's it, done.    
     die('0');
 }
 
@@ -145,26 +299,7 @@ foreach ($data['AcademicUnit'] as $group) {
         if (strtotime($membership['startDate']) > time() || strtotime($membership['endDate']) < time()) {
             continue;
         }
-        $dStudent = null;
-        foreach ($allStudents as $student) {
-            if ($student->getId() == $membership['student']['id']) {
-                $dStudent = $student;
-                $dStudent->setNames($membership['student']['firstName'], $membership['student']['lastName']);
-                break;
-            }
-        }
-        if (is_null($dStudent)) {
-            $dStudent = new Student([
-                Student::ID         => $membership['student']['id'],
-                Student::FIRST_NAME => $membership['student']['firstName'],
-                Student::LAST_NAME  => $membership['student']['lastName'],
-            ]);
-            //echo "<div class=\"row\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;New Student: " . $dStudent->getName() . "</div>";
-            array_push($allStudents, $dStudent);
-        }
-        $dGroup->addMember($dStudent);
-        
-        $dStudent->commit();
+        $dGroup->addMember($membership['student']['id']);
         
         // echo "... added to db and membership made</div>";
     }

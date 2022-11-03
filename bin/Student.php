@@ -5,6 +5,7 @@ class Student extends DatabaseCollection
 {
     const FIRST_NAME = 'first_name';
     const LAST_NAME = 'last_name';
+    const GENDER = 'gender';
     const USERNAME = 'username';
     
     public function __construct(array $details)
@@ -12,11 +13,16 @@ class Student extends DatabaseCollection
         $this->details[self::ID] = $details[self::ID];
         $this->setNames($details[self::FIRST_NAME], $details[self::LAST_NAME]);
         $this->details[self::USERNAME] = $details[self::USERNAME] ?? null;
+        $this->details[self::GENDER] = $details[self::GENDER] ?? '?';
     }
     
     public function setNames(String $first, String $last) {
         $this->details[self::FIRST_NAME] = $first;
         $this->details[self::LAST_NAME] = $last;
+    }
+    
+    public function setGender(String $gender) {
+        $this->details[self::GENDER] = $gender;
     }
     
     public function setUsername(String $username) {

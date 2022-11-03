@@ -128,10 +128,8 @@ EOF;
                 <thead>
                     <tr>
                         <td scope="col"><a href="$livedatalink" title="Copy this link and use Excel's Data>Get Data>From Web and paste into there.  No need for authentication with this, but don't then share the spreadsheet outside the organisation!">Live data link</a></td>
-                        <th scope="col">&nbsp;</th>
-                        <th scope="col">&nbsp;</th>
-                        <th scope="col">&nbsp;</th>
 eof;
+		    View::makeStudentTableHeading(true);
 		    if (isset($table_only) && $table_only) {
 		        echo '<th scope="col">&nbsp;</th>';
 		    }
@@ -160,7 +158,8 @@ eof;
 		    if (isset($table_only) && $table_only) {
 		        echo '<th scope="col">Arbor ID</th>';
 		    }
-		    echo "<th scope=\"col\">Name</th><th>Group</th><th>Ind.</th><th>CWAG</th>";
+		    
+		    View::makeStudentTableHeading(false);
 		    
 		    foreach ($tests as $t) {
 		        $percentComponentExists = false;
@@ -194,12 +193,7 @@ eof;
 		        if (isset($table_only) && $table_only) {
 		            echo "<th scope=\"row\">{$s->getId()}</th>";
 		        }
-		        echo "<th scope=\"row\" studentId=\"{$s->getId()}\"><a href=\"student_individual_scores.php?student=" . $s->getId() . "\">" . $s->getLastFirstName() . "</a></th>\n";
-		        echo "<td>";
-		        echo ($s->getLabel('group') ?? $teaching_group)->getName();
-		        echo "</td>";
-		        $baseline = $s->getShortIndicative($subject);
-		        echo "<td id=\"baseline-{$s->getId()}\">$baseline</td>";
+		        View::makeStudentTableRow($s, $teaching_group ?? null, $subject);
 		        
 		        $cwag = $s->getAverageGrade($subject) ?? '&nbsp;';
 		        echo "<td id=\"cwag-0-{$s->getId()}\">$cwag</td>";

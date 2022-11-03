@@ -286,7 +286,19 @@ case 26:
     $db->dosql("UPDATE `db_version` SET version = 27;");
     
 case 27:
+    $db->dosql("ALTER TABLE `Student` ADD gender CHAR(1) NOT NULL;");
+    $db->dosql("CREATE TABLE `Demographic` (
+            id INT NOT NULL AUTO_INCREMENT,
+            Student_id INT NOT NULL,
+            mis_id INT NOT NULL,
+            tag INT NOT NULL,
+            detail VARCHAR(255) NOT NULL,
+            CONSTRAINT PRIMARY KEY (id)
+        );");
+    $db->dosql("UPDATE `db_version` SET version = 28;");
     
+case 28:
+
 default:
 
 }

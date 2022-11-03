@@ -30,14 +30,13 @@ class TeachingGroup extends DatabaseCollection
         return $students;
     }
     
-    public function addMember(Student $student) {
+    public function addMember(int $sid) {
         if (is_null(self::$db)) {
             self::$db = new Database();
         }
         $db = self::$db;
         
         $gid = $this->getId();
-        $sid = $student->getId();
         
         $db->dosql("DELETE FROM StudentGroupMembership WHERE Student_id = $sid AND TeachingGroup_id = $gid;");
         $db->dosql("INSERT INTO StudentGroupMembership(Student_id, TeachingGroup_id) VALUES ($sid, $gid);");

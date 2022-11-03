@@ -46,6 +46,11 @@ class Config {
     // ^^^ Use this site to generate a key, and put it between the quotes on the following line.
     const backups_key = '';
     
+    // SEN demographics are annoying because for non-SEN pupils
+    // they are either missing or have this code, which means
+    // the same thing.  If the code is different for your MIS,
+    // change it here.
+    const no_sen_code = 'UK_DFE__NO_SEN';
     
     // It is beyond a nightmare to get Imagick to play with Ghostscript on IIS.
     // Let's save ourselves the headache and just use it directly-- please say where it is
