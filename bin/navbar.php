@@ -12,7 +12,7 @@ foreach (['subject', 'teaching_group', 'test'] as $persistentVar) {
 if (!empty($getVars)) {
     $getVars = '?' . implode('&', $getVars);
 } else {
-    $getVars = '';
+    $getVars = '?';
 }
 ?>
 
@@ -75,6 +75,11 @@ if (!empty($getVars)) {
                 	<?php } else { ?>
                 		<a class="dropdown-item" href="?large_marking=0">Make the tests fill screen height</a>
                 	<?php } ?>
+                	<?php if ($staff->get(Staff::MARK_BY_STUDENT) == 0) {
+                		echo "<a class=\"dropdown-item\" href=\"$getVars&mark_by_student=1\">Mark by student</a>";
+                	} else {
+                		echo "<a class=\"dropdown-item\" href=\"$getVars&mark_by_student=0\">Mark by question/page</a>";
+                	} ?>
                 	<?php if ($staff->get(Staff::DEFAULT_MARKING_TOOL) === 'pen') { ?>
                 		<a class="dropdown-item" href="?default_marking_tool=tick">Set the default marking tool to tick</a>
                 	<?php } else { ?>

@@ -187,14 +187,22 @@ EOF;
 	                $testPage = $testPages[$page_num];
 	                // Do not show a page if it's already been marked and I've ticked to hide already marked pages.
 	                if ($testPage->get(ScannedTestPage::PAGE_SCORE) != null && isset($_GET['skipMarked'])) {
-	                    $student_number++;
+	                    if ($staff->get(Staff::MARK_BY_STUDENT) == 0)
+	                       $student_number++;
+	                    else
+	                       $page_num++;
 	                    continue;
 	                } else {
 	                    $pageFound = true;
 	                }
 		        } else {
-		            $student_number = 0;
-		            $page_num++;
+		            if ($staff->get(Staff::MARK_BY_STUDENT) == 0) {
+		                $student_number = 0;
+		                $page_num++;
+		            } else {
+		                $student_number++;
+		                $page_num = 0;
+		            }
 		        }
 		    }
 		    $testPage = $testPages[$page_num];
@@ -459,7 +467,11 @@ if ($staff->get(Staff::LARGE_MARKING) == 1) {
 	function saved() {
 		setSaveBar("Saved! " + prevbutton + nextbutton);
 		if (scorepart !== '') {
-			location.href = '?' + getvars + '&page=<?= $page_num ?>&student_number=<?= $student_number + 1 ?>';
+			<?php if ($staff->get(Staff::MARK_BY_STUDENT) == 0) { ?>
+				location.href = '?' + getvars + '&page=<?= $page_num ?>&student_number=<?= $student_number + 1 ?>';
+			<?php } else { ?>
+				location.href = '?' + getvars + '&page=<?= $page_num + 1 ?>&student_number=<?= $student_number ?>';
+			<?php } ?>
 		}
 	}
 

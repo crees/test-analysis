@@ -29,6 +29,10 @@ if (!is_null($staff)) {
         $staff->setDefaultMarkingTool($_GET['default_marking_tool']);
         $staff->commit();
     }
+    if (isset($_GET['mark_by_student'])) {
+        $staff->setMarkByStudent($_GET['mark_by_student']);
+        $staff->commit();
+    }
 }
 
 if (!is_null($staff) && !is_null($staff->get(Staff::THEME))) {
