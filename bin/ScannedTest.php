@@ -89,6 +89,17 @@ class ScannedTest extends DatabaseCollection
         return ScannedTestPage::retrieveByDetail(ScannedTestPage::SCANNEDTEST_ID, $this->getId(), ScannedTestPage::PAGE_NUM);
     }
     
+    /**
+     * 
+     * Remove any ScannedTests with no existing pages
+     * 
+     */
+    public static function garbageCollect() {
+        self::lock();
+        self::$db->dosql("DELETE `ScannedTest` FROM `ScannedTest` WHERE NOT EXISTS (SELECT id FROM `ScannedTestPage` WHERE `ScannedTest`.`id` = `ScannedTestPage`.`ScannedTest_id`);");
+        self::unlock();
+    }
+    
     function __destruct()
     {}
 }

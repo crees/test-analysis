@@ -92,8 +92,16 @@ class ScannedTestPage extends DatabaseCollection
         $this->details[self::PAGE_SCORE] = $score;
     }
     
+    /**
+     * 
+     * Remove orphaned ScannedTestPages and remove superseded
+     * ScannedTestPage image files from server
+     * 
+     * @param bool $silent  Don't report errors
+     */
     public static function garbageCollect(bool $silent = false) {
         self::lock();
+        self::$db->dosql("DELETE `ScannedTestPage` FROM `ScannedTestPage` WHERE NOT EXISTS (SELECT id FROM `ScannedTest` WHERE `ScannedTest`.`id` = `ScannedTestPage`.`ScannedTest_id`);");
         $hashes = self::retrieveUniqueValues(self::SHA);
         $files = scandir(Config::scannedTestPagedir);
         $files = array_diff($files, array('.', '..'));
