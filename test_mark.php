@@ -17,15 +17,15 @@ foreach ($departments as $d) {
     }
 }
 
-if (isset($_GET['subject']) && !empty($_GET['subject'])) {
+if (isset($_GET['subject']) && !empty($_GET['subject']) && is_numeric($_GET['subject'])) {
     $subject = Subject::retrieveByDetail(Subject::ID, $_GET['subject'])[0];
     $teachingGroups = $subject->getTeachingGroups();
     $tests = $subject->getTests();
     
-    if (isset($_GET['teaching_group']) && !empty($_GET['teaching_group'])) {
+    if (isset($_GET['teaching_group']) && !empty($_GET['teaching_group']) && is_numeric($_GET['teaching_group'])) {
         $teaching_group = $_GET['teaching_group'];
         $students = TeachingGroup::retrieveByDetail(TeachingGroup::ID, $teaching_group)[0]->getStudents();
-        if (isset($_GET['test']) && !empty($_GET['test'])) {
+        if (isset($_GET['test']) && !empty($_GET['test']) && is_numeric($_GET['test'])) {
             $test = Test::retrieveByDetail(Test::ID, $_GET['test']);
             if (count($test) < 1) {
                 echo "<div>No tests defined for selected subject.</div>";
@@ -205,6 +205,7 @@ EOF;
 		            }
 		        }
 		    }
+		    
 		    $testPage = $testPages[$page_num];
 		    echo "<div class=\"row\">";
 		    if ($staff->get(Staff::LARGE_MARKING) == 1) {
@@ -218,14 +219,28 @@ EOF;
 		    echo "<div class=\"$savebarClass\">";
 		    echo "<div class=\"savebar\"></div><a class=\"btn btn-secondary\" onclick=\"visibleTop()\">Change test/class</a><br>";
 		    echo "<div class=\"form-inline form-group\">";
-            if (isset($_GET['skipMarked'])) {
+		    /* XXX Direct SQL for speed */
+		    if (isset($_GET['my_tests_only']) && $_GET['my_tests_only']) {
+		        $remaining = (new Database)->dosql("SELECT COUNT(scannedtestpage.id) from scannedtestpage inner join scannedtest on scannedtestpage.scannedtest_id=scannedtest.id where scannedtest.staff_id = {$staff->getId()} and scannedtestpage.page_num = $page_num and scannedtest.test_id = {$test->getId()} and scannedtestpage.page_score IS NULL;")->fetch_assoc()['COUNT(scannedtestpage.id)'];
+		    } else {
+		        $remaining = (new Database)->dosql(<<<EOF
+select COUNT(scannedtestpage.id) from scannedtestpage 
+inner join scannedtest on scannedtestpage.scannedtest_id=scannedtest.id 
+inner join student on scannedtest.student_id = student.id 
+inner join studentgroupmembership on studentgroupmembership.student_id = student.id
+inner join teachinggroup on studentgroupmembership.teachinggroup_id = teachinggroup.id
+where teachinggroup.id = $teaching_group and scannedtestpage.page_num = $page_num and scannedtest.test_id = {$test->getId()} and scannedtestpage.page_score is null
+EOF)->fetch_assoc()['COUNT(scannedtestpage.id)'];
+		    }
+		    echo "There are $remaining of these pages remaining to mark for you. ";
+		    if (isset($_GET['skipMarked'])) {
                 $skipMarked = 'checked';
             } else {
                 $skipMarked = '';
             }
             echo "<input class=\"form-control\" type=\"checkbox\" id=\"skipMarked\" $skipMarked onchange=\"doButtons()\"><br>";
             echo "<label for=\"skipMarked\"> Skip already marked tests</label>";
-            echo "<label for=\"score\">Total page score: </label>";
+            echo "<label for=\"score\">&nbsp;Total page score: </label>";
             echo "<input class=\"form-control\" type=\"number\" id=\"score\" value=\"{$testPage->get(ScannedTestPage::PAGE_SCORE)}\">";
 		    echo '</div>';
 		    echo "<div onclick=\"$('span#kidname')[0].style.display = 'inline';\">Student name (press ?): <span id=\"kidname\" style=\"display: none\">{$student->getName()}</span><br />Every tick placed increments the total by one.  Press Enter to save, or type a number (no clicks necessary) to jump to the score box.  Spacebar also saves.  Mark title page as zero!</div>";
