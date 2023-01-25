@@ -82,11 +82,11 @@ abstract class View
         } else {
             $needs = implode("\n", $senNeeds);
             $title = "$senStatus\n\n$needs";
-            echo "<td class=\"px-0 text-center\" title=\"$title\">{$senStatus[0]}</td>";
+            echo "<td class=\"px-0 text-center\" title=\"$title\" style=\"cursor: help;\">{$senStatus[0]}</td>";
         }
         if ($eal) {
             $title = implode(', ', $nativeLanguages);
-            echo "<td class=\"px-0 text-center\" title=\"$title\">&#128681;</td>";
+            echo "<td class=\"px-0 text-center\" title=\"$title\" style=\"cursor: help;\">&#128681;</td>";
         } else {
             echo "<td class=\"px-0 text-center\">&nbsp;</td>";
         }

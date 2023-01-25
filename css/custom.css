@@ -113,4 +113,5 @@ td.corner-mark {
 /*  padding: 1em 3em;
   border: 1px solid grey;*/
   background-image: linear-gradient(225deg, red, red 6px, transparent 6px, transparent);
+  cursor: help;
 }
