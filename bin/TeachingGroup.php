@@ -38,6 +38,8 @@ class TeachingGroup extends DatabaseCollection
         
         $gid = $this->getId();
         
+        // TODO Don't delete, update and update timestamp too
+        
         $db->dosql("DELETE FROM StudentGroupMembership WHERE Student_id = $sid AND TeachingGroup_id = $gid;");
         $db->dosql("INSERT INTO StudentGroupMembership(Student_id, TeachingGroup_id) VALUES ($sid, $gid);");
     }

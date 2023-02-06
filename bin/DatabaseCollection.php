@@ -180,6 +180,80 @@ abstract class DatabaseCollection
         }
     }
     
+    /**
+     * Match the first argument's attributes and update any in the second.
+     * 
+     * Needs to have TOUCHED_TS as a timestamp column, which gets updated
+     * when this method is called.
+     *  
+     * @param array $matching Update if these are matched
+     * @param array $update Update these items
+     * @param bool $touch Update the updated_ts column.  Don't make this true if that column doesn't exist!
+     */
+    public static function update_or_create(array $matching, array $update) {
+        if (is_null(self::$db)) {
+            self::$db = new Database();
+        }
+        $set = [];
+        
+        foreach ($update as $k => $v) {
+            if (is_numeric($v))
+                $set[] = "`$k`=$v";
+            else 
+                $set[] = "`$k`='$v'";
+        }
+        
+        $set[] = "`" . static::TOUCHED_TS . "` = CURRENT_TIMESTAMP";
+        
+        $where = [];
+        
+        foreach ($matching as $k => $v) {
+            if (is_numeric($v))
+                $where[] = "`$k`=$v";
+            else
+                $where[] = "`$k`='$v'";
+        }
+        
+        $update_cmd = "UPDATE `" . explode('\\', static::class)[1] . "` SET "
+            . implode(', ', $set) . " WHERE " . implode(' AND ', $where) . ";";
+        self::$db->dosql($update_cmd);
+
+        if (self::$db->get_affected_rows() == 0) {
+            $cols = [];
+            $values = [];
+            foreach (array_merge($matching, $update) as $k => $v) {
+                $cols[] = "`$k`";
+                if (is_numeric($v))
+                    $values[] = "$v";
+                else
+                    $values[] = "'$v'";
+            }
+            self::$db->dosql("INSERT INTO `" . explode('\\', static::class)[1] . "` ("
+            . implode(', ', $cols) . ") VALUES (" . implode(', ', $values) . ");");
+        }
+    }
+    
+    /**
+     * Deletes any rows in the table last touched before $age_in_minutes
+     * 
+     * Requires a timestamped table
+     * 
+     * @param int $age_in_minutes
+     */
+    public static function trimBefore(int $age_in_minutes = 60) {
+        if (is_null(self::$db)) {
+            self::$db = new Database();
+        }
+        
+        if (!defined("static::TOUCHED_TS")) {
+            die("Can't use this with a class without touched_ts column; " . static::class);
+        }
+        
+        
+        self::$db->dosql("DELETE FROM `" . explode('\\', static::class)[1] . "` WHERE `"
+            . static::TOUCHED_TS . "` < NOW() - INTERVAL $age_in_minutes MINUTE;");
+    }
+    
     protected function update_direct($detail, $value) {
         if (is_null(self::$db)) {
             self::$db = new Database();

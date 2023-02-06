@@ -299,11 +299,17 @@ case 27:
     
 case 28:
     $db->dosql("ALTER TABLE `Staff` ADD mark_by_student TINYINT NOT NULL DEFAULT 0;");
-    
+
     $db->dosql("UPDATE `db_version` SET version = 29;");
-    
+
 case 29:
-    
+    $db->dosql("ALTER TABLE `StudentGroupMembership`
+        ADD `touched_ts` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP;");
+
+    $db->dosql("UPDATE `db_version` SET version = 30;");
+
+case 30:
+
 default:
 
 }

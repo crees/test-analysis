@@ -47,4 +47,8 @@ class Database
         }
         return $result;
     }
+    
+    function get_affected_rows() {
+        return $this->conn->affected_rows;
+    }
 }

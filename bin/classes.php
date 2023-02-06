@@ -23,6 +23,7 @@ if (!class_exists("Config")) {
     require "Staff.php";
     require "StaffDepartmentMembership.php";
     require "Student.php";
+    require "StudentGroupMembership.php";
     require "Subject.php";
     require "TeachingGroup.php";
     require "Test.php";

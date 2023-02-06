@@ -264,12 +264,9 @@ $query = "query {
 $data = $client->rawQuery($query)->getData();
 
 if (empty($data['AcademicUnit'])) {
+    // Now we need to clear out any memberships that haven't been touched in five minutes.
+    StudentGroupMembership::trimBefore(60);
     die('0');
-}
-
-// Clear old memberships out
-if ($year_page == 0) {
-    (new Database())->dosql("DELETE FROM studentgroupmembership;");
 }
 
 $year_page++;
@@ -289,7 +286,7 @@ foreach ($data['AcademicUnit'] as $group) {
     } else {
         $group[TeachingGroup::NAME] = trim($displayName);
         $group[TeachingGroup::ACADEMIC_YEAR] = Config::academic_year;
-        $group[TeachingGroup::ID] = 
+        $group[TeachingGroup::ID] = $group['id'];
         $dGroup = new TeachingGroup($group);
         //echo "<div class=\"row\">New TeachingGroup: " . $dGroup->getName() . "</div>";
     }
@@ -299,14 +296,15 @@ foreach ($data['AcademicUnit'] as $group) {
         if (strtotime($membership['startDate']) > time() || strtotime($membership['endDate']) < time()) {
             continue;
         }
-        $dGroup->addMember($membership['student']['id']);
-        
+        StudentGroupMembership::update_or_create([
+            StudentGroupMembership::STUDENT_ID => $membership['student']['id'],
+            StudentGroupMembership::TEACHINGGROUP_ID => $dGroup->getId(),
+        ], []);
+
         // echo "... added to db and membership made</div>";
     }
     
     //echo "<div class=\"row\">Group {$dGroup->getName()} now has $numGroupMembers members.</div>";
 }
 
-//header("Location: arbor_import.php?baseline_done=yes&year_page=$year_page");
-//echo "<div class=\"row\"><a href=\"?baseline_done=yes&year_page=$year_page\" class=\"btn btn-primary\">Now click for Page $year_page</a></div>";
 echo "$year_page";
