@@ -37,7 +37,7 @@ class Database
      */
     function dosql(string $sqlcmd, bool $critical = TRUE) {
         if ($result = $this->conn->query($sqlcmd)) {
-            Config::debug("$sqlcmd performed successfully<br /><br />");
+            //Config::debug("$sqlcmd performed successfully<br /><br />");
         } else {
             if ($critical == TRUE) {
                 die ("Error:   $sqlcmd failed: " . $this->conn->error);
