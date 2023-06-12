@@ -8,12 +8,15 @@ class Student extends DatabaseCollection
     const GENDER = 'gender';
     const USERNAME = 'username';
     
+    protected $baselines;
+    
     public function __construct(array $details)
     {
         $this->details[self::ID] = $details[self::ID];
         $this->setNames($details[self::FIRST_NAME], $details[self::LAST_NAME]);
         $this->details[self::USERNAME] = $details[self::USERNAME] ?? null;
         $this->details[self::GENDER] = $details[self::GENDER] ?? '?';
+        $this->baselines = [];
     }
     
     public function setNames(String $first, String $last) {
@@ -57,12 +60,18 @@ class Student extends DatabaseCollection
             return "";
         }
         
+        if (isset($this->baselines[$subject->getId()])) {
+            return $this->baselines[$subject->getId()];
+        }
+        
         // Get all baselines
         $myBaseLines = Baseline::retrieveByDetails([Baseline::STUDENT_ID, Baseline::MIS_ASSESSMENT_ID], [$this->getId(), $subject->get(Subject::BASELINE_ID)]);
         
         // Now, find the baseline for the Subject
         
-        return $myBaseLines[0] ?? "";
+        $this->baselines[$subject->getId()] = $myBaseLines[0] ?? "";
+        
+        return $this->baselines[$subject->getId()];
     }
     
     public function getIgr(Subject $subject) {
