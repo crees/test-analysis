@@ -33,6 +33,7 @@ if (!class_exists("Config")) {
     require "TestTopic.php";
     require "TestTestTopic.php";
     require "View.php";
+    require Config::site_docroot . "/vendor/autoload.php";
     require Config::site_docroot . "/contrib/docxmerge/vendor/autoload.php";
     require Config::site_docroot . "/contrib/php-graphql-client/vendor/autoload.php";
     
