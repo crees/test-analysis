@@ -12,19 +12,23 @@ class TeachingGroup extends DatabaseCollection
         $this->details[self::ACADEMIC_YEAR] = $details[self::ACADEMIC_YEAR];
     }
     
-    public function getStudents() {
+    public function getStudentIds() : array {
         if (is_null(self::$db)) {
             self::$db = new Database();
         }
         $db = self::$db;
         
         $arr = $db->dosql("SELECT Student_id FROM StudentGroupMembership WHERE TeachingGroup_id = " . $this->getId() . ";")->fetch_all(MYSQLI_ASSOC);
+        return array_map(function($x) { return $x['Student_id']; }, $arr);
+    }
+    
+    public function getStudents() {
+        $studentIds = $this->getStudentIds();
         
-        if (!isset($arr[0])) {
+        if (!isset($studentIds[0])) {
             Config::debug("No kids in the group found");
             return [];
         }
-        $studentIds = array_map(function($x) { return $x['Student_id']; }, $arr);
         $students = array_map(function($x) { return Student::retrieveByDetail(Student::ID, $x)[0] ?? null; }, $studentIds);
         uasort($students, function($a, $b) { return $a->getLastFirstName() <=> $b->getLastFirstName();});
         return $students;
