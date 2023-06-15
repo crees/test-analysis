@@ -13,6 +13,16 @@ class FeedbackSheet extends DatabaseCollection
         $this->details[self::TEMPLATEDATA] = $details[self::TEMPLATEDATA] ?? null;
     }
 
+    /**
+     * Returns an array that you can use to get the substitution values
+     * for making a yellow sheet
+     * 
+     * @param Subject $subject
+     * @param Test $test
+     * @param Student $student
+     * @param string $teacher_name
+     * @return string[]
+     */
     public static function getSubst(Subject $subject, Test $test, Student $student, $teacher_name = '') {
         
         /* Count targets */
@@ -47,12 +57,13 @@ class FeedbackSheet extends DatabaseCollection
         $marksText = [];
         foreach ($test->getTestComponents() as $c) {
             $r = TestComponentResult::retrieveByDetails(
-                [TestComponentResult::STUDENT_ID, TestComponentResult::TESTCOMPONENT_ID],
-                [$student->getId(), $c->getId()],
+                [TestComponentResult::STUDENT_ID, TestComponentResult::TESTCOMPONENT_ID, TestComponentResult::INACTIVE],
+                [$student->getId(), $c->getId(), 0],
                 TestComponentResult::RECORDED_TS . ' DESC'
                 );
             if (empty($r)) {
-                return null;
+                $marksText = [];
+                break;
             }
             $r = $r[0];
             array_push($results, $r);
@@ -61,23 +72,24 @@ class FeedbackSheet extends DatabaseCollection
             }
             array_push($marksText, "{$c->getName()}: {$r->get(TestComponentResult::SCORE)}");
         }
-        if (is_null($results)) {
-            return;
-        }
         
         $marksText = implode(', ', $marksText);
         
-        $targets = $test->get(Test::TARGETS);
-        $numtargets = 3;
-        
-        while (($shiftmarks = $shiftmarks - $marks_to_shift) >= 0) {
-            if ($numtargets >= 1) {
-                $numtargets--;
-                continue;
+        if (empty($marksText)) {
+            $targets = ['', '', ''];
+        } else {
+            $targets = $test->get(Test::TARGETS);
+            $numtargets = 3;
+            
+            while (($shiftmarks = $shiftmarks - $marks_to_shift) >= 0) {
+                if ($numtargets >= 1) {
+                    $numtargets--;
+                    continue;
+                }
+                array_shift($targets);
             }
-            array_shift($targets);
         }
-        
+            
         $date = date('d/m/Y');
         $test_total = $test->getTotal();
         
