@@ -52,6 +52,11 @@ if (!is_null($oldResult) && $oldResult->get(TestComponentResult::RECORDED_TS) + 
     TestComponentResult::delete($oldResult->getId());
 }
 
+// We now need to invalidate the TestRegression cached values
+foreach (TestRegression::retrieveByDetail(TestRegression::TEST_ID, $test->getId()) as $r) {
+    TestRegression::delete($r->getId());
+}
+
 $returns = [];
 
 $percent = $test->calculatePercent($student, $subject);

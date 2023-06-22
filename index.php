@@ -137,6 +137,7 @@ eof;
                 $colspan = 0;
                 $percentComponentExists = false;
                 $gradeComponentExists = false;
+                $regressionComponentExists = false;
                 foreach ($t->getTestComponents() as $c) {
                     if ($c->get(TestComponent::INCLUDED_IN_PERCENT)) {
                         $percentComponentExists = true;
@@ -144,9 +145,16 @@ eof;
                     if ($c->get(TestComponent::INCLUDED_IN_GRADE)) {
                         $gradeComponentExists = true;
                     }
+                    if ($c->get(TestComponent::INCLUDED_IN_REGRESSION)) {
+                        $regressionComponentExists = true;
+                    }
                     $colspan++;
                 }
-		        $colspan += ($percentComponentExists ? 1 : 0) + ($gradeComponentExists ? 1 : 0);
+                foreach ([$percentComponentExists, $gradeComponentExists, $regressionComponentExists] as $extra) {
+                    if ($extra) {
+                        $colspan++;
+                    }
+                }
 		        if (isset($teaching_group)) {
 		          $link = "feedback_sheet.php?teaching_group={$teaching_group->getId()}&subject={$subject->getId()}&test={$t->getId()}";
 		          echo "<th colspan=\"$colspan\" class=\"text-center\"><a href=\"$link\">{$t->getName()}</a></th>\n";
@@ -162,22 +170,37 @@ eof;
 		    View::makeStudentTableHeading(false);
 		    
 		    foreach ($tests as $t) {
-		        $percentComponentExists = false;
-		        $gradeComponentExists = false;
+		        $percentComponentParts = [];
+		        $gradeComponentParts = [];
+		        $regressionComponentParts = [];
 		        foreach ($t->getTestComponents() as $c) {
 		            if ($c->get(TestComponent::INCLUDED_IN_PERCENT)) {
-		                $percentComponentExists = true;
+		                $percentComponentParts[] = $c->getName();
 		            }
 		            if ($c->get(TestComponent::INCLUDED_IN_GRADE)) {
-		                $gradeComponentExists = true;
+		                $gradeComponentParts[] = $c->getName();
+		            }
+		            if ($c->get(TestComponent::INCLUDED_IN_REGRESSION)) {
+		                $regressionComponentParts[] = $c->getName();
 		            }
 		            echo "<td>{$c->getName()}</td>";
 		        }
-		        if ($percentComponentExists) {
-		            echo "<td>%</td>";
+		        if (!empty($percentComponentParts)) {
+		            $title = "Calculated from Section " . implode(', ', $percentComponentParts) . '.';
+		            $title .= '&#13;&#13;This is the percentage out of the total.';		            
+		            echo "<td title=\"$title\">%</td>";
 		        }
-		        if ($gradeComponentExists) {
-		            echo "<td>Grd</td>\n";
+		        if (!empty($gradeComponentParts)) {
+		            $title = "Calculated from Section " . implode(', ', $gradeComponentParts) . '.';
+		            $title .= '&#13;&#13;This is the grade calculated from the grade boundaries set in &quot;Manage Database&quot;.';
+		            echo "<td title=\"$title\">Grd</td>";
+		        }
+		        if (!empty($regressionComponentParts)) {
+		            $title = "Calculated from Section " . implode(', ', $regressionComponentParts) . '.';
+		            $title .= '&#13;&#13;This is the residual calculated by taking the percentage for every student, and then ';
+		            $title .= 'finding a regression line against indicative grades, and comparing the expected percentage with the ';
+		            $title .= 'achieved percentage.  Each &gt; or &lt represents 5 percentage points above/below respectively.';
+		            echo "<td title=\"$title\">Res</td>";
 		        }
 		    }
 		    echo "</tr>\n</thead>\n";
@@ -199,6 +222,7 @@ eof;
 		        echo "<td id=\"cwag-0-{$s->getId()}\">$cwag</td>";
 		        
 		        foreach ($tests as $t) {
+		            /** @var $t Test */
 		            $results = $t->getTestComponentResults($s);
 		            foreach ($t->getTestComponents() as $c) {
 		                $result = $results[$c->getId()][0] ?? null;
@@ -218,6 +242,27 @@ eof;
 		            $grade = $t->calculateGrade($s, $subject);
 		            if (!is_null($grade)) {
 		                echo "<td id=\"grade-{$t->getId()}-{$s->getId()}\">$grade</td>";
+		            }
+		            $matches = [];
+		            if (preg_match('/^[0-9]+/', $teaching_group->getName(), $matches) != 0) {
+		                $regression = $t->calculateRegression($matches[0], $s, $subject);
+		                if (!empty($regression)) {
+		                    switch ($regression) {
+	                        case '_':
+	                            $title = 'Insufficient results for calculation';
+	                            break;
+	                        case '~':
+	                            $title = 'Insufficient student numbers in groups for calculation';
+	                            break;
+	                        case '?':
+	                            $title = 'Baseline either missing or not a number';
+	                            break;
+	                        default:
+	                            $title = '';
+		                    }
+
+		                    echo "<td id=\"regression-{$t->getId()}-{$s->getId()}\" title=\"$title\">$regression</td>";
+		                }
 		            }
 		        }
 		        echo "</tr>\n";
@@ -271,6 +316,7 @@ foreach ($tests as $t) {
 function inputify() {
 	$('input#editbutton')[0].hidden=true;
 	$('input#exportbutton')[0].hidden=true;
+	$('td[id^=regression]').empty();
 	tds = $('td.score-input');
 	tabindex = 1;
 	for (t of tests) {

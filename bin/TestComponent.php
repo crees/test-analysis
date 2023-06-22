@@ -7,6 +7,7 @@ class TestComponent extends DatabaseCollection
     const TOTAL = 'total';
     const INCLUDED_IN_PERCENT = 'included_in_percent';
     const INCLUDED_IN_GRADE = 'included_in_grade';
+    const INCLUDED_IN_REGRESSION = 'included_in_regression';
     const INCLUDED_FOR_TARGETS = 'included_for_targets';
     
     public function __construct(array $details)
@@ -15,9 +16,10 @@ class TestComponent extends DatabaseCollection
         $this->details[self::NAME] = $details[self::NAME];
         $this->details[self::TEST_ID] = $details[self::TEST_ID];
         $this->details[self::TOTAL] = $details[self::TOTAL];
-        foreach ([self::INCLUDED_FOR_TARGETS, self::INCLUDED_IN_GRADE, self::INCLUDED_IN_PERCENT] as $inc) {
+        foreach ([self::INCLUDED_FOR_TARGETS, self::INCLUDED_IN_GRADE, self::INCLUDED_IN_PERCENT, self::INCLUDED_IN_REGRESSION] as $inc) {
             $this->details[$inc] = $details[$inc] ?? 0;
         }
+        $this->details[self::INCLUDED_IN_REGRESSION] = 1;
     }
     
     public function getTotal() {

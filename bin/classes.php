@@ -29,6 +29,7 @@ if (!class_exists("Config")) {
     require "Test.php";
     require "TestComponent.php";
     require "TestComponentResult.php";
+    require "TestRegression.php";
     require "TestSubjectMembership.php";
     require "TestTopic.php";
     require "TestTestTopic.php";

@@ -51,7 +51,7 @@ if (isset($_GET['test']) && !isset($_POST['form_serial'])) {
         $test->set(Test::TARGETS, $targets);
     } else {
         foreach ($components as $component) {
-            foreach ([TestComponent::NAME, TestComponent::TOTAL, TestComponent::INCLUDED_IN_PERCENT, TestComponent::INCLUDED_IN_GRADE, TestComponent::INCLUDED_FOR_TARGETS] as $field) {
+            foreach ([TestComponent::NAME, TestComponent::TOTAL, TestComponent::INCLUDED_IN_PERCENT, TestComponent::INCLUDED_IN_GRADE, TestComponent::INCLUDED_FOR_TARGETS, TestComponent::INCLUDED_IN_REGRESSION] as $field) {
                 $data = "component-$field-{$component->getId()}";
                 if (isset($_POST[$data])) {
                     $component->set($field, $_POST[$data]);
@@ -170,12 +170,12 @@ if (isset($_GET['test']) && !isset($_POST['form_serial'])) {
 	</tr>
 </thead>
 <?php
-echo "<tr><th>Test component name</th><th>Total</th><th>Include in percent</th><th>Include in grade</th><th>Include in target calculation</td><th>Delete</th></tr>";
+echo "<tr><th>Test component name</th><th>Total</th><th>Include in percent</th><th>Include in grade</th><th>Include in target calculation</th><th>Include in regression calculation</th><th>Delete</th></tr>";
 foreach ($components as $component) {
     echo "<tr>";
     echo View::makeTextBoxCell("component-name-{$component->getId()}", $component->getName());
     echo View::makeTextBoxCell("component-total-{$component->getId()}", $component->getTotal(), 0, 'number');
-    foreach ([TestComponent::INCLUDED_IN_PERCENT, TestComponent::INCLUDED_IN_GRADE, TestComponent::INCLUDED_FOR_TARGETS] as $box) {
+    foreach ([TestComponent::INCLUDED_IN_PERCENT, TestComponent::INCLUDED_IN_GRADE, TestComponent::INCLUDED_FOR_TARGETS, TestComponent::INCLUDED_IN_REGRESSION] as $box) {
         $checked = $component->get($box) == 1 ? " checked" : "";
         echo "<td><input type=\"checkbox\" name=\"component-$box-{$component->getId()}\"" . $checked . "></td>";
     }

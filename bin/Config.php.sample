@@ -37,6 +37,12 @@ class Config {
     
     const forced_admin_users = array('reescm');
     
+    // When calculating regressions, insist on these for result validity
+    // We may have to compromise for small courses; supposedly for low variance
+    // you can go as low as n=8, but that seems very small for this purpose
+    const regression_minimum_cohort_size = 50;
+    const regression_cohort_minimum_percentage = 85;
+
     public static $maintenance = true;
     
     const debug = true;

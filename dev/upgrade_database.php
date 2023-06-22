@@ -309,7 +309,32 @@ case 29:
     $db->dosql("UPDATE `db_version` SET version = 30;");
 
 case 30:
+    
+    $db->dosql("ALTER TABLE `TestComponent`
+        ADD `included_in_regression` BOOLEAN NOT NULL DEFAULT FALSE;");
+    
+    $db->dosql("UPDATE `db_version` SET version = 31;");
+    
+case 31:
 
+    $db->dosql("CREATE TABLE `TestRegression` (
+            `id` INT NOT NULL AUTO_INCREMENT,
+            `Test_id` INT NOT NULL,
+            `regression_key` VARCHAR (30) NOT NULL,
+            `regression_gradient` FLOAT NOT NULL,
+            `regression_intercept` FLOAT NOT NULL,
+            CONSTRAINT PRIMARY KEY (`id`)
+        );");
+    
+    $db->dosql("UPDATE `db_version` SET version = 32;");
+    
+case 32:
+    
+    $db->dosql("ALTER TABLE `TestRegression`
+        ADD `regression_error` INT NULL;");
+    
+    $db->dosql("UPDATE `db_version` SET version = 33;");
+    
 default:
 
 }
