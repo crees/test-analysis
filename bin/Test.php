@@ -359,7 +359,7 @@ class Test extends DatabaseCollection
             
             $this->test_regressions[$regression_key] = $tr;
             
-            return $this->test_regressions;
+            return $this->test_regressions[$regression_key];
         }
         
         $num_results = count($testResult);
