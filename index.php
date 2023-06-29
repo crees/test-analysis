@@ -244,7 +244,8 @@ eof;
 		                echo "<td id=\"grade-{$t->getId()}-{$s->getId()}\">$grade</td>";
 		            }
 		            $matches = [];
-		            if (preg_match('/^[0-9]+/', $teaching_group->getName(), $matches) != 0) {
+		            $tg = $teaching_group ?? $s->getLabel('group');
+		            if (preg_match('/^[0-9]+/', $tg->getName(), $matches) != 0) {
 		                $regression = $t->calculateRegression($matches[0], $s, $subject);
 		                if (!empty($regression)) {
 		                    switch ($regression) {
