@@ -121,12 +121,13 @@ EOF;
 		    }
 		    $livedatalink = "?subject={$_GET['subject']}&teaching_group={$_GET['teaching_group']}&user={$staff->getId()}&key=" . auth_generate_key("subject:{$_GET['subject']};teaching_group:{$_GET['teaching_group']};user:{$staff->getId()}");
 		    echo <<< eof
-            <input type="button" id="editbutton" class="form-control btn btn-success" value="Edit values" onclick="inputify()">
-            <input type="button" id="exportbutton" class="form-control btn btn-warning" value="Export to Excel" onclick="excel_export()">
+            <input type="button" id="editbutton" class="form-control btn btn-success" value="Edit values" onclick="inputify()" />
+            <input type="button" id="exportbutton" class="form-control btn btn-warning" value="Export to Excel" onclick="excel_export()" />
+            <input type="button" id="kpiButton" class="form-control btn btn-primary" value="Show headlines" onclick="showHeadlines()" />
             <div class="table-responsive table-95 table-stickyrow">
             <table class="table table-bordered table-sm table-hover" id="data-table">
                 <thead>
-                    <tr>
+                    <tr id="top_row">
                         <td scope="col"><a href="$livedatalink" title="Copy this link and use Excel's Data>Get Data>From Web and paste into there.  No need for authentication with this, but don't then share the spreadsheet outside the organisation!">Live data link</a></td>
 eof;
 		    View::makeStudentTableHeading(true);
@@ -162,7 +163,7 @@ eof;
 		          echo "<th colspan=\"$colspan\" class=\"text-center\">{$t->getName()}</th>\n";
 		        }
 		    }
-		    echo "</tr>\n<tr class=\"excel-filtered\">";
+		    echo "</tr>\n<tr class=\"excel-filtered\" id=\"subtitle_row\">";
 		    if (isset($table_only) && $table_only) {
 		        echo '<th scope="col">Arbor ID</th>';
 		    }
@@ -193,14 +194,14 @@ eof;
 		        if (!empty($gradeComponentParts)) {
 		            $title = "Calculated from Section " . implode(', ', $gradeComponentParts) . '.';
 		            $title .= '&#13;&#13;This is the grade calculated from the grade boundaries set in &quot;Manage Database&quot;.';
-		            echo "<td title=\"$title\">Grd</td>";
+		            echo "<td title=\"$title\" grade_for_test=\"{$t->getId()}\">Grd</td>";
 		        }
 		        if (!empty($regressionComponentParts)) {
 		            $title = "Calculated from Section " . implode(', ', $regressionComponentParts) . '.';
-		            $title .= '&#13;&#13;This is the residual calculated by taking the percentage for every student, and then ';
+		            $title .= '&#13;&#13;This is the regression calculated by taking the percentage for every student, and then ';
 		            $title .= 'finding a regression line against indicative grades, and comparing the expected percentage with the ';
 		            $title .= 'achieved percentage.  Each &gt; or &lt represents 5 percentage points above/below respectively.';
-		            echo "<td title=\"$title\">Res</td>";
+		            echo "<td title=\"$title\">Reg</td>";
 		        }
 		    }
 		    echo "</tr>\n</thead>\n";
@@ -219,7 +220,10 @@ eof;
 		        View::makeStudentTableRow($s, $teaching_group ?? null, $subject);
 		        
 		        $cwag = $s->getAverageGrade($subject) ?? '&nbsp;';
-		        echo "<td id=\"cwag-0-{$s->getId()}\">$cwag</td>";
+		        $ppValue = is_null($s->getLabel('PupilPremium')) ? 0 : 1;
+		        $senValue = is_null($s->getLabel('SENNeed')) ? 0 : 1;
+		        $baseline = $s->getShortIndicative($subject);
+		        echo "<td id=\"cwag-0-{$s->getId()}\" baseline=\"$baseline\" pp=\"$ppValue\" sen=\"$senValue\">$cwag</td>";
 		        
 		        foreach ($tests as $t) {
 		            /** @var $t Test */
@@ -241,7 +245,7 @@ eof;
 		            }
 		            $grade = $t->calculateGrade($s, $subject);
 		            if (!is_null($grade)) {
-		                echo "<td id=\"grade-{$t->getId()}-{$s->getId()}\">$grade</td>";
+		                echo "<td id=\"grade-{$t->getId()}-{$s->getId()}\" pp=\"$ppValue\" sen=\"$senValue\" baseline=\"$baseline\">$grade</td>";
 		            }
 		            $matches = [];
 		            $tg = $teaching_group ?? $s->getLabel('group');
@@ -346,8 +350,11 @@ function inputify() {
 function excel_export() {
 	var table = $('table#data-table')[0];
 	// Add Arbor IDs
-	table.rows[0].insertCell(0).appendChild(document.createTextNode(" "));
-	table.rows[1].insertCell(0).appendChild(document.createTextNode("Arbor ID"));
+	for (var r of $('tr.headline-row')) {
+		r.insertCell(0).appendChild(document.createTextNode(" "));
+	}
+	$('tr#top_row')[0].insertCell(0).appendChild(document.createTextNode(" "));
+	$('tr#subtitle_row')[0].insertCell(0).appendChild(document.createTextNode("Arbor ID"));
 	for (r of table.lastChild.rows) {
 		r.insertCell(0).appendChild(document.createTextNode(r.cells[1].attributes["studentId"].value));
 	}
@@ -481,37 +488,241 @@ function colourise(arr, literalColours = false) {
 		// as they are from TestAnalysis\Test and TestAnalysis\Subject
 		gradeb = null;
 		// If there isn't a grade scored for the test, let's just score zero
-		if (gradeboundaries[testId]['grade/'+grade] == null) {
+		if (gradeboundaries[0]['grade/'+grade] == null) {
 			gradeb = 0;
+			console.log("Fail finding grade!");
 		} else {
 			// We will keep going until we match the grade, then award green until the 'next' grade
     		previousGrade = null;
-    		for (g in gradeboundaries[testId]) {
-        		// If they get the very top grade...
-				if (previousGrade == null) {
-					previousGrade = g;
-				}
-				// Aha, we've matched the grade, so let's (for colour purposes) award them one above
+    		for (g in gradeboundaries[0]) {
     			if (g.replace('grade/', '') == grade) {
-    				gradeb = gradeboundaries[testId][previousGrade];
+    				gradeb = gradeboundaries[0][g];
     				break;
     			}
-    			previousGrade = g;
     		}
 		}
-		baselineb = gradeboundaries[testId]['grade/'+baseline] ?? null;
+		baselineb = gradeboundaries[0]['grade/'+baseline] ?? null;
 		if (baselineb == null) {
 			return;
 		}
 
-		if (gradeb == baselineb) {
-			element.style.backgroundColor = literalColours ? '#ffeeba' : 'var(--grade-on)';
+		// So now we have baselineb, we need to work out how far above/below we are
+		grade_diff = 0;
+
+		if (gradeb < baselineb) {
+			var previous_gradeb = -1;
+			for (g in gradeboundaries[0]) {
+				if (gradeboundaries[0][g] == previous_gradeb)
+					continue;
+				if (gradeboundaries[0][g] > gradeb && gradeboundaries[0][g] <= baselineb) {
+					grade_diff--;
+				}
+				previous_gradeb = gradeboundaries[0][g];
+			}
 		} else if (gradeb > baselineb) {
+			var previous_gradeb = -1;
+			for (g in gradeboundaries[0]) {
+				if (gradeboundaries[0][g] == previous_gradeb)
+					continue;
+				if (gradeboundaries[0][g] < gradeb && gradeboundaries[0][g] >= baselineb)
+					grade_diff++;
+				previous_gradeb = gradeboundaries[0][g];
+			}
+		}
+
+		element.setAttribute('ta_grade_diff', grade_diff);
+
+		if (grade_diff == -1) {
+			element.style.backgroundColor = literalColours ? '#ffeeba' : 'var(--grade-on)';
+		} else if (grade_diff > -1) {
 			element.style.backgroundColor = literalColours ? '#c3e6cb' : 'var(--grade-above)';
 		} else {
 			element.style.backgroundColor = literalColours ? '#f5c6cb' : 'var(--grade-below)';
 		}
 	}
+}
+
+function showHeadlines() {
+
+	const TYPE_DIFF = 0;
+	const TYPE_IGR_PERCENT = 1;
+	const TYPE_GRADE_PERCENT = 2;
+	
+	const row_types = [
+		{
+			"label": "Av. diff",
+			"type": TYPE_DIFF,
+			"pp": 0,
+			"sen": 0
+		}, {
+			"label": "&gt;=IGR %",
+			"type": TYPE_IGR_PERCENT,
+			"pp": 0,
+			"sen": 0
+		}, {
+			"label": "&gt;=IGR % PP",
+			"type": TYPE_IGR_PERCENT,
+			"pp": 1,
+			"sen": 0
+		}, {
+			"label": "&gt;=IGR % non-PP",
+			"type": TYPE_IGR_PERCENT,
+			"pp": -1,
+			"sen": 0
+		}, {
+			"label": "&gt;=IGR % SEN",
+			"type": TYPE_IGR_PERCENT,
+			"pp": 0,
+			"sen": 1
+		}, {
+			"label": "&gt;=IGR % HPA",
+			"type": TYPE_IGR_PERCENT,
+			"pp": 0,
+			"sen": 0,
+			"baseline_min": 7
+		}, {
+			"label": "&gt;=IGR % MPA",
+			"type": TYPE_IGR_PERCENT,
+			"pp": 0,
+			"sen": 0,
+			"baseline_min": 5,
+			"baseline_max": 6
+		}, {
+			"label": "&gt;=IGR % LPA",
+			"type": TYPE_IGR_PERCENT,
+			"pp": 0,
+			"sen": 0,
+			"baseline_max": 4
+		}, {
+			"label": ">=4 %",
+			"type": TYPE_GRADE_PERCENT,
+			"pp": 0,
+			"sen": 0,
+			"grade_min": 4
+		}, {
+			"label": ">=5 %",
+			"type": TYPE_GRADE_PERCENT,
+			"pp": 0,
+			"sen": 0,
+			"grade_min": 5
+		}, {
+			"label": ">=7 %",
+			"type": TYPE_GRADE_PERCENT,
+			"pp": 0,
+			"sen": 0,
+			"grade_min": 7
+		}
+	];
+
+	var rows = [];
+	
+	$('#kpiButton')[0].hidden=true;
+
+	for (var r in row_types) {
+		rows[r] = headlineRow(row_types[r].label);
+	}
+	for (var c of $('tr#subtitle_row')[0].childNodes) {
+		if (c.innerHTML == 'Name')
+			continue;
+		if (c.attributes['grade_for_test'] === undefined) {
+			for (var r in rows) {
+				rows[r].append(document.createElement('td'));
+			}
+			continue;
+		}
+		// We've found a Test Grade, let's get all of the Grade for Tests
+		var test;
+		var grades;
+		if (c.attributes['grade_for_test'].nodeValue == 0) {
+			grades = $('td[id^=cwag-0-]');
+		} else {
+    		test = c.attributes['grade_for_test'].nodeValue;
+    		grades = $('td[id^=grade-' + test + '-]');
+		}
+		var count = [];
+		var total = [];
+		for (var r in rows) {
+			count[r] = 0;
+			total[r] = 0;
+		}
+		for (var g of grades) {
+			var gdiff = g.attributes['ta_grade_diff'];
+			if (gdiff === undefined) {
+				continue;
+			}
+			gdiff = parseInt(gdiff.nodeValue);
+			var studentBaselineb = gradeboundaries[0]['grade/' + g.attributes['baseline'].nodeValue];
+			for (var r in rows) {
+				// Check for IGR range min and max
+				if (row_types[r].baseline_min !== undefined) {
+					var minBaselineb = gradeboundaries[0]['grade/' + row_types[r].baseline_min];
+					if (minBaselineb > studentBaselineb)
+						continue;
+				}
+				if (row_types[r].baseline_max !== undefined) {
+					var maxBaselineb = gradeboundaries[0]['grade/' + row_types[r].baseline_max];
+					if (maxBaselineb < studentBaselineb)
+						continue;
+				}
+				if (g.attributes['sen'].nodeValue == 0 && row_types[r].sen == 1)
+					continue;
+				if (g.attributes['sen'].nodeValue == 1 && row_types[r].sen == -1)
+					continue;
+				if (g.attributes['pp'].nodeValue == 0 && row_types[r].pp == 1)
+					continue;
+				if (g.attributes['pp'].nodeValue == 1 && row_types[r].pp == -1)
+					continue;
+				count[r]++;
+				switch (row_types[r].type) {
+				case TYPE_DIFF:
+					total[r] += gdiff;
+					break;
+				case TYPE_IGR_PERCENT:
+    				if (gdiff >= 0)
+        				total[r]++;
+    				break;
+				case TYPE_GRADE_PERCENT:
+    				if (row_types[r].grade_min !== undefined) {
+    					if (gradeboundaries[0]['grade/' + g.innerHTML] >= gradeboundaries[0]['grade/' + row_types[r].grade_min])
+    						total[r]++;
+    				}
+    				break;
+				}
+			}
+		}
+		for (var r in rows) {
+			var cell = document.createElement('td');
+			switch (row_types[r].type) {
+			case TYPE_DIFF:
+    			if (count[r] > 0)
+    				cell.innerHTML = (total[r] / count[r]).toFixed(2);
+				break;
+			case TYPE_IGR_PERCENT:
+			case TYPE_GRADE_PERCENT:
+    			if (count[r] > 0)
+    				cell.innerHTML = Math.round(total[r] * 100 / count[r]);
+				break;
+			}
+			rows[r].append(cell);
+		}
+	}
+
+	var top_row = $('tr#top_row')[0];
+
+	for (var r of rows) {
+		top_row.parentElement.insertBefore(r, top_row);
+	}
+}
+
+function headlineRow(title) {
+
+	var row = document.createElement('tr');
+	row.classList.add('headline-row');
+	var h = document.createElement('th');
+	h.setAttribute('scope', 'row');
+	h.innerHTML = title;
+	row.append(h);
+	return row;
 }
 
 function calcCwag(studentId, literalColours) {
@@ -531,16 +742,16 @@ function calcCwag(studentId, literalColours) {
 			number_gradeboundaries++;
 		}
 	}
-	if (number_gradeboundaries < 4) {
+	if (number_gradeboundaries < 3) {
 		cwagElement.innerText = "-";
-		cwagElement.title = "Four or more test results required for a currently working at grade";
+		cwagElement.title = "Three or more test results required for a currently working at grade";
 		return;
 	}
 	avg_gradeboundaries = total_gradeboundaries / number_gradeboundaries;
 	// Look up grade from grade boundary
 	lower = -1;
 	for (grade in gradeboundaries[0]) {
-		if (gradeboundaries[0][grade] < avg_gradeboundaries && gradeboundaries[0][grade] > lower) {
+		if (gradeboundaries[0][grade] <= avg_gradeboundaries && gradeboundaries[0][grade] > lower) {
 			lower = gradeboundaries[0][grade];
 		}
 	}

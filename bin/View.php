@@ -40,7 +40,10 @@ abstract class View
             if ($spacers) {
                 echo '<th scope="col" class="px-0">&nbsp;</th>';
             } else {
-                echo "<th class=\"px-0\">$heading</th>";
+                if ($heading == 'CWAG')
+                    echo "<th class=\"px-0\" grade_for_test=\"0\">$heading</th>";
+                else
+                    echo "<th class=\"px-0\">$heading</th>";
             }
         }
     }
@@ -60,9 +63,11 @@ abstract class View
             switch ($d->get(Demographic::TAG)) {
             case Demographic::TAG_PUPIL_PREMIUM:
                 $ppi = '&#128681;';
+                $student->setLabel('PupilPremium', true);
                 break;
             case Demographic::TAG_SEN_STATUS:
                 $senStatus = $d->get(Demographic::DETAIL);
+                $student->setLabel('SENNeed', true);
                 break;
             case Demographic::TAG_SEN_NEED:
                 $senNeeds[] = $d->get(Demographic::DETAIL);
