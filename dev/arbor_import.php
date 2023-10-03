@@ -245,7 +245,7 @@ if (empty($_GET['kidsDone'])) {
 }
 
 $query = "query {
-  AcademicUnit (academicYear__code: \"" . Config::academic_year . "\" page_size: 100 page_num: $year_page) {
+  AcademicUnit (academicYear__code: \"" . get_current_AY() . "\" page_size: 100 page_num: $year_page) {
     id
     displayName
     dependantUnits {
@@ -285,7 +285,7 @@ foreach ($data['AcademicUnit'] as $group) {
         //echo "<div class=\"row\">Scanned TeachingGroup: " . $dGroup->getName() . "</div>"; 
     } else {
         $group[TeachingGroup::NAME] = trim($displayName);
-        $group[TeachingGroup::ACADEMIC_YEAR] = Config::academic_year;
+        $group[TeachingGroup::ACADEMIC_YEAR] = get_current_AY();
         $group[TeachingGroup::ID] = $group['id'];
         $dGroup = new TeachingGroup($group);
         //echo "<div class=\"row\">New TeachingGroup: " . $dGroup->getName() . "</div>";

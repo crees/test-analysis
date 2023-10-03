@@ -31,8 +31,6 @@ class Config {
         'password' => "",
     );
     
-    const academic_year = '2019-2020';
-    
     const max_targets = 12;
     
     const forced_admin_users = array('reescm');

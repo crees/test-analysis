@@ -77,4 +77,15 @@ if (!class_exists("Config")) {
     $_SESSION['form_serial']++;
     
     require "auth.php";
+    
+    function get_current_AY() {
+        $month = date("m");
+        $year = date("Y");
+        
+        if ($month >= 9) {
+            return "$year-" . $year+1;
+        } else {
+            return $year-1 . "-$year";
+        }
+    }
 }
