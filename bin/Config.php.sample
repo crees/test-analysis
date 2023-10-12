@@ -5,6 +5,7 @@ namespace TestAnalysis;
 class Config {
     const site = "Droitwich Spa High School & Sixth Form Centre Test Analysis Service";
     const site_docroot = "/home/crees/public_html/roombooking/test-analysis";
+    const scannedTestPagedir = "/home/crees/.test-analysis-images";
     const site_url = "https://www.bayofrum.net/~crees/roombooking/test-analysis";
     const site_emaildomain = "droitwichspahigh.worcs.sch.uk";
     const site_supportemail = "reescm@droitwichspahigh.worcs.sch.uk";
@@ -55,6 +56,7 @@ class Config {
     // the same thing.  If the code is different for your MIS,
     // change it here.
     const no_sen_code = 'UK_DFE__NO_SEN';
+    const our_native_languge = 'English';
     
     // It is beyond a nightmare to get Imagick to play with Ghostscript on IIS.
     // Let's save ourselves the headache and just use it directly-- please say where it is
