@@ -19,7 +19,7 @@ $staff = Staff::me($auth_user);
 
 $departments = $staff->getAdminDepartments(true);
 
-if (isset($_POST['newtest-name']) && isset($_POST['form_serial']) && (session_status() != PHP_SESSION_ACTIVE || $_POST['form_serial'] != $_SESSION['form_serial'] - 1)) {
+if (isset($_POST['newtest-name']) && isset($_POST['form_serial']) && (session_status() != PHP_SESSION_ACTIVE || $_POST['form_serial'] == $_SESSION['form_serial'] - 1)) {
     foreach (Test::retrieveAll() as $t) {
         $tId = $t->getId();
         // Test modifications
