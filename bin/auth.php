@@ -91,7 +91,10 @@ if (isset($_GET['backupkey']) && $_GET['backupkey'] == Config::backups_key && is
             if (empty($staff->getDepartments()) && !$staff->isGlobalAdmin()) {
                 die("Please get in touch with your head of department to give you access.");
             }
+        } else {
+            $staff = $_SESSION['staff'];
         }
+        
         switch (basename(dirname($_SERVER['PHP_SELF']))) {
         case 'dev':
             // Lock non-admins out of management area
