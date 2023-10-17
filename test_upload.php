@@ -36,7 +36,7 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
     } else {
         $students = $subject->getStudents();
     }
-    if (isset($_POST['form_serial']) && (session_status() != PHP_SESSION_ACTIVE || $_POST['form_serial'] != $_SESSION['form_serial'] - 1)) {
+    if (isset($_POST['form_serial']) && (session_status() != PHP_SESSION_ACTIVE || $_POST['form_serial'] == $_SESSION['form_serial'] - 1)) {
         $garbageCollect_required = false;
         foreach ($students as $s) {
             if (isset($_POST["delete-for-{$s->getId()}"]) && $_POST["delete-for-{$s->getId()}"] == 'on') {
