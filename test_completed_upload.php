@@ -56,9 +56,9 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
                 case ".pdf":
                     try {
                         if (defined('TestAnalysis\Config::windows_path_to_gs_exe')) {
-                            shell_exec(Config::windows_path_to_gs_exe . " -sDEVICE=jpeg -sOutputFile={$f['tmp_name']}-page-%03d.jpg -r150x150 -f -dBATCH -dNOPAUSE -q {$f['tmp_name']}");
+                            shell_exec(Config::windows_path_to_gs_exe . " -sDEVICE=jpeg -sOutputFile={$f['tmp_name']}-page-%05d.jpg -r150x150 -f -dBATCH -dNOPAUSE -q {$f['tmp_name']}");
                             $pages = [];
-                            foreach (glob("{$f['tmp_name']}-page-[0-9][0-9][0-9].jpg") as $page) {
+                            foreach (glob("{$f['tmp_name']}-page-[0-9][0-9][0-9][0-9][0-9].jpg") as $page) {
                                 array_push($pages, file_get_contents($page));
                                 unlink($page);
                             }
