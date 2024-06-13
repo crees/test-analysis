@@ -1,9 +1,6 @@
 <?php
 
 namespace TestAnalysis;
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
-error_reporting(-1);
 
 /* Have we been called before? */
 if (!class_exists("Config")) {
@@ -39,12 +36,6 @@ if (!class_exists("Config")) {
     require Config::site_docroot . "/contrib/php-graphql-client/vendor/autoload.php";
     
     require Config::site_docroot . "/dev/upgrade_database.php";
-    
-    if(empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == "off") {
-        header('HTTP/1.1 301 Moved Permanently');
-        header('location: https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
-        exit();
-    }
     
     /**
      * We start the session timer on creation, and destroy it after that time.
