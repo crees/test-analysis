@@ -105,8 +105,9 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
                 
                 // Simple sanity check
                 if (count($pages) % $num_pages != 0) {
-                    die("You can't be uploading a $num_pages-page test-- the total doesn't divide by it.");
-                }
+		    $cnt = count($pages);
+		    die("You can't be uploading a $num_pages-page test-- the total ($cnt) doesn't divide by it.");
+		}
                 
                 $components = $test->getTestComponents();
                 
