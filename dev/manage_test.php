@@ -36,7 +36,7 @@ if (isset($_GET['test']) && !isset($_POST['form_serial'])) {
         header("Location: manage_test.php?test={$_GET['test']}");
         die();
     }
-} else if (isset($_POST['form_serial']) && (session_status() != PHP_SESSION_ACTIVE || $_POST['form_serial'] != $_SESSION['form_serial'] - 1)){
+} else if (isset($_POST['form_serial']) && (session_status() != PHP_SESSION_ACTIVE || $_POST['form_serial'] == $_SESSION['form_serial'] - 1)){
     $test = Test::retrieveByDetail(Test::ID, $_POST['test'])[0];
     $components = $test->getTestComponents();
     $targets = $test->get(Test::TARGETS);
