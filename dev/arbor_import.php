@@ -265,7 +265,7 @@ $data = $client->rawQuery($query)->getData();
 
 if (empty($data['AcademicUnit'])) {
     // Now we need to clear out any memberships that haven't been touched in five minutes.
-    StudentGroupMembership::trimBefore(60);
+    StudentGroupMembership::trimBefore(3000);
     die('0');
 }
 
