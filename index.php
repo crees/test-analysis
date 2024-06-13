@@ -53,12 +53,12 @@ if (isset($_GET['subject']) && !empty($_GET['subject'])) {
 <html>
 
 <head>
-<?php require "bin/head.php"; ?>
+<?php if (!$table_only) require "bin/head.php"; ?>
 </head>
 
 <body onload="colouriseAll()">
 	<div class="container">
-		<?php require "bin/navbar.php"; ?>
+		<?php if (!$table_only) require "bin/navbar.php"; ?>
 		<form method="GET">
     		<div class="form-group row">
     			<label for="subject" class="col-2 col-form-label">Subject</label>
