@@ -742,9 +742,9 @@ function calcCwag(studentId, literalColours) {
 			number_gradeboundaries++;
 		}
 	}
-	if (number_gradeboundaries < 3) {
+	if (number_gradeboundaries < 2) {
 		cwagElement.innerText = "-";
-		cwagElement.title = "Three or more test results required for a currently working at grade";
+		cwagElement.title = "Two or more test results required for a currently working at grade";
 		return;
 	}
 	avg_gradeboundaries = total_gradeboundaries / number_gradeboundaries;
