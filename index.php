@@ -156,7 +156,7 @@ eof;
                         $colspan++;
                     }
                 }
-		        if (isset($teaching_group)) {
+		        if (isset($teaching_group) && !empty($t->get(Test::TARGETS))) {
 		          $link = "feedback_sheet.php?teaching_group={$teaching_group->getId()}&subject={$subject->getId()}&test={$t->getId()}";
 		          echo "<th colspan=\"$colspan\" class=\"text-center\"><a href=\"$link\">{$t->getName()}</a></th>\n";
 		        } else {
