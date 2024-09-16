@@ -53,6 +53,32 @@ if (isset($_GET['removeGroup'])) {
 ?>
 <!doctype html>
 <html><head><?php require "../bin/head.php" ?></head>
+<script>
+function filter() {
+    var keyword = document.getElementById("search").value;
+    var selects = $("select.filterable");
+    var select = document.getElementById("select");
+    for (var s of selects) {
+	    for (var o of s) {
+		    if (!o.text.match(keyword)) {
+			o.hidden = true;
+			o.disabled = true;
+		    } else {
+			o.hidden = false;
+			o.disabled = false
+		    }
+	    }
+    }
+    for (var i = 0; i < select.length; i++) {
+        var txt = select.options[i].text;
+        if (!txt.match(keyword)) {
+            $(select.options[i]).attr('disabled', 'disabled').hide();
+        } else {
+            $(select.options[i]).removeAttr('disabled').show();
+        }
+    }
+}
+</script>
 <body>
 <div class="container">
     <nav class="navbar navbar-expand">
@@ -78,7 +104,7 @@ if (isset($_GET['removeGroup'])) {
     </nav>
 <form method="post">
 <table class="table table-sm table-hover">
-<thead><tr><th>Name</th><th>Department</th><th>Baseline source</th><th>Feedback sheet template</th><th>Groups (click to remove)</th><th>Add group</th><th>Save</th></tr></thead>
+<thead><tr><th>Name</th><th>Department</th><th>Baseline source</th><th>Feedback sheet template</th><th><input type="text" id="search" oninput="filter();" placeholder="Add group (filter here)"></th><th>Save</th><th>Groups (click to remove)</th></tr></thead>
 <?php
 
 // Let's get the List of baseline subject IDs
@@ -152,9 +178,7 @@ foreach ($departments as $department) {
                 unset($orphanedGroups[$o]);
             }
         }
-        echo "<td>" . implode(", ", $names) . "</td>";
-
-        echo "<td><select name=\"subject-add-group-" . $s->getId() . "[]\" multiple>";
+        echo "<td><select class=\"filterable\" name=\"subject-add-group-" . $s->getId() . "[]\" multiple>";
         echo "<option value=\"\" selected>Add Group to " . $s->getName() . "</option>";
         foreach ($allGroups as $g) {
             echo "<option value=\"" . $g->getId() . "\">" . $g->getName() . "</option>";
@@ -162,6 +186,8 @@ foreach ($departments as $department) {
         echo "</select></td>";
         
         echo "<td><input type=\"submit\" value=\"Attach selected groups\"></td>";
+
+        echo "<td>" . implode(", ", $names) . "</td>";
 
         echo "</tr>";
     }
