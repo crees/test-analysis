@@ -127,7 +127,7 @@ foreach (FeedbackSheet::retrieveAll(FeedbackSheet::NAME) as $f) {
 $orphanedGroups = TeachingGroup::retrieveAll(TeachingGroup::NAME);
 foreach ($departments as $department) {
     foreach (Subject::retrieveByDetail(Subject::DEPARTMENT_ID, $department->getId(), Subject::NAME) as $s) {
-        $allGroups = TeachingGroup::retrieveAll(TeachingGroup::NAME);
+        $allGroups = TeachingGroup::retrieveAll(TeachingGroup::ACADEMIC_YEAR . ' DESC,' . TeachingGroup::NAME);
         echo "<tr>";
         echo View::makeTextBoxCell("subject-name-{$s->getId()}", $s->get(Subject::NAME), 0, 'text', 'style="width: min-content;"');
         echo "<td>";
@@ -172,7 +172,7 @@ foreach ($departments as $department) {
         
         $names = [];
         foreach ($s->getTeachingGroups() as $g) {
-            array_push($names, "<a href=\"?removeGroup=" . $g->getId() . "&removeFromSubject=" . $s->getId() . "\">" . $g->getName() . "</a>");
+            array_push($names, "<a href=\"?removeGroup=" . $g->getId() . "&removeFromSubject=" . $s->getId() . "\">{$g->get(TeachingGroup::ACADEMIC_YEAR)} {$g->getName()}</a>");
             unset($allGroups[array_search($g, $allGroups)]);
             if (($o = array_search($g, $orphanedGroups)) !== FALSE) {
                 unset($orphanedGroups[$o]);
@@ -181,7 +181,7 @@ foreach ($departments as $department) {
         echo "<td><select class=\"filterable\" name=\"subject-add-group-" . $s->getId() . "[]\" multiple>";
         echo "<option value=\"\" selected>Add Group to " . $s->getName() . "</option>";
         foreach ($allGroups as $g) {
-            echo "<option value=\"" . $g->getId() . "\">" . $g->getName() . "</option>";
+            echo "<option value=\"" . $g->getId() . "\">{$g->get(TeachingGroup::ACADEMIC_YEAR)} {$g->getName()}</option>";
         }
         echo "</select></td>";
         
