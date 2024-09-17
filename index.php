@@ -156,12 +156,14 @@ eof;
                         $colspan++;
                     }
                 }
+		          echo "<th colspan=\"$colspan\" class=\"text-center\"><span id=\"showhide-test-{$t->getId()}\" onclick=\"unsquishcolumn({$t->getId()})\"></span> ";
 		        if (isset($teaching_group) && !empty($t->get(Test::TARGETS))) {
 		          $link = "feedback_sheet.php?teaching_group={$teaching_group->getId()}&subject={$subject->getId()}&test={$t->getId()}";
-		          echo "<th colspan=\"$colspan\" class=\"text-center\"><a href=\"$link\">{$t->getName()}</a></th>\n";
+		          echo "<a href=\"$link\">{$t->getName()}</a>";
 		        } else {
-		          echo "<th colspan=\"$colspan\" class=\"text-center\">{$t->getName()}</th>\n";
+		          echo "{$t->getName()}";
 		        }
+		          echo "</th>\n";
 		    }
 		    echo "</tr>\n<tr class=\"excel-filtered\" id=\"subtitle_row\">";
 		    if (isset($table_only) && $table_only) {
@@ -184,7 +186,7 @@ eof;
 		            if ($c->get(TestComponent::INCLUDED_IN_REGRESSION)) {
 		                $regressionComponentParts[] = $c->getName();
 		            }
-		            echo "<td>{$c->getName()}</td>";
+		            echo "<td class=\"squish-{$t->getId()}\">{$c->getName()}</td>";
 		        }
 		        if (!empty($percentComponentParts)) {
 		            $title = "Calculated from Section " . implode(', ', $percentComponentParts) . '.';
@@ -237,7 +239,7 @@ eof;
 		                }
 	                    $title = empty($popupResults) ? '' : "title=\"" . implode('&#xA;', $popupResults) . "\"";
 		                $highlight = (count($popupResults) > 1) ? 'corner-mark' : '';
-		                echo "<td class=\"score-input $highlight\" $title id=\"" . TestComponentResult::SCORE . "-{$c->getId()}-{$s->getId()}\">" . (is_null($result) ? "" : $result->get(TestComponentResult::SCORE)) . "</td>";
+		                echo "<td class=\"score-input $highlight squish-{$t->getId()}\" $title id=\"" . TestComponentResult::SCORE . "-{$c->getId()}-{$s->getId()}\">" . (is_null($result) ? "" : $result->get(TestComponentResult::SCORE)) . "</td>";
 		            }
 		            $percent = $t->calculatePercent($s);
 		            if (!is_null($percent)) {
@@ -317,6 +319,32 @@ foreach ($tests as $t) {
 }
 ?>
 };
+
+/* Here we'll hide all of the nonvital parts (i.e. components) */
+
+for (o of tests) {
+	squishcolumn(o);
+}
+
+function squishcolumn(testId) {
+	$(".squish-" + testId).css("visibility", "hidden");
+	$(".squish-" + testId).css("max-width", "0");
+	showhide = $("#showhide-test-" + testId)[0];
+	if (showhide !== undefined) {
+		showhide.setAttribute("onclick", "unsquishcolumn(" + testId + ")");
+		showhide.innerHTML = "&#128065;";
+	}
+}
+
+function unsquishcolumn(testId) {
+	$(".squish-" + testId).css("visibility", "");
+	$(".squish-" + testId).css("max-width", "");
+	showhide = $("#showhide-test-" + testId)[0];
+	if (showhide !== undefined) {
+		showhide.setAttribute("onclick", "squishcolumn(" + testId + ")");
+		showhide.innerHTML = "&rarr;&larr;";
+	}
+}
 
 function inputify() {
 	$('input#editbutton')[0].hidden=true;
@@ -626,7 +654,9 @@ function showHeadlines() {
 			continue;
 		if (c.attributes['grade_for_test'] === undefined) {
 			for (var r in rows) {
-				rows[r].append(document.createElement('td'));
+				d = document.createElement('td');
+				d.className = "squish-0";
+				rows[r].append(d);
 			}
 			continue;
 		}
@@ -712,6 +742,7 @@ function showHeadlines() {
 	for (var r of rows) {
 		top_row.parentElement.insertBefore(r, top_row);
 	}
+	squishcolumn(0);
 }
 
 function headlineRow(title) {
