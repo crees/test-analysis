@@ -156,7 +156,7 @@ eof;
                         $colspan++;
                     }
                 }
-		          echo "<th colspan=\"$colspan\" class=\"text-center\"><span id=\"showhide-test-{$t->getId()}\" onclick=\"unsquishcolumn({$t->getId()})\"></span> ";
+		          echo "<th colspan=\"$colspan\" class=\"text-center\"><span id=\"showhide-test-{$t->getId()}\" onclick=\"unsquishcolumn({$t->getId()})\" style=\"cursor: col-resize;\"></span> ";
 		        if (isset($teaching_group) && !empty($t->get(Test::TARGETS))) {
 		          $link = "feedback_sheet.php?teaching_group={$teaching_group->getId()}&subject={$subject->getId()}&test={$t->getId()}";
 		          echo "<a href=\"$link\">{$t->getName()}</a>";
