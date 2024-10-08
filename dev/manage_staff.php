@@ -18,7 +18,7 @@ if (isset($_GET['removeStaff'])) {
         die("You should not be working on someone else's department!");
     }
     $departments[$deptId]->removeStaff(Staff::retrieveByDetail(Staff::ID, $_GET['removeStaff'])[0]);
-    $url = explode("?", "https://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]")[0];
+    $url = Config::site_url . "/dev/manage_staff.php";
     header("Location: $url");
     die();
 } else if (isset($_GET['toggleAdmin'])) {
@@ -31,7 +31,7 @@ if (isset($_GET['removeStaff'])) {
     } else {
         $m = StaffDepartmentMembership::retrieveByDetails([StaffDepartmentMembership::DEPARTMENT_ID, StaffDepartmentMembership::STAFF_ID], [$_GET['applyToDepartment'], $_GET['toggleAdmin']])[0];
         $m->toggleAdmin();
-        $url = explode("?", "https://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]")[0];
+        $url = Config::site_url . "/dev/manage_staff.php";
         header("Location: $url");
         die();
     }
