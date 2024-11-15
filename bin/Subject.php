@@ -131,7 +131,27 @@ class Subject extends DatabaseCollection
     }
     
     public function getGradeBoundaries() {
-        return GradeBoundary::retrieveByDetail(GradeBoundary::TEST_ID, -$this->getId(), GradeBoundary::BOUNDARY . ' DESC');
+	if (!isset($this->gradeBoundaries)) {
+            $this->gradeBoundaries = GradeBoundary::retrieveByDetail(GradeBoundary::TEST_ID, -$this->getId(), GradeBoundary::BOUNDARY . ' DESC');
+	}
+	return $this->gradeBoundaries;
+    }
+
+    public function calcCwag(Student $s) {
+	$num_tests = 0;
+	$total_percent = 0;
+	foreach ($this->getTests() as $t) {
+		$test_grade = $t->calculateGrade($s, $this);
+		foreach ($this->getGradeBoundaries() as $b) {
+			if ($b->getName() == $test_grade) {
+				$num_tests++;
+				$total_percent += $b->get(GradeBoundary::BOUNDARY);
+				break;
+			}
+		}
+	}
+	$average_percent = $total_percent / $num_tests;
+	return $this->calculateGrade($average_percent);
     }
     
     function __destruct()
