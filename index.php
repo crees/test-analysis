@@ -353,6 +353,7 @@ function inputify() {
 	tds = $('td.score-input');
 	tabindex = 1;
 	for (t of tests) {
+		unsquishcolumn(t);
 		for (s of students) {
 			for (tc of testWithComponents[t]) {
 				id = [score, tc, s].join('-');
