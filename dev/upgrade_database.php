@@ -334,6 +334,12 @@ case 32:
         ADD `regression_error` INT NULL;");
     
     $db->dosql("UPDATE `db_version` SET version = 33;");
+
+case 33:
+    $db->dosql("ALTER TABLE `TestComponentResult`
+	ADD INDEX `student_id_index` (`student_id`);");
+
+    $db->dosql("UPDATE `db_version` SET version = 34;");
     
 default:
 
