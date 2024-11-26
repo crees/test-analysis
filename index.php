@@ -560,7 +560,7 @@ function colourise(arr, literalColours = false) {
 
 		element.setAttribute('ta_grade_diff', grade_diff);
 
-		if (grade_diff == -1) {
+		if (grade_diff == -1 || grade_diff == 0) {
 			element.style.backgroundColor = literalColours ? '#ffeeba' : 'var(--grade-on)';
 		} else if (grade_diff > -1) {
 			element.style.backgroundColor = literalColours ? '#c3e6cb' : 'var(--grade-above)';
