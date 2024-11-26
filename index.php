@@ -355,22 +355,22 @@ function inputify() {
 	for (t of tests) {
 		for (s of students) {
 			for (tc of testWithComponents[t]) {
-    			id = [score, tc, s].join('-');
-    			elements = $('td#' + id)
-    			if (elements.length == 0) {
-    				continue;
+				id = [score, tc, s].join('-');
+				elements = $('td#' + id)
+				if (elements.length == 0) {
+					continue;
+				}
+				val = elements[0].innerHTML;
+				if (val.match('[<>]')) {
+					// HTML present, something already there-- not sure how this can happen
+					console.log("Already HTML in " + id + ", weird!");
+					continue;
+				}
+			//echo val, tabindex, "number", onchange=\"save('{$t->getId()}', '{$s->getId()}', '" . TestResult::SCORE_A . "')\"");
+				elements[0].innerHTML = '<input class="form-control border-0 px-1" tabindex="' + tabindex + '" value="' + val + '" type="number" onwheel="this.blur()" id="' + id + '" onchange="save(\'' + tc + '\', \'' + s + '\')">';
+				elements[0].classList.add('nopadding');
+				tabindex++;
     			}
-    			val = elements[0].innerHTML;
-    			if (val.match('[<>]')) {
-    				// HTML present, something already there-- not sure how this can happen
-    				console.log("Already HTML in " + id + ", weird!");
-    				continue;
-    			}
-                //echo val, tabindex, "number", onchange=\"save('{$t->getId()}', '{$s->getId()}', '" . TestResult::SCORE_A . "')\"");
-    			elements[0].innerHTML = '<input class="form-control border-0 px-1" tabindex="' + tabindex + '" value="' + val + '" type="number" onwheel="this.blur()" id="' + id + '" onchange="save(\'' + tc + '\', \'' + s + '\')">';
-    			elements[0].classList.add('nopadding');
-    			tabindex++;
-    		}
 		}
 	}
 }
