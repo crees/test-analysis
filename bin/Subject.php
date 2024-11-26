@@ -150,6 +150,9 @@ class Subject extends DatabaseCollection
 			}
 		}
 	}
+	if ($num_tests == 0) {
+		return null;
+	}
 	$average_percent = $total_percent / $num_tests;
 	return $this->calculateGrade($average_percent);
     }
