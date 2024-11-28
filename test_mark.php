@@ -323,6 +323,10 @@ if ($staff->get(Staff::LARGE_MARKING) == 1) {
 					} else {
 						score.value = parseInt(score.value) + 1;
 					}
+				  } else {
+					if (score.value == '') {
+						score.value = 0;
+					}
 				  }
 				  setSaveBar(savebutton + dontsavebutton + scorebuttons + savebutton);
 			  },
