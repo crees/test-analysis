@@ -324,7 +324,7 @@ if ($staff->get(Staff::LARGE_MARKING) == 1) {
 						score.value = parseInt(score.value) + 1;
 					}
 				  }
-				  setSaveBar(savebutton + dontsavebutton + scorebuttons);
+				  setSaveBar(savebutton + dontsavebutton + scorebuttons + savebutton);
 			  },
     };
 
