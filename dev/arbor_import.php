@@ -1,6 +1,8 @@
 <?php
 namespace TestAnalysis;
 
+$backup_key_override_auth = true;
+
 include "../bin/classes.php";
 
 $client = new GraphQLClient();
