@@ -21,10 +21,13 @@ if (!empty($getVars)) {
     <a class="navbar-brand"><?php 
     $staff = $staff ?? Staff::me($auth_user);
     echo $staff->getName();
+    $isAdmin = false;
     if ($staff->adminType() == Staff::ADMIN_TYPE_GLOBAL) {
         echo "<span class=\"text-danger\"> (admin)</span>";
+	$isAdmin = true;
     } elseif ($staff->adminType() == Staff::ADMIN_TYPE_DEPARTMENT) {
         echo "<span class=\"text-warning\"> (department admin)</span>";
+	$isAdmin = true;
     }
     ?></a>
     
@@ -39,6 +42,11 @@ if (!empty($getVars)) {
     		<li class="nav-item">
         		<a class="nav-link" href="<?= Config::site_url; ?>/index.php?session_destroy=<?= $_SESSION['SESSION_CREATIONTIME'] ?? '' ?>">Home</a>
         	</li>
+	<?php if ($isAdmin) { ?>
+    		<li class="nav-item">
+			<a class="nav-link" href="<?= Config::site_url; ?>/overview.php?subject=<?= $_GET['subject'] ?>&teaching_group=<?= $_GET['teaching_group'] ?>">Overview</a>
+        	</li>
+	<?php } ?>
 <!--
     		<li class="nav-item">
         		<a class="nav-link" href="<?= Config::site_url; ?>/topic_overview.php">Topic overview</a>
