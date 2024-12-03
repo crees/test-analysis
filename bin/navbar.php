@@ -40,7 +40,7 @@ if (!empty($getVars)) {
         		<a class="nav-link" href="<?= Config::site_url; ?>/index.php?session_destroy=<?= $_SESSION['SESSION_CREATIONTIME'] ?? '' ?>">Home</a>
         	</li>
     		<li class="nav-item">
-			<a class="nav-link" href="<?= Config::site_url; ?>/overview.php?subject=<?= $_GET['subject'] ?>&teaching_group=<?= $_GET['teaching_group'] ?>">Overview</a>
+			<a class="nav-link" href="<?= Config::site_url; ?>/overview.php<?= $getVars ?>">Overview</a>
         	</li>
 <!--
     		<li class="nav-item">
