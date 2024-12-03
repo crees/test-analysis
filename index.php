@@ -559,6 +559,9 @@ function colourise(arr, literalColours = false) {
 			}
 		}
 
+		if (baseline[1] == '-' && baseline[0] == baseline[2])
+			grade_diff /= 2;
+
 		element.setAttribute('ta_grade_diff', grade_diff);
 
 		if (grade_diff == -1 || grade_diff == 0) {
