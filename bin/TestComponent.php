@@ -19,7 +19,6 @@ class TestComponent extends DatabaseCollection
         foreach ([self::INCLUDED_FOR_TARGETS, self::INCLUDED_IN_GRADE, self::INCLUDED_IN_PERCENT, self::INCLUDED_IN_REGRESSION] as $inc) {
             $this->details[$inc] = $details[$inc] ?? 0;
         }
-        $this->details[self::INCLUDED_IN_REGRESSION] = 1;
     }
     
     public function getTotal() {

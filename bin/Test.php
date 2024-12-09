@@ -11,7 +11,6 @@ class Test extends DatabaseCollection
     const TARGETS = 'targets';
 
     const REGRESSION_ERROR_INSUFFICENT_STUDENT_NUMBERS = 1;
-    const REGRESSION_ERROR_NO_COMPONENTS = 2;
     const REGRESSION_ERROR_INSUFFICIENT_RESULTS = 3;
     const REGRESSION_ERROR_NO_BASELINE = 4;
     
@@ -271,6 +270,18 @@ class Test extends DatabaseCollection
             return $this->test_regressions[$regression_key];
         }
         
+        $regressionComponents = [];
+        foreach ($this->getTestComponents() as $c) {
+            if ($c->get(TestComponent::INCLUDED_IN_REGRESSION)) {
+                $regressionComponents[] = $c;
+            }
+        }
+        
+        if (!isset($regressionComponents[0])) {
+            $this->regressions[$regression_key] = null;
+            return null;
+        }
+        
         $r = TestRegression::retrieveByDetails([TestRegression::TEST_ID, TestRegression::REGRESSION_KEY],
                     [$this->getId(), $regression_key]);
         if (count($r) > 1) {
@@ -300,22 +311,6 @@ class Test extends DatabaseCollection
             
             return $this->test_regressions;
         }
-        
-        $regressionComponents = [];
-        foreach ($this->getTestComponents() as $c) {
-            if ($c->get(TestComponent::INCLUDED_IN_REGRESSION)) {
-                $regressionComponents[] = $c;
-            }
-        }
-        
-        /* Not doing 'included in regressions'
-        if (!isset($regressionComponents[0])) {
-            $this->regressions[$regression_key] = null;
-            $this->regression_error[$regression_key] = self::REGRESSION_ERROR_NO_COMPONENTS;
-            return null;
-        }
-        
-        */
         
         $testResult = [];
         
@@ -426,9 +421,14 @@ class Test extends DatabaseCollection
     public function calculateRegression(String $group_prefix, Student $student, Subject $subject) : String {
         
         $tr = $this->getRegression($group_prefix, $subject);
+
+	if (is_null($tr)) {
+		// No test components selected for regression
+		return '';
+	}
         
         //$results = $this->getLabel("testResults_" . $this->getRegressionKey($group_prefix, $subject));
-        
+	
         $results = $this->getTestComponentResults($student);
         
         $tr_error = $tr->get(TestRegression::REGRESSION_ERROR);
@@ -438,8 +438,6 @@ class Test extends DatabaseCollection
                 return '~';
             case self::REGRESSION_ERROR_INSUFFICIENT_RESULTS:
                 return '_';
-            case self::REGRESSION_ERROR_NO_COMPONENTS:
-                return '';
             default:
                 throw new \Exception("Test::calculateRegression: Unknown regression error {$this->regression_error}");
             }

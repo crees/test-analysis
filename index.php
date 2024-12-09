@@ -255,19 +255,18 @@ eof;
 		                $regression = $t->calculateRegression($matches[0], $s, $subject);
 		                if (!empty($regression)) {
 		                    switch ($regression) {
-	                        case '_':
-	                            $title = 'Insufficient results for calculation';
-	                            break;
-	                        case '~':
-	                            $title = 'Insufficient student numbers in groups for calculation';
-	                            break;
-	                        case '?':
-	                            $title = 'Baseline either missing or not a number';
-	                            break;
-	                        default:
-	                            $title = '';
+	                            case '_':
+	                                $title = 'Insufficient results for calculation';
+	                                break;
+	                            case '~':
+	                                $title = 'Insufficient student numbers in groups for calculation';
+	                                break;
+	                            case '?':
+	                                $title = 'Baseline either missing or not a number';
+	                                break;
+	                            default:
+	                                $title = '';
 		                    }
-
 		                    echo "<td id=\"regression-{$t->getId()}-{$s->getId()}\" title=\"$title\">$regression</td>";
 		                }
 		            }
