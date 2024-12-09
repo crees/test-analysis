@@ -19,7 +19,7 @@ $student = Student::retrieveByDetail(Student::ID, $_POST['studentId'])[0];
 $tc = TestComponent::retrieveByDetail(TestComponent::ID, $_POST['testComponentId']);
 
 if (empty($tc)) {
-    die("Other failure");
+    die("testcomponent empty: subjectId: {$_POST['subjectId']} studentId: {$_POST['studentId']} tc: {$_POST['testComponentId']}");
 }
 
 $tc = $tc[0];
