@@ -193,10 +193,10 @@ EOF;
 
                     $difference = '-';
 
-                    if (is_numeric(substr($g, 0, 1)) && is_numeric(substr($i, 0, 1))) {
+                    if (is_numeric($g[0]) && is_numeric($i[0])) {
                         // Special case-- a double grade 5-4 is effectively 4.5
-                        $difference = (int)substr($g, 0, 1) - (int)substr($i, 0, 1);
-                        if (substr($g, 1, 1) == '-' && substr($g, 2, 1) != substr($g, 0, 1)) {
+                        $difference = (int)$g[0] - (int)$i[0];
+                        if ($g[1] == '-' && isset($g[2]) && $g[2] != $g[0]) {
                             $difference -= 0.5;
                         }
                     }
@@ -349,14 +349,28 @@ eof;
             foreach ($tests as $t) {
                 $component_results_sum = [];
                 $component_results_quantity = [];
-                $header = "";
+                $header = "<th>P8</th>";
                 foreach ($t->getTestComponents() as $component) {
                     $component_results_sum[$component->getId()] = 0;
                     $component_results_quantity[$component->getId()] = 0;
                     $header = $header . "<th>{$component->getName()}</th>";
                 }
                 $shouldPrint = false;
+                $residual_sum = 0;
+                $number_of_residuals = 0;
                 foreach ($students as $s) {
+                    $grade = $t->calculateGrade($s, $subject);
+                    if ($grade[1] == '-' && isset($grade[2])) {
+                        $grade = ($grade[0] + $grade[2] / 2);
+                    }
+                    $baseline = $s->getBaseline($subject);
+                    if (!empty($baseline)) {
+                        $baseline = $baseline->getShortIndicative()[0];
+                        if (is_numeric($grade) && is_numeric($baseline)) {
+                            $residual_sum += $grade - $baseline;
+                            $number_of_residuals++;
+                        }
+                    }
                     foreach ($t->getTestComponentResults($s) as $c_id => $r) {
                         if (isset($r[0])) {
                             $component_results_sum[$c_id] += $r[0]->get(TestComponentResult::SCORE);
@@ -372,6 +386,13 @@ eof;
                 echo "<tr><th>Name</th>";
                 echo "$header";
                 echo "</tr><tr><th>{$t->getName()}</th>";
+                echo "<td>";
+                if ($number_of_residuals > 0) {
+                    printf("%+0.2f", $residual_sum / $number_of_residuals);
+                } else {
+                    echo "-";
+                }
+                echo "</td>";
                 foreach ($t->getTestComponents() as $component) {
                     if ($component_results_quantity[$component->getId()] > 0) {
                         $average = $component_results_sum[$component->getId()] / $component_results_quantity[$component->getId()];
