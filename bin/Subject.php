@@ -132,7 +132,7 @@ class Subject extends DatabaseCollection
     
     public function getGradeBoundaries() {
 	if (!isset($this->gradeBoundaries)) {
-            $this->gradeBoundaries = GradeBoundary::retrieveByDetail(GradeBoundary::TEST_ID, -$this->getId(), GradeBoundary::BOUNDARY . ' DESC');
+            $this->gradeBoundaries = GradeBoundary::retrieveByDetails([GradeBoundary::TEST_ID, GradeBoundary::BOUNDARY_TYPE], [$this->getId(), GradeBoundary::TYPE_SUBJECT], GradeBoundary::BOUNDARY . ' DESC');
 	}
 	return $this->gradeBoundaries;
     }

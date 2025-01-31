@@ -24,7 +24,7 @@ if (isset($_GET['test']) && !isset($_POST['form_serial'])) {
             }
             
             // Delete any custom grade boundaries
-            foreach (GradeBoundary::retrieveByDetail(GradeBoundary::TEST_ID, $test->getId()) as $g) {
+            foreach (GradeBoundary::retrieveByDetails([GradeBoundary::TEST_ID, GradeBoundary::BOUNDARY_TYPE], [$test->getId(), GradeBoundary::TYPE_TEST]) as $g) {
                 GradeBoundary::delete($g->getId());
             }
             
@@ -74,7 +74,7 @@ if (isset($_GET['test']) && !isset($_POST['form_serial'])) {
         if (isset($_POST['custom_boundaries'])) {
             $test->set(Test::CUSTOM_GRADE_BOUNDARIES, 1);
             // Let's now examine the grade boundaries.  First handle any that have changed
-            foreach (GradeBoundary::retrieveAll() as $b) {
+            foreach (GradeBoundary::retrieveByDetail(GradeBoundary::BOUNDARY_TYPE, GradeBoundary::TYPE_TEST) as $b) {
                 $bId = $b->getId();
                 if (!isset($_POST["GradeBoundary-grade-$bId"])) {
                     continue;
@@ -98,6 +98,7 @@ if (isset($_GET['test']) && !isset($_POST['form_serial'])) {
                         GradeBoundary::NAME => $newGrade,
                         GradeBoundary::BOUNDARY => $newBoundary,
                         GradeBoundary::TEST_ID => $test->getId(),
+			GradeBoundary::BOUNDARY_TYPE => GradeBoundary::TYPE_TEST,
                     ]);
                     $b->commit();
                 }
@@ -232,21 +233,22 @@ if ($test->get(Test::CUSTOM_GRADE_BOUNDARIES)) {
     $boundaryArray = [];
     $columns = 0;
     // We'll give whatever's already there + 20 columns; that should be enough!
-    $existingBoundaries = GradeBoundary::retrieveByDetail(GradeBoundary::TEST_ID, $test->getId(), GradeBoundary::BOUNDARY);
+    $existingBoundaries = GradeBoundary::retrieveByDetails([GradeBoundary::TEST_ID, GradeBoundary::BOUNDARY_TYPE], [$test->getId(), GradeBoundary::TYPE_TEST], GradeBoundary::BOUNDARY);
     if (empty($existingBoundaries)) {
         // Arbitrarily base off the first subject match for the test
         $memberships = TestSubjectMembership::retrieveByDetail(TestSubjectMembership::TEST_ID, $test->getId());
         if (isset($memberships[0])) {
             $membership = $memberships[0];
             $subject = Subject::retrieveByDetail(Subject::ID, $membership->get(TestSubjectMembership::SUBJECT_ID))[0];
-            foreach ($test->getGradeBoundaries($subject, true) as $b) {
+            foreach (GradeBoundary::retrieveByDetails([GradeBoundary::TEST_ID, GradeBoundary::BOUNDARY_TYPE], [$subject->getId(), GradeBoundary::TYPE_SUBJECT]) as $b) {
                 (new GradeBoundary([
                     GradeBoundary::TEST_ID => $test->getId(),
                     GradeBoundary::NAME => $b->get(GradeBoundary::NAME),
-                    GradeBoundary::BOUNDARY => $b->get(GradeBoundary::BOUNDARY)
+                    GradeBoundary::BOUNDARY => $b->get(GradeBoundary::BOUNDARY),
+		    GradeBoundary::BOUNDARY_TYPE => GradeBoundary::TYPE_TEST
                 ]))->commit();
             }
-            $existingBoundaries = GradeBoundary::retrieveByDetail(GradeBoundary::TEST_ID, $test->getId(), GradeBoundary::BOUNDARY);
+            $existingBoundaries = GradeBoundary::retrieveByDetails([GradeBoundary::TEST_ID, GradeBoundary::BOUNDARY_TYPE], [$test->getId(), GradeBoundary::TYPE_TEST], GradeBoundary::BOUNDARY);
         } else {
             $existingBoundaries = [];
         }

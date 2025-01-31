@@ -340,6 +340,15 @@ case 33:
 	ADD INDEX `student_id_index` (`student_id`);");
 
     $db->dosql("UPDATE `db_version` SET version = 34;");
+
+case 34:
+    $db->dosql("ALTER TABLE `GradeBoundary`
+	ADD `boundary_type` ENUM('Subject', 'Test', 'CalculatedColumn') NULL;");
+    $db->dosql("UPDATE `GradeBoundary` SET `boundary_type` = 'Subject' WHERE `Test_id` < 0;");
+    $db->dosql("UPDATE `GradeBoundary` SET `boundary_type` = 'Test' WHERE `Test_id` > 0;");
+    $db->dosql("UPDATE `GradeBoundary` SET `Test_id` = ABS(`Test_id`) WHERE `Test_id` < 0;");
+
+    $db->dosql("UPDATE `db_version` SET version = 35;");
     
 default:
 

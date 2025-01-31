@@ -218,9 +218,8 @@ class Test extends DatabaseCollection
          *
          */
         if ($this->details[self::CUSTOM_GRADE_BOUNDARIES] == 1 && $forceForSubject == false) {
-            $ret = GradeBoundary::retrieveByDetail(GradeBoundary::TEST_ID, $this->getId(), GradeBoundary::BOUNDARY . ' DESC');
+            $ret = GradeBoundary::retrieveByDetails([GradeBoundary::TEST_ID, GradeBoundary::BOUNDARY_TYPE], [$this->getId(), GradeBoundary::TYPE_TEST], GradeBoundary::BOUNDARY . ' DESC');
         } else {
-            $id_to_use = -$subject->getId();
             $ret = [];
             $total_for_grade = 0;
             foreach ($this->getTestComponents() as $c) {
@@ -228,12 +227,13 @@ class Test extends DatabaseCollection
                     $total_for_grade += $c->get(TestComponent::TOTAL);
                 }
             }
-            foreach (GradeBoundary::retrieveByDetail(GradeBoundary::TEST_ID, $id_to_use, GradeBoundary::BOUNDARY . ' DESC') as $g) {
+            foreach (GradeBoundary::retrieveByDetails([GradeBoundary::TEST_ID, GradeBoundary::BOUNDARY_TYPE], [$subject->getId(), GradeBoundary::TYPE_SUBJECT], GradeBoundary::BOUNDARY . ' DESC') as $g) {
                 array_push($ret, new GradeBoundary([
                     GradeBoundary::BOUNDARY => round($g->get(GradeBoundary::BOUNDARY) * $total_for_grade / 100.0, 0),
                     GradeBoundary::ID       => $g->get(GradeBoundary::ID),
                     GradeBoundary::NAME     => $g->get(GradeBoundary::NAME),
-                    GradeBoundary::TEST_ID  => $g->get(GradeBoundary::TEST_ID)
+                    GradeBoundary::TEST_ID  => $g->get(GradeBoundary::TEST_ID),
+		    GradeBoundary::BOUNDARY_TYPE => GradeBoundary::TYPE_SUBJECT
                 ]));
             }
         }

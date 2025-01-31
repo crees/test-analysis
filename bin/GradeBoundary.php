@@ -11,6 +11,10 @@ class GradeBoundary extends DatabaseCollection
 {
     const TEST_ID = 'Test_id';
     const BOUNDARY = 'boundary';
+    const BOUNDARY_TYPE = 'boundary_type';
+    const TYPE_TEST = 'Test';
+    const TYPE_SUBJECT = 'Subject';
+    const TYPE_CALCULATEDCOLUMN = 'CalculatedColumn';
     
     public function __construct(array $details)
     {
@@ -22,6 +26,7 @@ class GradeBoundary extends DatabaseCollection
         $this->details[self::NAME] = $details[self::NAME];
         $this->details[self::TEST_ID] = $details[self::TEST_ID];
         $this->details[self::BOUNDARY] = $details[self::BOUNDARY];
+        $this->details[self::BOUNDARY_TYPE] = $details[self::BOUNDARY_TYPE];
     }
     
     public function getTest() {

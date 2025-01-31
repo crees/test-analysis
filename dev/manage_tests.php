@@ -64,7 +64,7 @@ if (isset($_POST['newtest-name']) && isset($_POST['form_serial']) && (session_st
     }
     
     // Let's now examine the grade boundaries.  First handle any that have changed
-    foreach (GradeBoundary::retrieveAll() as $b) {
+    foreach (GradeBoundary::retrieveByDetail(GradeBoundary::BOUNDARY_TYPE, GradeBoundary::TYPE_SUBJECT) as $b) {
         $bId = $b->getId();
         if (!isset($_POST["GradeBoundary-grade-$bId"])) {
             continue;
@@ -89,7 +89,8 @@ if (isset($_POST['newtest-name']) && isset($_POST['form_serial']) && (session_st
                     $b = new GradeBoundary([
                         GradeBoundary::NAME => $newGrade,
                         GradeBoundary::BOUNDARY => $newBoundary,
-                        GradeBoundary::TEST_ID => -$sId,
+			GradeBoundary::TEST_ID => -$sId,
+			GradeBoundary::BOUNDARY_TYPE => GradeBoundary::TYPE_SUBJECT
                     ]);
                     $b->commit();
                 }
@@ -226,7 +227,7 @@ foreach ($departments as $department) {
         $boundaryArray = [];
         $columns = 0;
         // We'll give whatever's already there + 20 columns; that should be enough!
-        foreach (GradeBoundary::retrieveByDetail(GradeBoundary::TEST_ID, -$s->getId(), GradeBoundary::BOUNDARY) as $b) {
+        foreach (GradeBoundary::retrieveByDetails([GradeBoundary::TEST_ID, GradeBoundary::BOUNDARY_TYPE], [$s->getId(), GradeBoundary::TYPE_SUBJECT], GradeBoundary::BOUNDARY) as $b) {
             array_push($gradeArray, View::makeTextBoxCell("GradeBoundary-grade-" . $b->getId(), $b->get(GradeBoundary::NAME)));
             array_push($boundaryArray, View::makeTextBoxCell("GradeBoundary-boundary-" . $b->getId(), $b->get(GradeBoundary::BOUNDARY)));
             $columns++;
