@@ -89,7 +89,7 @@ if (isset($_POST['newtest-name']) && isset($_POST['form_serial']) && (session_st
                     $b = new GradeBoundary([
                         GradeBoundary::NAME => $newGrade,
                         GradeBoundary::BOUNDARY => $newBoundary,
-			GradeBoundary::TEST_ID => -$sId,
+			GradeBoundary::TEST_ID => $sId,
 			GradeBoundary::BOUNDARY_TYPE => GradeBoundary::TYPE_SUBJECT
                     ]);
                     $b->commit();
