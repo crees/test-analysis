@@ -240,7 +240,7 @@ abstract class DatabaseCollection
      * 
      * @param int $age_in_minutes
      */
-    public static function trimBefore(int $age_in_minutes = 60) {
+    public static function trimBefore(int $age_in_minutes = 60, String $academic_year = null) {
         if (is_null(self::$db)) {
             self::$db = new Database();
         }
@@ -248,9 +248,11 @@ abstract class DatabaseCollection
         if (!defined("static::TOUCHED_TS")) {
             die("Can't use this with a class without touched_ts column; " . static::class);
         }
+
+	$whereay = is_null($academic_year) ? "" : "`ACADEMIC_YEAR` = '$academic_year' AND";
         
         
-        self::$db->dosql("DELETE FROM `" . explode('\\', static::class)[1] . "` WHERE `"
+        self::$db->dosql("DELETE FROM `" . explode('\\', static::class)[1] . "` WHERE $academic_year `"
             . static::TOUCHED_TS . "` < NOW() - INTERVAL $age_in_minutes MINUTE;");
     }
     
