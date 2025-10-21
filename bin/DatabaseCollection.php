@@ -252,7 +252,7 @@ abstract class DatabaseCollection
 	$whereay = is_null($academic_year) ? "" : "`ACADEMIC_YEAR` = '$academic_year' AND";
         
         
-        self::$db->dosql("DELETE FROM `" . explode('\\', static::class)[1] . "` WHERE $academic_year `"
+        self::$db->dosql("DELETE FROM `" . explode('\\', static::class)[1] . "` WHERE $whereay `"
             . static::TOUCHED_TS . "` < NOW() - INTERVAL $age_in_minutes MINUTE;");
     }
     
