@@ -353,6 +353,8 @@ case 34:
 case 35:
     $db->dosql("ALTER TABLE `StudentGroupMembership`
 	ADD `academic_year` TINYTEXT NULL;");
+    $db->dosql("UPDATE `StudentGroupMembership`
+	SET `academic_year`='" . get_current_AY() . "';");
 
     $db->dosql("UPDATE `db_version` SET version = 36;");
     
