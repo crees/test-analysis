@@ -301,6 +301,7 @@ foreach ($data['AcademicUnit'] as $group) {
         StudentGroupMembership::update_or_create([
             StudentGroupMembership::STUDENT_ID => $membership['student']['id'],
             StudentGroupMembership::TEACHINGGROUP_ID => $dGroup->getId(),
+	    StudentGroupMembership::ACADEMIC_YEAR => get_current_AY(),
         ], []);
 
         // echo "... added to db and membership made</div>";
