@@ -6,6 +6,7 @@ class StudentGroupMembership extends DatabaseCollection
     const STUDENT_ID = 'Student_id';
     const TEACHINGGROUP_ID = 'TeachingGroup_id';
     const TOUCHED_TS = 'touched_ts';
+    const ACADEMIC_YEAR = 'academic_year';
     
     public function __construct(array $details)
     {
@@ -17,6 +18,7 @@ class StudentGroupMembership extends DatabaseCollection
         $this->details[self::STUDENT_ID] = $details[self::STUDENT_ID];
         $this->details[self::TEACHINGGROUP_ID] = $details[self::TEACHINGGROUP_ID];
         $this->details[self::TOUCHED_TS] = $details[self::TOUCHED_TS] ?? 0;
+	$this->details[self::ACADEMIC_YEAR] = get_current_AY();
     }
     
     public function destroy() {

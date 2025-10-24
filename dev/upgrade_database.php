@@ -349,6 +349,12 @@ case 34:
     $db->dosql("UPDATE `GradeBoundary` SET `Test_id` = ABS(`Test_id`) WHERE `Test_id` < 0;");
 
     $db->dosql("UPDATE `db_version` SET version = 35;");
+
+case 35:
+    $db->dosql("ALTER TABLE `StudentGroupMembership`
+	ADD `academic_year` TINYTEXT NULL;");
+
+    $db->dosql("UPDATE `db_version` SET version = 36;");
     
 default:
 
