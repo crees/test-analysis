@@ -3,18 +3,6 @@ namespace TestAnalysis;
 
 include "../bin/classes.php";
 
-/*
-if (isset($_GET['removeTopic'])) {
-    // Remove removeTopic removeFromTest
-    foreach (TestTestTopic::retrieveByDetail(TestTestTopic::TESTTOPIC_ID, $_GET['removeTopic']) as $ttt) {
-        if ($ttt->get(TestTestTopic::TEST_ID) == $_GET['removeFromTest']) {
-            $ttt->destroy();
-            break;
-        }
-    }
-} else 
-*/
-
 $staff = Staff::me($auth_user);
 
 $departments = $staff->getAdminDepartments(true);
@@ -33,14 +21,6 @@ if (isset($_POST['newtest-name']) && isset($_POST['form_serial']) && (session_st
             
             $newTest->commit();
         }
-/*        
-        if (!empty($topicToAdd = $_POST["test-add-topic-to-{$t->getId()}"])) {
-            (new TestTestTopic([
-                TestTestTopic::TESTTOPIC_ID => $topicToAdd,
-                TestTestTopic::TEST_ID => $t->getId()
-            ]))->commit();
-        }
-*/
     }
     
     if (!empty($_POST['newtest-name'])) {
@@ -133,12 +113,10 @@ if (isset($_POST['newtest-name']) && isset($_POST['form_serial']) && (session_st
 		<th>Test name</th>
 		<th>Edit test details</th>
 		<th>Components and totals</th>
-		<!-- <th colspan="2">Topic (section B only!)</th> -->
 	</tr>
 </thead>
 
 <?php
-// $orphanedTopics = TestTopic::retrieveAll(TestTopic::NAME);
 foreach ($departments as $department) {
     foreach (Test::retrieveByDetail(Test::DEPARTMENT_ID, $department->getId(), Test::NAME) as $t) {
         $tId = $t->getId();
@@ -169,31 +147,6 @@ foreach ($departments as $department) {
         }
         echo implode(", ", $components);
         echo "</td>";
-        
-        /* Not now thank you
-         * 
-        $allTopics = TestTopic::retrieveAll(TestTopic::NAME);
-        $names = [];
-        foreach ($t->getTopics() as $topic) {
-            array_push($names, "<a href=\"?removeTopic=" . $topic->getId() . "&removeFromTest=$tId\">" . $topic->getName() . "</a>");
-            unset($allTopics[array_search($topic, $allTopics)]);
-            if (($o = array_search($topic, $orphanedTopics)) !== FALSE) {
-                unset($orphanedTopics[$o]);
-            }
-        }
-        
-        echo "<td>" . implode(', ', $names) . "</td>";
-        
-        echo "<td><select name=\"test-add-topic-to-{$t->getid()}\" onchange=\"this.form.submit()\">";
-        
-        echo "<option value=\"\" selected>Add Topic to " . $t->getName() . "</option>";
-        
-        foreach ($allTopics as $topic) {
-            echo "<option value=\"" . $topic->getId() . "\">" . $topic->getName() . "</option>";
-        }
-        
-        echo "</select></td>";
-        */
         
         echo "</tr>";
     }
