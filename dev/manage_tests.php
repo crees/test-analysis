@@ -116,6 +116,19 @@ if (isset($_POST['newtest-name']) && isset($_POST['form_serial']) && (session_st
 	</tr>
 </thead>
 
+<tr>
+	<?php
+	echo "<td><select name=\"newtest-" . Test::DEPARTMENT_ID . "\">";
+	foreach ($departments as $dept) {
+	    echo "<option value=\"" . $dept->getId() . "\">" . $dept->getName() . "</option>";
+	}
+	echo "</select></td>";
+	echo View::makeTextBoxCell("newtest-" . Test::NAME, "");
+
+	?>
+
+</tr>
+
 <?php
 foreach ($departments as $department) {
     foreach (Test::retrieveByDetail(Test::DEPARTMENT_ID, $department->getId(), Test::NAME) as $t) {
@@ -152,19 +165,6 @@ foreach ($departments as $department) {
     }
 }
 ?>
-<tr>
-	<?php
-	echo "<td><select name=\"newtest-" . Test::DEPARTMENT_ID . "\">";
-	foreach ($departments as $dept) {
-	    echo "<option value=\"" . $dept->getId() . "\">" . $dept->getName() . "</option>";
-	}
-	echo "</select></td>";
-	echo View::makeTextBoxCell("newtest-" . Test::NAME, "");
-
-	?>
-
-</tr>
-
 </table>
 <input type="submit" class="form-control" value="Save">
 
